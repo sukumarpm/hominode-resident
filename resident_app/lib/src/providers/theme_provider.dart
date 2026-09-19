@@ -6,8 +6,9 @@ import 'package:flutter/material.dart';
 /// App theme data
 class AppTheme {
   // Light theme colors
-  static const Color lightPrimary = Color(0xFF2563EB);
-  static const Color lightPrimaryDark = Color(0xFF1E40AF);
+  static const Color lightPrimary = Color(0xFF0E4778);
+  static const Color lightPrimaryDark = Color(0xFF061C4C);
+  static const Color lightSecondary = Color(0xFF3AA6C8);
   static const Color lightBackground = Color(0xFFFAFBFC);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightCardBorder = Color(0xFFE5E7EB);
@@ -26,17 +27,15 @@ class AppTheme {
       scaffoldBackgroundColor: lightBackground,
       cardColor: lightSurface,
       dividerColor: lightDivider,
-      
+
       colorScheme: const ColorScheme.light(
         primary: lightPrimary,
-        secondary: lightPrimary,
+        secondary: lightSecondary,
         surface: lightSurface,
-        background: lightBackground,
         error: Color(0xFFEF4444),
         onPrimary: Colors.white,
         onSecondary: Colors.white,
         onSurface: lightTextPrimary,
-        onBackground: lightTextPrimary,
         onError: Colors.white,
       ),
 
@@ -92,23 +91,12 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: lightTextPrimary,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          color: lightTextPrimary,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          color: lightTextSecondary,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          color: lightTextTertiary,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, color: lightTextPrimary),
+        bodyMedium: TextStyle(fontSize: 14, color: lightTextSecondary),
+        bodySmall: TextStyle(fontSize: 12, color: lightTextTertiary),
       ),
 
-      iconTheme: const IconThemeData(
-        color: lightTextPrimary,
-      ),
+      iconTheme: const IconThemeData(color: lightTextPrimary),
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(

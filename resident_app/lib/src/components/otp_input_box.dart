@@ -10,12 +10,12 @@ class OTPInputBox extends StatefulWidget {
   final VoidCallback onBackspace;
 
   const OTPInputBox({
-    Key? key,
+    super.key,
     required this.controller,
     required this.focusNode,
     required this.onChanged,
     required this.onBackspace,
-  }) : super(key: key);
+  });
 
   @override
   State<OTPInputBox> createState() => _OTPInputBoxState();
@@ -51,15 +51,13 @@ class _OTPInputBoxState extends State<OTPInputBox> {
         color: const Color(0xFFFFFFFF),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _isFocused
-              ? const Color(0xFF2563EB)
-              : const Color(0xFFE5E5E5),
+          color: _isFocused ? const Color(0xFF0E4778) : const Color(0xFFE5E5E5),
           width: _isFocused ? 2 : 1,
         ),
         boxShadow: _isFocused
             ? [
                 BoxShadow(
-                  color: const Color(0xFF2563EB).withOpacity(0.1),
+                  color: const Color(0xFF0E4778).withOpacity(0.1),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),

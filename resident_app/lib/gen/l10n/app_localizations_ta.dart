@@ -9,7 +9,7 @@ class AppLocalizationsTa extends AppLocalizations {
   AppLocalizationsTa([String locale = 'ta']) : super(locale);
 
   @override
-  String get appTitle => 'லிவோ';
+  String get appTitle => 'Hominode';
 
   @override
   String get appSubtitle => 'உங்கள் சமூகம், இணைக்கப்பட்டுள்ளது';

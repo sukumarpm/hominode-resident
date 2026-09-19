@@ -33,12 +33,12 @@ class OTPVerificationDialog extends StatefulWidget {
   final String? secret;
 
   const OTPVerificationDialog({
-    Key? key,
+    super.key,
     required this.method,
     this.destination,
     this.qrCodeData,
     this.secret,
-  }) : super(key: key);
+  });
 
   @override
   State<OTPVerificationDialog> createState() => _OTPVerificationDialogState();
@@ -50,7 +50,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
     (_) => TextEditingController(),
   );
   final List<FocusNode> _focusNodes = List.generate(6, (_) => FocusNode());
-  
+
   bool _isResending = false;
   int _resendCountdown = 0;
 
@@ -73,7 +73,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
     if (value.isNotEmpty && index < 5) {
       _focusNodes[index + 1].requestFocus();
     }
-    
+
     // Auto-submit when all digits are entered
     if (_isCodeComplete) {
       Navigator.pop(context, _code);
@@ -93,9 +93,9 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
 
     try {
       await TwoFactorService.instance.resend2FACode(widget.method);
-      
+
       if (!mounted) return;
-      
+
       setState(() {
         _isResending = false;
         _resendCountdown = 60;
@@ -112,9 +112,9 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() => _isResending = false);
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Failed to resend code'),
@@ -173,14 +173,10 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFF2563EB).withOpacity(0.1),
+            color: const Color(0xFF0E4778).withOpacity(0.1),
             shape: BoxShape.circle,
           ),
-          child: const Icon(
-            Icons.security,
-            size: 40,
-            color: Color(0xFF2563EB),
-          ),
+          child: const Icon(Icons.security, size: 40, color: Color(0xFF0E4778)),
         ),
         const SizedBox(height: 16),
         const Text(
@@ -201,10 +197,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
         const Text(
           'Scan this QR code with your authenticator app',
           textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6B7280),
-          ),
+          style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
         ),
         const SizedBox(height: 16),
         // QR Code placeholder
@@ -225,7 +218,11 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
                   ),
                 )
               : const Center(
-                  child: Icon(Icons.qr_code_2, size: 100, color: Color(0xFFE5E7EB)),
+                  child: Icon(
+                    Icons.qr_code_2,
+                    size: 100,
+                    color: Color(0xFFE5E7EB),
+                  ),
                 ),
         ),
         if (widget.secret != null) ...[
@@ -288,16 +285,13 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
 
   Widget _buildSMSEmailInstructions() {
     final methodName = widget.method == TwoFactorMethod.sms ? 'SMS' : 'email';
-    
+
     return Column(
       children: [
         Text(
           'We\'ve sent a 6-digit verification code to your $methodName',
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF6B7280),
-          ),
+          style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
         ),
         if (widget.destination != null) ...[
           const SizedBox(height: 8),
@@ -332,10 +326,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
             textAlign: TextAlign.center,
             keyboardType: TextInputType.number,
             maxLength: 1,
-            style: const TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w700,
-            ),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w700),
             decoration: InputDecoration(
               counterText: '',
               contentPadding: EdgeInsets.zero,
@@ -349,12 +340,13 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0E4778),
+                  width: 2,
+                ),
               ),
             ),
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-            ],
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onChanged: (value) => _onDigitChanged(index, value),
             onTap: () {
               // Clear the field when tapped
@@ -368,7 +360,9 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
 
   Widget _buildResendButton() {
     return TextButton(
-      onPressed: _resendCountdown > 0 || _isResending ? null : _handleResendCode,
+      onPressed: _resendCountdown > 0 || _isResending
+          ? null
+          : _handleResendCode,
       child: _isResending
           ? const SizedBox(
               width: 16,
@@ -384,7 +378,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
                 fontWeight: FontWeight.w600,
                 color: _resendCountdown > 0
                     ? const Color(0xFF9CA3AF)
-                    : const Color(0xFF2563EB),
+                    : const Color(0xFF0E4778),
               ),
             ),
     );
@@ -421,7 +415,7 @@ class _OTPVerificationDialogState extends State<OTPVerificationDialog> {
                 : null,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               disabledBackgroundColor: const Color(0xFF93C5FD),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),

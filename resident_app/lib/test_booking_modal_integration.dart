@@ -3,10 +3,7 @@
 // Verifies that the booking modal correctly displays capacity and uses flow function results
 
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'src/models/amenity.dart';
-import 'src/modals/booking_modal.dart';
 import 'src/services/booking_firestore_service.dart';
 import 'src/services/amenities_booking_flow_function.dart';
 

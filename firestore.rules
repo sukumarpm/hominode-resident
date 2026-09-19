@@ -1,8 +1,19 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // ============================================================
+    // BASIC AUTH HELPERS
+    // ============================================================
+
     function signedIn() {
       return request.auth != null;
+    }
+
+    function phoneAuthenticated() {
+      return signedIn()
+        && request.auth.token.firebase.sign_in_provider == 'phone';
     }
 
     function userPath() {
@@ -21,160 +32,2125 @@ service cloud.firestore {
       return signedIn() && exists(adminPath());
     }
 
-    function profile() {
-      return hasAdminProfile() ? get(adminPath()).data : get(userPath()).data;
+    function userProfile() {
+      return get(userPath()).data;
     }
 
-    function profileIsActive() {
-      return (hasAdminProfile() || hasUserProfile()) && profile().isActive == true;
+    function adminProfile() {
+      return get(adminPath()).data;
+    }
+    
+    function activeCommunity(communityId) {
+      return communityId is string
+        && communityId.size() > 0
+        && exists(
+          /databases/$(database)/documents/communities/$(communityId)
+        )
+        && get(
+          /databases/$(database)/documents/communities/$(communityId)
+        ).data.isActive == true;
     }
 
-    function communityId() {
-      return profile().communityId;
+
+    // ============================================================
+    // ADMIN HELPERS
+    // ============================================================
+
+    function validAdmin() {
+      return hasAdminProfile()
+        && adminProfile().uid == request.auth.uid
+        && adminProfile().role == 'admin'
+        && adminProfile().isActive == true
+        && adminProfile().authorizedCommunityIds is list
+        && adminProfile().authorizedCommunityIds.size() > 0;
+    }
+    
+    function validSuperAdmin() {
+      return hasAdminProfile()
+        && adminProfile().uid == request.auth.uid
+        && adminProfile().role == 'superAdmin'
+        && adminProfile().isActive == true;
     }
 
-    function isAdmin() {
-      return hasAdminProfile() &&
-        (profile().role == 'admin' || profile().role == 'superAdmin');
+    function adminCanAccessCommunity(communityId) {
+      return validAdmin()
+        && communityId is string
+        && communityId in adminProfile().authorizedCommunityIds
+        && activeCommunity(communityId);
     }
 
-    function adminCanAccess(tenantId) {
-      return isAdmin() && profileIsActive() &&
-        (communityId() == tenantId ||
-         (profile().authorizedCommunityIds is list &&
-          tenantId in profile().authorizedCommunityIds));
+    function singleCommunityAdmin() {
+      return validAdmin()
+        && adminProfile().authorizedCommunityIds.size() == 1;
     }
 
-    function belongsToCurrentTenant(data) {
-      return profileIsActive() && data.communityId is string &&
-        data.communityId == communityId();
+    function adminPrimaryCommunityId() {
+      return adminProfile().authorizedCommunityIds[0];
     }
 
-    function canAccessTenant(tenantId) {
-      return profileIsActive() &&
-        (communityId() == tenantId || adminCanAccess(tenantId));
+
+    // ============================================================
+    // RESIDENT HELPERS
+    // ============================================================
+
+    function residentTypeIs(expected) {
+      return hasUserProfile()
+        && (
+          (
+            ('residentType' in userProfile())
+            && userProfile().residentType == expected
+            && (
+              !('ownershipType' in userProfile())
+              || userProfile().ownershipType == expected
+            )
+          )
+          || (
+            !('residentType' in userProfile())
+            && ('ownershipType' in userProfile())
+            && userProfile().ownershipType == expected
+          )
+        );
     }
 
-    function tenantFieldsUnchanged() {
-      return request.resource.data.communityId == resource.data.communityId &&
-        request.resource.data.role == resource.data.role &&
-        request.resource.data.isActive == resource.data.isActive;
+    function residentIdentityVerifiedFor(profile) {
+  return ('identityVerified' in profile)
+    && profile.identityVerified == true
+    && ('identityVerificationStatus' in profile)
+    && profile.identityVerificationStatus == 'verified';
+}
+
+function ownerIdentityVerificationRequiredFor(communityId) {
+  let community = get(
+    /databases/$(database)/documents/communities/$(communityId)
+  ).data;
+
+  return ('ownerIdentityVerificationRequired' in community)
+    && community.ownerIdentityVerificationRequired == true;
+}
+
+function residentIdentityEligibleFor(profile) {
+  return
+    (
+      ('residentType' in profile)
+      && (
+        (
+          profile.residentType == 'owner'
+          && (
+            !('ownershipType' in profile)
+            || profile.ownershipType == 'owner'
+          )
+          && (
+            !ownerIdentityVerificationRequiredFor(profile.communityId)
+            || residentIdentityVerifiedFor(profile)
+          )
+        )
+        ||
+        (
+          profile.residentType == 'tenant'
+          && (
+            !('ownershipType' in profile)
+            || profile.ownershipType == 'tenant'
+          )
+          && residentIdentityVerifiedFor(profile)
+        )
+      )
+    )
+    ||
+    (
+      !('residentType' in profile)
+      && ('ownershipType' in profile)
+      && (
+        (
+          profile.ownershipType == 'owner'
+          && (
+            !ownerIdentityVerificationRequiredFor(profile.communityId)
+            || residentIdentityVerifiedFor(profile)
+          )
+        )
+        ||
+        (
+          profile.ownershipType == 'tenant'
+          && residentIdentityVerifiedFor(profile)
+        )
+      )
+    );
+}
+
+    function flatHasNoOccupant(flat) {
+      return (
+          !('residentUserId' in flat)
+          || flat.residentUserId == null
+        )
+        && (
+          !('residentUid' in flat)
+          || flat.residentUid == null
+        )
+        && (
+          !('residentIds' in flat)
+          || flat.residentIds == null
+          || (
+            flat.residentIds is list
+            && flat.residentIds.size() == 0
+          )
+        );
     }
 
-    match /communities/{tenantId} {
-      allow read: if canAccessTenant(tenantId);
+    function flatOccupancyIsConsistent(flat) {
+      return ('status' in flat)
+        && (
+          (
+            flat.status == 'occupied'
+            && !flatHasNoOccupant(flat)
+          )
+          || (
+            (
+              flat.status == 'vacant'
+              || flat.status == 'maintenance'
+            )
+            && flatHasNoOccupant(flat)
+          )
+        );
+    }
+
+    /*
+     * Canonical Resident operational access requires an approved, active
+     * profile in an active community, a valid owner/tenant classification,
+     * and any identity verification required for that resident type.
+     */
+    function approvedResident() {
+  return hasUserProfile()
+    && approvedResidentProfile(userProfile());
+}
+
+function approvedResidentProfile(profile) {
+  return profile.role == 'resident'
+    && profile.approvalStatus == 'approved'
+    && profile.isActive == true
+    && (
+      !('status' in profile)
+      || profile.status == 'active'
+    )
+    && profile.communityId is string
+    && profile.communityId.size() > 0
+    && activeCommunity(profile.communityId)
+    && residentIdentityEligibleFor(profile);
+}
+
+    function residentCanAccessCommunity(communityId) {
+      return approvedResident()
+        && communityId is string
+        && userProfile().communityId == communityId;
+    }
+    
+    // ============================================================
+// SECURITY HELPERS
+// ============================================================
+
+function securityPath() {
+  return /databases/$(database)/documents/securityStaff/$(request.auth.uid);
+}
+
+function hasSecurityProfile() {
+  return signedIn() && exists(securityPath());
+}
+
+function securityProfile() {
+  return get(securityPath()).data;
+}
+
+function validSecurity() {
+  return hasSecurityProfile()
+    && securityProfile().uid == request.auth.uid
+    && securityProfile().role == 'security'
+    && securityProfile().isActive == true
+    && securityProfile().communityId is string
+    && securityProfile().communityId.size() > 0
+    && activeCommunity(
+      securityProfile().communityId
+    );
+}
+
+function securityCanAccessCommunity(communityId) {
+  return validSecurity()
+    && communityId is string
+    && securityProfile().communityId == communityId;
+}
+
+    function canAccessCommunity(communityId) {
+      return adminCanAccessCommunity(communityId)
+        || residentCanAccessCommunity(communityId);
+    }
+
+
+    // ============================================================
+    // RESIDENT SCOPE HELPERS
+    // ============================================================
+
+    function residentOwns(data) {
+  return approvedResident()
+
+    // If the document carries a communityId,
+    // it must be the resident's own community.
+    && (
+      !('communityId' in data)
+      || (
+        data.communityId is string
+        && data.communityId == userProfile().communityId
+      )
+    )
+
+    && (
+      ('userId' in data
+        && data.userId == request.auth.uid)
+
+      || ('residentId' in data
+        && data.residentId == request.auth.uid)
+
+      || ('uid' in data
+        && data.uid == request.auth.uid)
+
+      || ('ownerId' in data
+        && data.ownerId == request.auth.uid)
+
+      || ('createdBy' in data
+        && data.createdBy == request.auth.uid)
+
+      || ('firebaseAuthUid' in data
+        && data.firebaseAuthUid == request.auth.uid)
+
+      || ('authorId' in data
+        && data.authorId == request.auth.uid)
+    );
+}
+
+    function residentSameFlat(data) {
+  return approvedResident()
+
+    && (
+      !('communityId' in data)
+      || (
+        data.communityId is string
+        && data.communityId == userProfile().communityId
+      )
+    )
+
+    && ('flatId' in userProfile())
+    && userProfile().flatId is string
+    && userProfile().flatId.size() > 0
+    && ('flatId' in data)
+    && data.flatId == userProfile().flatId;
+}
+
+    function residentSameBuilding(data) {
+  return approvedResident()
+
+    && (
+      !('communityId' in data)
+      || (
+        data.communityId is string
+        && data.communityId == userProfile().communityId
+      )
+    )
+
+    && ('buildingId' in userProfile())
+    && userProfile().buildingId is string
+    && userProfile().buildingId.size() > 0
+    && ('buildingId' in data)
+    && data.buildingId == userProfile().buildingId;
+}
+
+    function residentSameCommunity(data) {
+      return approvedResident()
+        && ('communityId' in data)
+        && data.communityId == userProfile().communityId;
+    }
+
+
+    // ============================================================
+    // REGISTRATION USER
+    // ============================================================
+
+    function profileLessPhoneUser() {
+      return phoneAuthenticated()
+        && !hasUserProfile()
+        && !hasAdminProfile();
+    }
+
+
+    // ============================================================
+    // ADMINS
+    // ============================================================
+
+    match /admins/{adminId} {
+
+      // Any signed-in admin may read their own profile.
+      // Super Admin may read the platform admin registry.
+      allow get: if signedIn()
+        && (
+          request.auth.uid == adminId
+          || validSuperAdmin()
+        );
+
+      // Required for Super Admin -> Admins page
+      // and platform dashboard admin counters.
+      allow list: if validSuperAdmin();
+
+      // Registry changes stay server-controlled.
       allow create, update, delete: if false;
     }
 
+
+    // ============================================================
+    // COMMUNITIES
+    // ============================================================
+
+    match /communities/{communityId} {
+
+      allow get: if validSuperAdmin()
+        || adminCanAccessCommunity(communityId)
+        || residentCanAccessCommunity(communityId)
+        || securityCanAccessCommunity(communityId)
+        || profileLessPhoneUser();
+
+      allow list: if validSuperAdmin();
+
+      allow create, update, delete: if false;
+    }
+
+
+    // ============================================================
+    // COMMUNITY INVITES
+    // ============================================================
+
+    match /communityInvites/{inviteCode} {
+
+      allow get: if profileLessPhoneUser()
+        || adminCanAccessCommunity(resource.data.communityId);
+
+      allow list: if singleCommunityAdmin()
+        && resource.data.communityId == adminPrimaryCommunityId();
+
+      allow create: if adminCanAccessCommunity(
+          request.resource.data.communityId
+        )
+        && request.resource.data.code == inviteCode
+        && request.resource.data.isActive == true
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.useCount == 0
+        && request.resource.data.usedCount == 0;
+
+      allow update: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && request.resource.data.code
+          == resource.data.code;
+
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // USERS / RESIDENTS
+    // ============================================================
+
     match /users/{userId} {
-      allow read: if signedIn() &&
-        (request.auth.uid == userId ||
-         (isAdmin() && belongsToCurrentTenant(resource.data)));
-      allow create: if isAdmin() && belongsToCurrentTenant(request.resource.data);
-      allow update: if signedIn() &&
-        ((request.auth.uid == userId && tenantFieldsUnchanged()) ||
-         (isAdmin() && belongsToCurrentTenant(resource.data) &&
-          request.resource.data.communityId == resource.data.communityId));
-      allow delete: if isAdmin() && belongsToCurrentTenant(resource.data);
 
-      match /{subdocument=**} {
-        allow read, write: if signedIn() && request.auth.uid == userId;
+      // Resident profiles are created only by the trusted OTP registration
+      // and onboarding callables. Admin clients cannot create hidden users.
+      allow create: if false;
+
+      // Resident can always read own profile.
+      allow get: if signedIn()
+        && request.auth.uid == userId;
+
+      // Admin can read users in authorized community.
+      allow get, list: if adminCanAccessCommunity(
+        resource.data.communityId
+      );
+
+      /*
+       * Allow an approved resident query to resolve ONLY their own
+       * resident document when the query uses one of the canonical
+       * identity fields.
+       */
+      allow list: if approvedResident()
+        && (
+          (('uid' in resource.data)
+            && resource.data.uid == request.auth.uid)
+
+          || (('firebaseAuthUid' in resource.data)
+            && resource.data.firebaseAuthUid == request.auth.uid)
+        );
+
+      // Resident-safe profile changes.
+      allow update: if approvedResident()
+        && request.auth.uid == userId
+        && request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'name',
+            'fullName',
+            'email',
+            'profileImage',
+            'profileImageUrl',
+            'photoURL',
+            'profileImageUpdatedAt',
+            'language',
+            'buildingReference',
+            'unitReference',
+            'updatedAt'
+          ]);
+
+      // Admin approval / reject / block.
+      allow update: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && !request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'role',
+            'communityId',
+            'residentType',
+            'ownershipType',
+            'declaredResidentType',
+            'identityVerified',
+            'identityVerificationStatus',
+            'identityProofStoragePath',
+            'identityProofContentType',
+            'identityProofUploadedAt',
+            'identityVerificationReviewedAt',
+            'identityVerificationReviewedBy',
+            'identityVerificationRejectionReason',
+            'approvalStatus',
+            'isActive',
+            'status',
+            'buildingId',
+            'buildingName',
+            'flatId',
+            'flatLabel',
+            'unitId',
+            'occupancyStatus',
+            'approvedAt',
+            'approvedBy',
+            'rejectedAt',
+            'rejectedBy',
+            'rejectedReason',
+            'deactivatedAt',
+            'deactivatedBy',
+            'reactivatedAt',
+            'reactivatedBy',
+            'legalAcceptance',
+            'reassignedAt',
+            'reassignedBy',
+            'reassignmentCount',
+            'movedOutAt',
+            'movedOutBy',
+            'previousFlatId',
+            'previousUnitId',
+            'previousFlatLabel',
+            'previousBuildingId',
+            'previousBuildingName'
+          ]);
+
+      allow delete: if false;
+    }
+
+    // Admin single onboarding and bulk onboarding are server-owned. Residents
+    // claim them only through verified-OTP callable registration.
+    match /residentOnboarding/{onboardingId} {
+      allow read, write: if false;
+    }
+
+
+    // ============================================================
+    // USER SUBCOLLECTIONS
+    // ============================================================
+
+    // Require at least one path segment below the profile document. In rules
+    // version 2, a bare recursive wildcard may match zero segments and would
+    // otherwise bypass the protected-field checks on /users/{userId}.
+    match /users/{userId}/{subCollection}/{subPath=**} {
+
+      allow read: if approvedResident()
+        && request.auth.uid == userId;
+
+      allow create, update, delete: if approvedResident()
+        && request.auth.uid == userId;
+    }
+
+
+    // ============================================================
+    // BUILDINGS
+    // ============================================================
+
+    match /buildings/{buildingId} {
+
+      allow read: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        || residentSameBuilding(resource.data)
+        || residentSameCommunity(resource.data);
+
+      allow create: if adminCanAccessCommunity(
+        request.resource.data.communityId
+      );
+
+      allow update: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && !request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'floors',
+            'flatsPerFloor',
+            'totalFlats'
+          ]);
+
+      // Building lifecycle deletion is exclusively server-side.
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // FLATS
+    // ============================================================
+
+    match /flats/{flatId} {
+
+      allow read: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        || residentSameFlat(resource.data);
+
+      allow create: if adminCanAccessCommunity(
+          request.resource.data.communityId
+        )
+        && exists(/databases/$(database)/documents/buildings/$(request.resource.data.buildingId))
+        && get(/databases/$(database)/documents/buildings/$(request.resource.data.buildingId)).data.communityId
+          == request.resource.data.communityId
+        && flatHasNoOccupant(request.resource.data)
+        && flatOccupancyIsConsistent(request.resource.data);
+
+      allow update: if adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && request.resource.data.buildingId
+          == resource.data.buildingId
+        && flatOccupancyIsConsistent(request.resource.data)
+        && !request.resource.data.diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'residentUserId',
+            'residentUid',
+            'residentIds',
+            'residentId',
+            'residentName',
+            'ownershipType'
+          ]);
+
+      // Canonical units are removed only by trusted reconciliation/deletion.
+      allow delete: if false;
+    }
+
+
+    // ============================================================
+    // FAMILY MEMBERS
+    // ============================================================
+
+    match /familyMembers/{memberId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if residentOwns(request.resource.data)
+        || residentSameFlat(request.resource.data)
+        || (
+          ('communityId' in request.resource.data)
+          && adminCanAccessCommunity(
+            request.resource.data.communityId
+          )
+        );
+
+      allow update, delete: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+    match /family_members/{memberId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if residentOwns(request.resource.data)
+        || residentSameFlat(request.resource.data)
+        || (
+          ('communityId' in request.resource.data)
+          && adminCanAccessCommunity(
+            request.resource.data.communityId
+          )
+        );
+
+      allow update, delete: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+
+    // ============================================================
+    // VEHICLES
+    // ============================================================
+
+    match /vehicles/{vehicleId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if residentOwns(request.resource.data)
+        || residentSameFlat(request.resource.data)
+        || (
+          ('communityId' in request.resource.data)
+          && adminCanAccessCommunity(
+            request.resource.data.communityId
+          )
+        );
+
+      allow update: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow delete: if residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+    // ============================================================
+    // BILLS
+    // ============================================================
+
+    match /bills/{billId} {
+
+      allow read: if
+        residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(
+          request.resource.data.communityId
+        );
+
+      allow delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(
+          resource.data.communityId
+        );
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId
+          == resource.data.communityId;
+    }
+
+    // ============================================================
+    // PAYMENTS
+    // Resident submits external payment proof.
+    // Admin verification is handled server-side.
+    // ============================================================
+
+    match /payments/{paymentId} {
+
+      function residentPaymentCreateIsValid() {
+        return approvedResident()
+
+          // The payment must belong to this authenticated resident.
+          && residentOwns(request.resource.data)
+
+          // It must also belong to the resident's current flat/community.
+          && residentSameFlat(request.resource.data)
+
+          // Only the V1 payment-proof fields are accepted.
+          && request.resource.data.keys().hasOnly([
+            'id',
+            'communityId',
+            'billId',
+            'flatId',
+            'userId',
+            'amount',
+            'method',
+            'status',
+            'transactionId',
+            'receiptPath',
+            'paymentDate',
+            'createdAt',
+            'updatedAt'
+          ])
+
+          // Required ownership/scope values.
+          && request.resource.data.id == paymentId
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.communityId
+              == userProfile().communityId
+          && request.resource.data.flatId
+              == userProfile().flatId
+
+          // Valid V1 state.
+          && request.resource.data.method == 'external'
+          && request.resource.data.status == 'pending'
+
+          // Required field types.
+          && request.resource.data.billId is string
+          && request.resource.data.billId.size() > 0
+          && request.resource.data.amount is number
+          && request.resource.data.amount > 0
+
+          // Do NOT store a public/download URL for the receipt.
+          // Store only its protected Firebase Storage path.
+          && request.resource.data.receiptPath is string
+          && request.resource.data.receiptPath.size() > 0
+
+          && (
+            !('transactionId' in request.resource.data)
+            || request.resource.data.transactionId == null
+            || request.resource.data.transactionId is string
+          )
+
+          // The referenced bill must actually exist.
+          && exists(
+            /databases/$(database)/documents/bills/$(request.resource.data.billId)
+          )
+
+          // Payment scope must exactly match that bill.
+          && get(
+            /databases/$(database)/documents/bills/$(request.resource.data.billId)
+          ).data.communityId == request.resource.data.communityId
+
+          && get(
+            /databases/$(database)/documents/bills/$(request.resource.data.billId)
+          ).data.flatId == request.resource.data.flatId
+
+          // Resident can submit proof only against an unpaid bill.
+          && get(
+            /databases/$(database)/documents/bills/$(request.resource.data.billId)
+          ).data.status == 'pending'
+
+          // Resident cannot submit an arbitrary amount.
+          && get(
+            /databases/$(database)/documents/bills/$(request.resource.data.billId)
+          ).data.amount == request.resource.data.amount;
+      }
+
+      // Resident can read only their own payment records.
+      // Scoped Admin can read payment proofs for their community.
+      allow read: if
+        (
+          residentOwns(resource.data)
+          && residentSameFlat(resource.data)
+        )
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      // Resident may only CREATE a pending payment-proof submission.
+      allow create: if residentPaymentCreateIsValid();
+
+      // No client is allowed to directly alter verification state.
+      // Verify/reject will be done by a trusted callable/backend operation.
+      allow update, delete: if false;
+    }
+    
+    // ============================================================
+    // VISITORS
+    // ============================================================
+
+    match /visitors/{visitorId} {
+
+    function visitorStateUpdateOnly() {
+      return request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly([
+          'status',
+          'isApproved',
+          'approvedBy',
+          'approvedAt',
+          'rejectedBy',
+          'rejectedAt',
+          'rejectionReason',
+          'actualArrival',
+          'departure',
+          'checkedInAt',
+          'checkedOutAt',
+          'updatedAt'
+        ]);
+    }
+
+    function residentVisitorUpdateIsSafe() {
+      return resource.data.status == 'expected'
+        && resource.data.isApproved == false
+        && resource.data.actualArrival == null
+        && resource.data.departure == null
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'visitorName',
+            'purpose',
+            'expectedArrival',
+            'phoneNumber',
+            'vehicleNumber',
+            'updatedAt'
+          ]);
+    }
+
+    // ------------------------------------------------------------
+    // READ
+    // ------------------------------------------------------------
+
+    allow read: if
+
+      // Admin: authorized active community only.
+      (
+        ('communityId' in resource.data)
+        && resource.data.communityId is string
+        && adminCanAccessCommunity(
+          resource.data.communityId
+        )
+      )
+
+      ||
+
+      // Security: own active community only.
+      (
+        ('communityId' in resource.data)
+        && resource.data.communityId is string
+        && securityCanAccessCommunity(
+          resource.data.communityId
+        )
+      )
+
+      ||
+
+      // Resident: only visitors hosted by this resident.
+      (
+        approvedResident()
+        && ('communityId' in resource.data)
+        && resource.data.communityId
+          == userProfile().communityId
+        && ('hostUserId' in resource.data)
+        && resource.data.hostUserId
+          == request.auth.uid
+      );
+
+
+    // ------------------------------------------------------------
+    // CREATE
+    // ------------------------------------------------------------
+
+    allow create: if
+
+      // Admin.
+      (
+        ('communityId' in request.resource.data)
+        && request.resource.data.communityId is string
+        && adminCanAccessCommunity(
+          request.resource.data.communityId
+        )
+      )
+
+      ||
+
+      // Security manual visitor entry.
+      (
+        ('communityId' in request.resource.data)
+        && request.resource.data.communityId is string
+        && securityCanAccessCommunity(
+          request.resource.data.communityId
+        )
+      )
+
+      ||
+
+      // Resident creates only their own visitor
+      // within their own community and flat.
+      (
+        approvedResident()
+        && ('communityId' in request.resource.data)
+        && request.resource.data.communityId
+          == userProfile().communityId
+        && ('hostUserId' in request.resource.data)
+        && request.resource.data.hostUserId
+          == request.auth.uid
+        && residentSameFlat(
+          request.resource.data
+        )
+        && request.resource.data.status == 'expected'
+        && request.resource.data.isApproved == false
+        && request.resource.data.approvedBy == null
+        && request.resource.data.approvedAt == null
+        && request.resource.data.actualArrival == null
+        && request.resource.data.departure == null
+        && !request.resource.data.keys().hasAny([
+          'rejectedBy',
+          'rejectedAt',
+          'rejectionReason',
+          'checkedInAt',
+          'checkedOutAt'
+        ])
+      );
+
+
+    // ------------------------------------------------------------
+    // UPDATE
+    // ------------------------------------------------------------
+
+    allow update: if
+
+      // Admin cannot move a visitor to another community.
+      (
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && visitorStateUpdateOnly()
+      )
+
+      ||
+
+      // Security can update same-community visitor state,
+      // but cannot change tenant ownership.
+      (
+        ('communityId' in resource.data)
+        && securityCanAccessCommunity(
+          resource.data.communityId
+        )
+        && request.resource.data.communityId
+          == resource.data.communityId
+        && visitorStateUpdateOnly()
+      )
+
+      ||
+
+      // Resident can update only their own visitor.
+      // Ownership/tenant fields remain immutable.
+      (
+        approvedResident()
+        && ('communityId' in resource.data)
+        && resource.data.communityId
+          == userProfile().communityId
+        && ('hostUserId' in resource.data)
+        && resource.data.hostUserId
+          == request.auth.uid
+
+        && residentVisitorUpdateIsSafe()
+      );
+
+
+    // ------------------------------------------------------------
+    // DELETE
+    // ------------------------------------------------------------
+
+    allow delete: if
+
+      // Admin.
+      (
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(
+          resource.data.communityId
+        )
+      )
+
+      ||
+
+      // Resident's own visitor.
+      (
+        approvedResident()
+        && ('communityId' in resource.data)
+        && resource.data.communityId
+          == userProfile().communityId
+        && ('hostUserId' in resource.data)
+        && resource.data.hostUserId
+          == request.auth.uid
+        && resource.data.status == 'expected'
+        && resource.data.isApproved == false
+        && resource.data.actualArrival == null
+        && resource.data.departure == null
+      );
+
+    // Security intentionally cannot delete visitors.
+  }
+
+
+    // ============================================================
+    // DOMESTIC STAFF
+    // ============================================================
+
+    match /domesticStaff/{staffId} {
+
+      allow read: if residentSameFlat(resource.data)
+        || residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create, update: if residentSameFlat(
+          request.resource.data
+        )
+        || (
+          ('communityId' in request.resource.data)
+          && adminCanAccessCommunity(
+            request.resource.data.communityId
+          )
+        );
+
+      allow delete: if (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+    
+    match /securityStaff/{securityId} {
+      allow get: if signedIn()
+        && request.auth.uid == securityId;
+
+      allow get, list: if adminCanAccessCommunity(
+        resource.data.communityId
+      );
+
+      allow create, update, delete: if false;
+    }
+
+
+    // ============================================================
+    // BOOKINGS
+    // ============================================================
+
+    match /bookings/{bookingId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId
+          == resource.data.communityId;
+
+      allow delete: if (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+    match /amenityBookings/{bookingId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId
+          == resource.data.communityId;
+
+      allow delete: if (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+    match /amenity_bookings/{bookingId} {
+
+      allow read: if residentOwns(resource.data)
+        || residentSameFlat(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId
+          == resource.data.communityId;
+
+      allow delete: if (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+
+    // ============================================================
+    // DOCUMENTS / CIRCULARS
+    // ============================================================
+
+    match /documents/{documentId} {
+
+      allow read: if residentSameBuilding(resource.data)
+        || residentSameCommunity(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create, update, delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+    }
+
+
+    // ============================================================
+    // POSTS / COMMUNITY WALL
+    // ============================================================
+
+    match /posts/{postId} {
+
+      allow read: if residentSameCommunity(resource.data)
+        || residentSameBuilding(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if approvedResident()
+        && (
+          residentSameCommunity(request.resource.data)
+          || residentSameBuilding(request.resource.data)
+          || residentOwns(request.resource.data)
+        )
+        || (
+          ('communityId' in request.resource.data)
+          && adminCanAccessCommunity(
+            request.resource.data.communityId
+          )
+        );
+
+      allow update: if residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow delete: if residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+    match /community_wall/{postId} {
+
+      allow read: if residentSameCommunity(resource.data)
+        || residentSameBuilding(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if approvedResident()
+        && (
+          residentSameCommunity(request.resource.data)
+          || residentSameBuilding(request.resource.data)
+          || residentOwns(request.resource.data)
+        );
+
+      allow update, delete: if residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+
+    // ============================================================
+    // MARKETPLACE / LISTINGS
+    // ============================================================
+
+    match /listings/{listingId} {
+
+      allow read: if residentSameBuilding(resource.data)
+        || residentSameCommunity(resource.data)
+        || residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      allow create: if approvedResident()
+        && (
+          residentSameBuilding(request.resource.data)
+          || residentSameCommunity(request.resource.data)
+          || residentOwns(request.resource.data)
+        );
+
+      allow update, delete: if residentOwns(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+    }
+
+
+    // ============================================================
+    // CHATS
+    // ============================================================
+
+    match /chats/{chatId} {
+
+      // Resident can read chats where they are a participant.
+      allow read: if approvedResident()
+        && ('participantIds' in resource.data)
+        && request.auth.uid in resource.data.participantIds;
+
+      // Resident can create a chat only when they are included.
+      allow create: if approvedResident()
+        && ('participantIds' in request.resource.data)
+        && request.auth.uid in request.resource.data.participantIds;
+
+      // Resident can update only chats they participate in.
+      allow update: if approvedResident()
+        && ('participantIds' in resource.data)
+        && request.auth.uid in resource.data.participantIds
+        && request.resource.data.participantIds
+          == resource.data.participantIds;
+
+      // Keep chat deletion admin-only for safety.
+      allow delete: if
+        (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+
+      // ----------------------------------------------------------
+      // CHAT MESSAGES
+      // ----------------------------------------------------------
+
+      match /messages/{messageId} {
+
+        function parentChatData() {
+          return get(
+            /databases/$(database)/documents/chats/$(chatId)
+          ).data;
+        }
+
+        function isChatParticipant() {
+          return approvedResident()
+            && ('participantIds' in parentChatData())
+            && request.auth.uid in parentChatData().participantIds;
+        }
+
+        allow read: if isChatParticipant();
+
+        allow create: if isChatParticipant()
+          && request.resource.data.senderId == request.auth.uid;
+
+        allow update: if isChatParticipant();
+
+        allow delete: if isChatParticipant();
+      }
+    }
+    
+    // ============================================================
+    // CHAT REQUESTS
+    // ============================================================
+
+    match /chatRequests/{requestId} {
+
+      // Sender or receiver can read the request.
+      allow read: if approvedResident()
+        && (
+          (
+            ('senderId' in resource.data)
+            && resource.data.senderId == request.auth.uid
+          )
+          ||
+          (
+            ('receiverId' in resource.data)
+            && resource.data.receiverId == request.auth.uid
+          )
+        );
+
+      // Resident can create a request only as themselves.
+      allow create: if approvedResident()
+        && ('senderId' in request.resource.data)
+        && request.resource.data.senderId == request.auth.uid
+        && ('receiverId' in request.resource.data)
+        && request.resource.data.receiverId is string
+        && ('flatId' in request.resource.data)
+        && request.resource.data.flatId == userProfile().flatId
+        && request.resource.data.status == 'pending';
+
+      // Receiver can accept/reject.
+      // Sender may also update/cancel their own request.
+      allow update: if approvedResident()
+        && (
+          (
+            ('receiverId' in resource.data)
+            && resource.data.receiverId == request.auth.uid
+          )
+          ||
+          (
+            ('senderId' in resource.data)
+            && resource.data.senderId == request.auth.uid
+          )
+        )
+        && request.resource.data.senderId == resource.data.senderId
+        && request.resource.data.receiverId == resource.data.receiverId
+        && request.resource.data.flatId == resource.data.flatId;
+
+      // Sender may delete/cancel their own request.
+      allow delete: if approvedResident()
+        && ('senderId' in resource.data)
+        && resource.data.senderId == request.auth.uid;
+    }
+
+
+    // ============================================================
+    // PRIVATE NOTIFICATIONS AND TRUSTED DEVICE REGISTRY
+    // ============================================================
+
+    match /auditLogs/{auditLogId} {
+      // Critical audit records are append-only through the Admin SDK. V1 has
+      // no client audit-log reader or mutation surface.
+      allow read, write: if false;
+    }
+
+    // SOS state is written exclusively by App Check protected callables.
+    match /sosAlerts/{alertId} {
+      allow read: if adminCanAccessCommunity(resource.data.communityId)
+        || securityCanAccessCommunity(resource.data.communityId)
+        || (approvedResident()
+          && resource.data.residentUid == request.auth.uid
+          && resource.data.communityId == userProfile().communityId);
+      allow write: if false;
+    }
+    match /sosActive/{residentUid} { allow read, write: if false; }
+    match /sosRequests/{requestId} { allow read, write: if false; }
+    match /sosNotificationEvents/{eventId} { allow read, write: if false; }
+    match /sosDeliveries/{deliveryId} { allow read, write: if false; }
+
+    match /notificationDevices/{deviceId} {
+      // Registration and stale-token cleanup are Admin SDK only.
+      allow read, write: if false;
+    }
+
+    match /notifications/{notificationId} {
+      function residentNotificationRecipient(data) {
+        return approvedResident()
+          && data.recipientId == request.auth.uid
+          && data.communityId == userProfile().communityId
+          && data.audience == 'resident'
+          && data.role == 'resident'
+          && data.appId == 'resident';
+      }
+
+      function adminNotificationRecipient(data) {
+        return validAdmin()
+          && data.recipientId == request.auth.uid
+          && data.communityId in adminProfile().authorizedCommunityIds
+          && data.audience == 'admin'
+          && data.role == 'admin'
+          && data.appId == 'admin';
+      }
+
+      function securityNotificationRecipient(data) {
+        return validSecurity()
+          && data.recipientId == request.auth.uid
+          && data.communityId == securityProfile().communityId
+          && data.audience == 'security'
+          && data.role == 'security'
+          && data.appId == 'security';
+      }
+
+      function isNotificationRecipient(data) {
+        return residentNotificationRecipient(data)
+          || adminNotificationRecipient(data)
+          || securityNotificationRecipient(data);
+      }
+
+      allow read: if isNotificationRecipient(resource.data);
+
+      allow update: if isNotificationRecipient(resource.data)
+        && isNotificationRecipient(request.resource.data)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'isRead',
+          'readAt',
+          'updatedAt'
+        ])
+        && request.resource.data.isRead is bool;
+
+      // Canonical creation and delivery state remain backend-owned. A verified
+      // recipient may remove an item from their own private inbox.
+      allow create: if false;
+      allow delete: if isNotificationRecipient(resource.data);
+    }
+
+
+    // ============================================================
+    // NOTICES
+    // ============================================================
+
+    match /notices/{noticeId} {
+
+      function residentNoticeScopeMatches(data) {
+        return approvedResident()
+          && data.communityId == userProfile().communityId
+          && userProfile().flatId is string
+          && userProfile().flatId.size() > 0;
+      }
+
+      function residentNoticeIsVisible(data) {
+        return (
+            (
+              ('isActive' in data)
+              && data.isActive == true
+            )
+            || (
+              ('status' in data)
+              && data.status == 'published'
+            )
+          )
+          && (
+            !('expiryDate' in data)
+            || (
+              data.expiryDate is timestamp
+              && data.expiryDate >= request.time
+            )
+          )
+          && (
+            !('expiresAt' in data)
+            || (
+              data.expiresAt is timestamp
+              && data.expiresAt >= request.time
+            )
+          );
+      }
+
+      allow get: if residentNoticeScopeMatches(resource.data)
+        && residentNoticeIsVisible(resource.data)
+        && (
+          !('targetFlats' in resource.data)
+          || resource.data.targetFlats == []
+          || (
+            resource.data.targetFlats is list
+            && userProfile().flatId in resource.data.targetFlats
+          )
+        );
+
+      allow get, list: if ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId)
+        && request.resource.data.targetFlats is list;
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId == resource.data.communityId;
+
+      allow delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+
+      match /readBy/{readerId} {
+
+        function parentNotice() {
+          return get(
+            /databases/$(database)/documents/notices/$(noticeId)
+          ).data;
+        }
+
+        function currentResidentMayReadParent() {
+          let notice = parentNotice();
+          return approvedResident()
+            && notice.communityId == userProfile().communityId
+            && userProfile().flatId is string
+            && userProfile().flatId.size() > 0
+            && residentNoticeIsVisible(notice)
+            && (
+              !('targetFlats' in notice)
+              || (
+                notice.targetFlats is list
+                && (
+                  notice.targetFlats == []
+                  || userProfile().flatId in notice.targetFlats
+                )
+              )
+            );
+        }
+
+        allow read: if readerId == request.auth.uid
+          && currentResidentMayReadParent()
+          && resource.data.userId == request.auth.uid;
+
+        allow create: if readerId == request.auth.uid
+          && currentResidentMayReadParent()
+          && request.resource.data.keys().hasOnly(['userId', 'readAt'])
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update: if readerId == request.auth.uid
+          && currentResidentMayReadParent()
+          && resource.data.userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data
+            .diff(resource.data)
+            .affectedKeys()
+            .hasOnly(['readAt']);
+
+        allow delete: if readerId == request.auth.uid
+          && currentResidentMayReadParent()
+          && resource.data.userId == request.auth.uid;
       }
     }
 
-    match /admins/{adminId} {
-      allow read: if signedIn() &&
-        (request.auth.uid == adminId ||
-         (isAdmin() && belongsToCurrentTenant(resource.data)));
-      allow create, delete: if false;
-      allow update: if signedIn() && request.auth.uid == adminId &&
-        tenantFieldsUnchanged() &&
-        request.resource.data.authorizedCommunityIds ==
-          resource.data.authorizedCommunityIds;
+
+    // ============================================================
+    // GATES
+    // ============================================================
+
+    match /gates/{gateId} {
+
+      allow get: if (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        )
+        || (
+          ('communityId' in resource.data)
+          && securityCanAccessCommunity(resource.data.communityId)
+          && ('gateId' in securityProfile())
+          && securityProfile().gateId == gateId
+        );
+
+      allow list: if adminCanAccessCommunity(resource.data.communityId);
+
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId == resource.data.communityId;
+
+      allow delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
     }
 
-    // Root collection paths are retained for backward compatibility. Every
-    // migrated document must carry communityId, and every query must include
-    // where('communityId', isEqualTo: resolvedCommunityId).
-    match /buildings/{id} {
-      allow read: if belongsToCurrentTenant(resource.data);
-      allow create: if isAdmin() && belongsToCurrentTenant(request.resource.data);
-      allow update, delete: if isAdmin() && belongsToCurrentTenant(resource.data) &&
-        request.resource.data.communityId == resource.data.communityId;
+
+    // ============================================================
+    // REMAINING TENANT COLLECTIONS
+    // ============================================================
+
+    match /{collectionName}/{documentId} {
+
+      function tenantCollection() {
+        return collectionName in [
+          'parcels',
+
+          'staff',
+
+          'parkingSlots',
+          'parking_violations',
+
+          'vendors',
+
+          'broadcasts',
+
+          'chats',
+          'messages',
+
+          'events_announcements',
+          'events',
+          'announcements',
+
+          'posters',
+          'pinnedPosts',
+
+          'marketplaceRequests',
+          'marketplace',
+
+          'comments',
+
+          'reports',
+          'requests',
+          'readBy'
+        ];
+      }
+
+      // READ
+      allow read: if tenantCollection()
+        && (
+          (
+            ('communityId' in resource.data)
+            && canAccessCommunity(resource.data.communityId)
+          )
+          || residentOwns(resource.data)
+        );
+
+      // CREATE
+      allow create: if tenantCollection()
+        && request.resource.data.communityId is string
+        && canAccessCommunity(
+          request.resource.data.communityId
+        );
+
+      // UPDATE
+      allow update: if tenantCollection()
+        && (
+          (
+            ('communityId' in resource.data)
+            && canAccessCommunity(resource.data.communityId)
+          )
+          || residentOwns(resource.data)
+        )
+        && (
+          !('communityId' in resource.data)
+          || request.resource.data.communityId
+              == resource.data.communityId
+        );
+
+      // DELETE
+      allow delete: if tenantCollection()
+        && ('communityId' in resource.data)
+        && adminCanAccessCommunity(
+          resource.data.communityId
+        );
+    }
+    
+    match /complaints/{complaintId} {
+
+    function residentOwnsComplaint(data) {
+      return approvedResident()
+        && ('communityId' in data)
+        && data.communityId == userProfile().communityId
+        && (
+          (
+            ('userId' in data)
+            && data.userId == request.auth.uid
+          )
+          || (
+            ('residentId' in data)
+            && data.residentId == request.auth.uid
+          )
+        )
+        && (
+          !('userId' in data)
+          || data.userId == request.auth.uid
+        )
+        && (
+          !('residentId' in data)
+          || data.residentId == request.auth.uid
+        );
     }
 
-    match /flats/{id} {
-      allow read: if belongsToCurrentTenant(resource.data);
-      allow create: if isAdmin() && belongsToCurrentTenant(request.resource.data);
-      allow update, delete: if isAdmin() && belongsToCurrentTenant(resource.data) &&
-        request.resource.data.communityId == resource.data.communityId;
+    allow read: if residentOwnsComplaint(resource.data)
+      || (
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+      );
+
+    allow create: if (
+        approvedResident()
+        && request.resource.data.communityId == userProfile().communityId
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.residentId == request.auth.uid
+        && request.resource.data.flatId == userProfile().flatId
+        && request.resource.data.status == 'pending'
+      )
+      || (
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(
+          request.resource.data.communityId
+        )
+      );
+
+    allow update: if (
+        residentOwnsComplaint(resource.data)
+        && request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasOnly([
+            'imageUrl',
+            'imageUrls',
+            'imageUploadedAt',
+            'imageUploadedBy',
+            'updatedAt'
+          ])
+        && (
+          !('imageUploadedBy' in request.resource.data)
+          || request.resource.data.imageUploadedBy == request.auth.uid
+        )
+      )
+      || (
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId == resource.data.communityId
+        && !request.resource.data
+          .diff(resource.data)
+          .affectedKeys()
+          .hasAny([
+            'communityId',
+            'userId',
+            'residentId',
+            'uid',
+            'ownerId',
+            'createdBy',
+            'flatId',
+            'buildingId'
+          ])
+      );
+
+    allow delete: if (
+      ('communityId' in resource.data)
+      && adminCanAccessCommunity(resource.data.communityId)
+    );
+  }
+  
+  // ============================================================
+  // AMENITIES
+  // ============================================================
+
+  match /amenities/{amenityId} {
+
+    function buildingInAmenityCommunity(data) {
+      return ('buildingId' in data)
+        && data.buildingId is string
+        && data.buildingId.size() > 0
+        && exists(/databases/$(database)/documents/buildings/$(data.buildingId))
+        && get(/databases/$(database)/documents/buildings/$(data.buildingId)).data.communityId
+          == data.communityId;
     }
+function nonNegativeAmenityPrice(data, field) {
+  return (field in data)
+    && data[field] is number
+    && data[field] >= 0;
+}
 
-    match /residents/{id} {
-      allow read: if belongsToCurrentTenant(resource.data) &&
-        (isAdmin() || resource.data.userId == request.auth.uid);
-      allow create: if isAdmin() && belongsToCurrentTenant(request.resource.data);
-      allow update: if isAdmin() && belongsToCurrentTenant(resource.data) &&
-        request.resource.data.communityId == resource.data.communityId;
-      allow delete: if isAdmin() && belongsToCurrentTenant(resource.data);
-    }
+function optionalNonNegativeAmenityPrice(data, field) {
+  return !(field in data)
+    || (
+      data[field] is number
+      && data[field] >= 0
+    );
+}
 
-    match /visitors/{id} {
-      allow read: if belongsToCurrentTenant(resource.data);
-      allow create: if belongsToCurrentTenant(request.resource.data) &&
-        (isAdmin() || request.resource.data.hostUserId == request.auth.uid ||
-         request.resource.data.residentId == request.auth.uid);
-      allow update: if belongsToCurrentTenant(resource.data) &&
-        (isAdmin() || resource.data.hostUserId == request.auth.uid ||
-         resource.data.residentId == request.auth.uid) &&
-        request.resource.data.communityId == resource.data.communityId;
-      allow delete: if belongsToCurrentTenant(resource.data) &&
-        (isAdmin() || resource.data.hostUserId == request.auth.uid ||
-         resource.data.residentId == request.auth.uid);
-    }
+function validAmenityPricing(data) {
+  return
+    ('isFree' in data)
+    && data.isFree is bool
 
-    match /{collectionName}/{id} {
-      allow read: if collectionName in [
-          'amenities', 'bookings', 'amenityBookings', 'complaints', 'notices',
-          'announcements', 'events', 'maintenance', 'bills', 'payments',
-          'marketplace', 'listings', 'chats', 'adminChats', 'chatRequests',
-          'community_wall', 'posts', 'notifications', 'staff', 'domesticStaff'
-        ] && belongsToCurrentTenant(resource.data);
-      allow create: if collectionName in [
-          'bookings', 'amenityBookings', 'complaints', 'payments', 'marketplace',
-          'listings', 'chats', 'adminChats', 'chatRequests', 'community_wall',
-          'posts'
-        ] && belongsToCurrentTenant(request.resource.data);
-      allow create: if collectionName in [
-          'amenities', 'notices', 'announcements', 'events', 'maintenance',
-          'bills', 'notifications', 'staff', 'domesticStaff'
-        ] && isAdmin() && belongsToCurrentTenant(request.resource.data);
-      allow update: if belongsToCurrentTenant(resource.data) &&
-        request.resource.data.communityId == resource.data.communityId &&
-        (isAdmin() || resource.data.userId == request.auth.uid ||
-         resource.data.ownerId == request.auth.uid ||
-         resource.data.authorId == request.auth.uid ||
-         resource.data.sellerId == request.auth.uid);
-      allow delete: if belongsToCurrentTenant(resource.data) &&
-        (isAdmin() || resource.data.userId == request.auth.uid ||
-         resource.data.ownerId == request.auth.uid ||
-         resource.data.authorId == request.auth.uid ||
-         resource.data.sellerId == request.auth.uid);
+    // Legacy facilities:
+    // isFree + pricePerDay, without pricingMode.
+    && (
+      (
+        !('pricingMode' in data)
+        && (
+          (
+            data.isFree == true
+            && nonNegativeAmenityPrice(data, 'pricePerDay')
+            && data.pricePerDay == 0
+          )
+          ||
+          (
+            data.isFree == false
+            && nonNegativeAmenityPrice(data, 'pricePerDay')
+          )
+        )
+      )
 
-      match /{subcollection}/{subId} {
-        allow read: if belongsToCurrentTenant(resource.data);
-        allow create: if belongsToCurrentTenant(request.resource.data);
-        allow update: if belongsToCurrentTenant(resource.data) &&
-          request.resource.data.communityId == resource.data.communityId &&
-          (isAdmin() || resource.data.userId == request.auth.uid ||
-           resource.data.senderId == request.auth.uid ||
-           resource.data.authorId == request.auth.uid);
-        allow delete: if belongsToCurrentTenant(resource.data) &&
-          (isAdmin() || resource.data.userId == request.auth.uid ||
-           resource.data.senderId == request.auth.uid ||
-           resource.data.authorId == request.auth.uid);
+      // New FREE pricing.
+      ||
+      (
+        ('pricingMode' in data)
+        && data.pricingMode == 'free'
+        && data.isFree == true
+        && nonNegativeAmenityPrice(data, 'pricePerDay')
+        && data.pricePerDay == 0
+        && optionalNonNegativeAmenityPrice(data, 'ownerPricePerDay')
+        && optionalNonNegativeAmenityPrice(data, 'tenantPricePerDay')
+      )
+
+      // New FLAT pricing.
+      ||
+      (
+        ('pricingMode' in data)
+        && data.pricingMode == 'flat'
+        && data.isFree == false
+        && nonNegativeAmenityPrice(data, 'pricePerDay')
+        && optionalNonNegativeAmenityPrice(data, 'ownerPricePerDay')
+        && optionalNonNegativeAmenityPrice(data, 'tenantPricePerDay')
+      )
+
+      // Different Owner / Tenant pricing.
+      ||
+      (
+        ('pricingMode' in data)
+        && data.pricingMode == 'resident_type'
+        && data.isFree == false
+        && nonNegativeAmenityPrice(data, 'pricePerDay')
+        && data.pricePerDay == 0
+        && nonNegativeAmenityPrice(data, 'ownerPricePerDay')
+        && nonNegativeAmenityPrice(data, 'tenantPricePerDay')
+      )
+    );
+}
+    // Resident can read amenities for their own building/community.
+    allow read: if
+      residentSameBuilding(resource.data)
+      || residentSameCommunity(resource.data)
+      || (
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+      );
+
+    // Admin creates amenities for an authorized community.
+    allow create: if
+  ('communityId' in request.resource.data)
+  && adminCanAccessCommunity(
+    request.resource.data.communityId
+  )
+  && buildingInAmenityCommunity(request.resource.data)
+  && validAmenityPricing(request.resource.data);
+
+    // Updates preserve tenant scope and keep the building in that community.
+    allow update: if
+  ('communityId' in resource.data)
+  && adminCanAccessCommunity(resource.data.communityId)
+  && request.resource.data.communityId == resource.data.communityId
+  && buildingInAmenityCommunity(request.resource.data)
+
+  // Validate pricing only when pricing fields are changed.
+  // This avoids blocking unrelated edits to older legacy facilities.
+  && (
+    !request.resource.data
+      .diff(resource.data)
+      .affectedKeys()
+      .hasAny([
+        'isFree',
+        'pricingMode',
+        'pricePerDay',
+        'ownerPricePerDay',
+        'tenantPricePerDay'
+      ])
+    || validAmenityPricing(request.resource.data)
+  );
+
+    // Preserve existing Admin delete authorization.
+    allow delete: if
+      ('communityId' in resource.data)
+      && adminCanAccessCommunity(
+        resource.data.communityId
+      );
+  }
+  // ============================================================
+// MARKETPLACE
+// ============================================================
+
+match /marketplaces/{listingId} {
+
+  // Residents can browse listings in their own building.
+  allow read: if
+    residentSameBuilding(resource.data)
+    || residentOwns(resource.data)
+    || (
+      ('communityId' in resource.data)
+      && adminCanAccessCommunity(resource.data.communityId)
+    );
+
+  // Resident can create a listing for their own building.
+  allow create: if approvedResident()
+    && ('sellerId' in request.resource.data)
+    && request.resource.data.sellerId == request.auth.uid
+    && ('buildingId' in request.resource.data)
+    && request.resource.data.buildingId == userProfile().buildingId;
+
+  // Seller can update own listing.
+  allow update: if approvedResident()
+    && ('sellerId' in resource.data)
+    && resource.data.sellerId == request.auth.uid
+    && request.resource.data.sellerId == resource.data.sellerId
+    && request.resource.data.buildingId == resource.data.buildingId;
+
+  // Seller can delete own listing.
+  allow delete: if approvedResident()
+    && ('sellerId' in resource.data)
+    && resource.data.sellerId == request.auth.uid;
+
+
+  // ----------------------------------------------------------
+  // PHONE NUMBER REQUESTS
+  // ----------------------------------------------------------
+
+      match /requests/{requestId} {
+
+        function parentListing() {
+          return get(
+            /databases/$(database)/documents/marketplaces/$(listingId)
+          ).data;
+        }
+
+        function sameBuildingResident() {
+          return approvedResident()
+            && ('buildingId' in parentListing())
+            && parentListing().buildingId == userProfile().buildingId;
+        }
+
+        // Same-building residents and seller can read requests.
+        allow read: if sameBuildingResident()
+          && (
+            request.auth.uid == parentListing().sellerId
+            || (
+              ('requesterId' in resource.data)
+              && resource.data.requesterId == request.auth.uid
+            )
+          );
+
+        // Buyer can create their own phone request.
+        allow create: if sameBuildingResident()
+          && ('requesterId' in request.resource.data)
+          && request.resource.data.requesterId == request.auth.uid
+          && request.resource.data.status == 'pending';
+
+        // Seller can accept/reject requests.
+        allow update: if sameBuildingResident()
+          && request.auth.uid == parentListing().sellerId;
+
+        allow delete: if false;
       }
     }
+    
+    match /apartmentImages/{imageId} {
+
+      // Resident can read active images for their own building.
+      allow read: if
+        residentSameBuilding(resource.data)
+        || (
+          ('communityId' in resource.data)
+          && adminCanAccessCommunity(resource.data.communityId)
+        );
+
+      // Admin manages images.
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update, delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+    }
+    
+    match /staffAttendance/{attendanceId} {
+
+      // Community Admin
+      allow read: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+
+      // Security may read only their own attendance
+      allow read: if validSecurity()
+        && resource.data.communityId == securityProfile().communityId
+        && resource.data.staffId == request.auth.uid;
+
+      // Security attendance mutations are server-only so geofence validation
+      // cannot be bypassed by writing directly from a client.
+      allow create: if
+        ('communityId' in request.resource.data)
+        && adminCanAccessCommunity(request.resource.data.communityId);
+
+      allow update: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId)
+        && request.resource.data.communityId == resource.data.communityId;
+
+      // Only Admin may delete
+      allow delete: if
+        ('communityId' in resource.data)
+        && adminCanAccessCommunity(resource.data.communityId);
+    }
+
+
+    // ============================================================
+    // PUBLIC PLATFORM STATISTICS
+    // ============================================================
+
+    match /publicPlatformStats/{statsId} {
+      // Public website/app may read only the canonical aggregate.
+      allow get: if statsId == "current";
+
+      // Prevent collection enumeration and all client writes.
+      allow list: if false;
+      allow create, update, delete: if false;
+    }
+
+
+    // ============================================================
+    // DENY EVERYTHING ELSE
+    // ============================================================
 
     match /{document=**} {
       allow read, write: if false;

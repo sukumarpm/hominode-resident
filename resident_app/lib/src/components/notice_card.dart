@@ -19,10 +19,10 @@ class NoticeCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const NoticeCard({
-    Key? key,
+    super.key,
     required this.notice,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

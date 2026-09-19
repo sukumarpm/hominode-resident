@@ -13,10 +13,10 @@ class LanguageSwitcher extends StatelessWidget {
   final VoidCallback? onLanguageChanged;
 
   const LanguageSwitcher({
-    Key? key,
+    super.key,
     this.isCompact = false,
     this.onLanguageChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class LanguageSwitcher extends StatelessWidget {
         }
       },
       underline: Container(),
-      icon: const Icon(Icons.language, color: Color(0xFF2563EB)),
+      icon: const Icon(Icons.language, color: Color(0xFF0E4778)),
     );
   }
 
@@ -76,10 +76,7 @@ class LanguageSwitcher extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'Language',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
         ),
         GridView.builder(
@@ -104,12 +101,12 @@ class LanguageSwitcher extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? const Color(0xFF2563EB)
+                      ? const Color(0xFF0E4778)
                       : Colors.grey[100],
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
                     color: isSelected
-                        ? const Color(0xFF2563EB)
+                        ? const Color(0xFF0E4778)
                         : Colors.grey[300]!,
                     width: 2,
                   ),
@@ -176,10 +173,7 @@ class LanguageSwitcher extends StatelessWidget {
 class LanguageSwitcherDialog extends StatelessWidget {
   final VoidCallback? onLanguageChanged;
 
-  const LanguageSwitcherDialog({
-    Key? key,
-    this.onLanguageChanged,
-  }) : super(key: key);
+  const LanguageSwitcherDialog({super.key, this.onLanguageChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -199,14 +193,9 @@ class LanguageSwitcherDialog extends StatelessWidget {
                     _getLanguageFlag(language),
                     style: const TextStyle(fontSize: 24),
                   ),
-                  title: Text(
-                    localizationProvider.getLanguageName(language),
-                  ),
+                  title: Text(localizationProvider.getLanguageName(language)),
                   trailing: isSelected
-                      ? const Icon(
-                          Icons.check_circle,
-                          color: Color(0xFF2563EB),
-                        )
+                      ? const Icon(Icons.check_circle, color: Color(0xFF0E4778))
                       : null,
                   onTap: () async {
                     await localizationProvider.setLanguage(language);

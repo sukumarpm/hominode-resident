@@ -13,7 +13,7 @@ void main() async {
 }
 
 class TestBillingFlatLabelApp extends StatelessWidget {
-  const TestBillingFlatLabelApp({Key? key}) : super(key: key);
+  const TestBillingFlatLabelApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class TestBillingFlatLabelApp extends StatelessWidget {
 }
 
 class TestBillingWidget extends StatefulWidget {
-  const TestBillingWidget({Key? key}) : super(key: key);
+  const TestBillingWidget({super.key});
 
   @override
   State<TestBillingWidget> createState() => _TestBillingWidgetState();

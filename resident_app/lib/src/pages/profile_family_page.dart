@@ -7,14 +7,14 @@ import '../widgets/family_card.dart';
 /// Sample page demonstrating Family Members management
 /// This shows how to integrate the AddEditMemberModal
 class ProfileFamilyPage extends StatefulWidget {
-  const ProfileFamilyPage({Key? key}) : super(key: key);
+  const ProfileFamilyPage({super.key});
 
   @override
   State<ProfileFamilyPage> createState() => _ProfileFamilyPageState();
 }
 
 class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
-  List<FamilyMember> _familyMembers = FamilyMember.mockList();
+  final List<FamilyMember> _familyMembers = FamilyMember.mockList();
 
   @override
   Widget build(BuildContext context) {
@@ -28,9 +28,7 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
             const SizedBox(height: 20),
             _buildSectionHeader(),
             const SizedBox(height: 16),
-            Expanded(
-              child: _buildFamilyList(),
-            ),
+            Expanded(child: _buildFamilyList()),
           ],
         ),
       ),
@@ -41,7 +39,7 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
     return Container(
       width: double.infinity,
       decoration: const BoxDecoration(
-        color: Color(0xFF2563EB),
+        color: Color(0xFF0E4778),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -55,12 +53,13 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
             children: [
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-                padding: const EdgeInsets.all(12),
-                constraints: const BoxConstraints(
-                  minWidth: 44,
-                  minHeight: 44,
+                icon: const Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 20,
                 ),
+                padding: const EdgeInsets.all(12),
+                constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
               ),
               const Text(
                 'Family Members',
@@ -108,7 +107,7 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               elevation: 0,
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
               shape: RoundedRectangleBorder(
@@ -127,18 +126,11 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.people_outline,
-              size: 80,
-              color: Colors.grey[300],
-            ),
+            Icon(Icons.people_outline, size: 80, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
               'No family members yet',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
             const SizedBox(height: 8),
             TextButton(
@@ -172,7 +164,7 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
         setState(() {
           _familyMembers.add(member);
         });
-        
+
         // Show success SnackBar
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -302,7 +294,7 @@ class _ProfileFamilyPageState extends State<ProfileFamilyPage> {
                         _familyMembers.removeWhere((m) => m.id == id);
                       });
                       Navigator.pop(context);
-                      
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: const Text('Member removed'),

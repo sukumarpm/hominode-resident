@@ -6,11 +6,11 @@ class SellerInfoCard extends StatelessWidget {
   final String sellerPhone;
 
   const SellerInfoCard({
-    Key? key,
+    super.key,
     required this.sellerName,
     required this.sellerUnit,
     required this.sellerPhone,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

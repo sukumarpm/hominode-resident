@@ -1,24 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Pixel-Perfect Splash Screen
 /// Based on reference: sp screen.png
 /// Device: iPhone 13 (390px width)
-/// 
+///
 /// Design Specs:
 /// - Gradient: #2B6BEA (top) → #1F5FE0 (bottom)
 /// - Logo: Centered with shadow
-/// - App Name: "Lyvo" (Bold, 32pt, white)
+/// - App Name: "Hominode" (Bold, 32pt, white)
 /// - Tagline: "Your Community, Connected" (Regular, 16pt, white 70%)
 /// - Animation: Fade + Scale (1.3s total)
 class SimpleSplashScreen extends StatefulWidget {
   final VoidCallback? onComplete;
 
-  const SimpleSplashScreen({
-    Key? key,
-    this.onComplete,
-  }) : super(key: key);
+  const SimpleSplashScreen({super.key, this.onComplete});
 
   @override
   State<SimpleSplashScreen> createState() => _SimpleSplashScreenState();
@@ -33,7 +29,7 @@ class _SimpleSplashScreenState extends State<SimpleSplashScreen>
   @override
   void initState() {
     super.initState();
-    
+
     // Set status bar to transparent
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -50,10 +46,7 @@ class _SimpleSplashScreenState extends State<SimpleSplashScreen>
     );
 
     // Fade animation: 0 → 1
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.6, curve: Curves.easeOut),
@@ -63,13 +56,17 @@ class _SimpleSplashScreenState extends State<SimpleSplashScreen>
     // Scale animation: 0.9 → 1.05 → 1.0
     _scaleAnimation = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.9, end: 1.05)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(
+          begin: 0.9,
+          end: 1.05,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 60,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeInOut)),
+        tween: Tween<double>(
+          begin: 1.05,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeInOut)),
         weight: 40,
       ),
     ]).animate(_controller);
@@ -80,7 +77,7 @@ class _SimpleSplashScreenState extends State<SimpleSplashScreen>
     // Navigate after animation completes
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        Future.delayed(const Duration(milliseconds: 500), () {
+        Future.delayed(const Duration(milliseconds: 1500), () {
           if (mounted) {
             widget.onComplete?.call();
             // Navigator.pushReplacementNamed(context, '/login');
@@ -162,9 +159,9 @@ class _SimpleSplashScreenState extends State<SimpleSplashScreen>
 
                         const SizedBox(height: 32),
 
-                        // App Name: "Lyvo"
+                        // App Name: "Hominode"
                         const Text(
-                          'Lyvo',
+                          'Hominode',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,

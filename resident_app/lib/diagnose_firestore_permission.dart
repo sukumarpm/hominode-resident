@@ -183,7 +183,7 @@ Future<void> diagnoseFirestorePermissions() async {
   print('');
   
   print('📋 SUMMARY:');
-  print('   - User logged in: ${currentUser != null ? '✅' : '❌'}');
+  print('   - User logged in: ${'✅'}');
   print('   - User document exists: Check output above');
   print('   - Required fields present: Check output above');
   print('   - Collections accessible: Check output above');

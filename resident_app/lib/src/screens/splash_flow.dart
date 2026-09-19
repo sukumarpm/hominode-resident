@@ -1,12 +1,11 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Production-ready Splash Flow with multi-stage animations
-/// 
+///
 /// Flow: Gradient Wave Splash → Bottom Loader → Center-Only Logo → Navigation
-/// 
+///
 /// Features:
 /// - Stage 1: Full splash with waves, logo pop, app name & tagline (2.0s)
 /// - Stage 2: Bottom loader with progress animation (1.0s)
@@ -26,24 +25,23 @@ class SplashFlow extends StatefulWidget {
   final VoidCallback? onFinish;
 
   const SplashFlow({
-    Key? key,
+    super.key,
     this.initialDuration = const Duration(milliseconds: 2000),
     this.loaderDuration = const Duration(milliseconds: 1000),
     this.transitionDuration = const Duration(milliseconds: 400),
     this.nightMode = false,
     this.useSmartWave = false,
     this.logoAssetPath = 'assets/logo1.png',
-    this.appName = 'Lyvo',
+    this.appName = 'Hominode',
     this.tagline = 'Your Community, Connected',
     this.onFinish,
-  }) : super(key: key);
+  });
 
   @override
   State<SplashFlow> createState() => _SplashFlowState();
 }
 
-class _SplashFlowState extends State<SplashFlow>
-    with TickerProviderStateMixin {
+class _SplashFlowState extends State<SplashFlow> with TickerProviderStateMixin {
   // Animation Controllers
   late AnimationController _waveController;
   late AnimationController _logoController;
@@ -88,13 +86,17 @@ class _SplashFlowState extends State<SplashFlow>
     // Logo scale with overshoot
     _logoScale = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.6, end: 1.05)
-            .chain(CurveTween(curve: Curves.easeOutBack)),
+        tween: Tween<double>(
+          begin: 0.6,
+          end: 1.05,
+        ).chain(CurveTween(curve: Curves.easeOutBack)),
         weight: 70,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(
+          begin: 1.05,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 30,
       ),
     ]).animate(_logoController);
@@ -114,10 +116,7 @@ class _SplashFlowState extends State<SplashFlow>
     );
 
     _breathing = Tween<double>(begin: 1.0, end: 1.02).animate(
-      CurvedAnimation(
-        parent: _breathingController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
     );
 
     // Loader progress
@@ -127,10 +126,7 @@ class _SplashFlowState extends State<SplashFlow>
     );
 
     _loaderProgress = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _loaderController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _loaderController, curve: Curves.easeInOut),
     );
 
     // Transition animations
@@ -140,10 +136,7 @@ class _SplashFlowState extends State<SplashFlow>
     );
 
     _backgroundFade = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _transitionController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _transitionController, curve: Curves.easeInOut),
     );
 
     _textFade = Tween<double>(begin: 1.0, end: 0.0).animate(
@@ -154,10 +147,7 @@ class _SplashFlowState extends State<SplashFlow>
     );
 
     _logoTransition = Tween<double>(begin: 1.0, end: 0.9).animate(
-      CurvedAnimation(
-        parent: _transitionController,
-        curve: Curves.elasticOut,
-      ),
+      CurvedAnimation(parent: _transitionController, curve: Curves.elasticOut),
     );
 
     // Stars animation (for night mode)
@@ -243,7 +233,9 @@ class _SplashFlowState extends State<SplashFlow>
                 _buildSmartWave(),
 
               // Stars for night mode
-              if (widget.nightMode && !_reduceMotion && _starsController != null)
+              if (widget.nightMode &&
+                  !_reduceMotion &&
+                  _starsController != null)
                 _buildStarsLayer(),
 
               // Main content
@@ -281,8 +273,8 @@ class _SplashFlowState extends State<SplashFlow>
                         const Color(0xFF061226), // Night bottom
                       ]
                     : [
-                        const Color(0xFF2563EB), // Primary blue
-                        const Color(0xFF1E40AF), // Secondary blue
+                        const Color(0xFF0E4778), // Primary blue
+                        const Color(0xFF061C4C), // Secondary blue
                       ],
               ),
             ),
@@ -293,12 +285,17 @@ class _SplashFlowState extends State<SplashFlow>
   }
 
   Widget _buildWaveLayer(
-      int index, double opacity, double speed, bool reverse) {
+    int index,
+    double opacity,
+    double speed,
+    bool reverse,
+  ) {
     return AnimatedBuilder(
       animation: Listenable.merge([_waveController, _transitionController]),
       builder: (context, child) {
-        final waveOpacity =
-            _currentStage < 3 ? opacity : opacity * _backgroundFade.value;
+        final waveOpacity = _currentStage < 3
+            ? opacity
+            : opacity * _backgroundFade.value;
         return Opacity(
           opacity: waveOpacity,
           child: CustomPaint(
@@ -322,9 +319,7 @@ class _SplashFlowState extends State<SplashFlow>
       animation: _waveController,
       builder: (context, child) {
         return CustomPaint(
-          painter: SmartWavePainter(
-            animationValue: _waveController.value,
-          ),
+          painter: SmartWavePainter(animationValue: _waveController.value),
           size: Size.infinite,
         );
       },
@@ -336,9 +331,7 @@ class _SplashFlowState extends State<SplashFlow>
       animation: _starsController!,
       builder: (context, child) {
         return CustomPaint(
-          painter: StarsPainter(
-            animationValue: _starsController!.value,
-          ),
+          painter: StarsPainter(animationValue: _starsController!.value),
           size: Size.infinite,
         );
       },
@@ -354,7 +347,8 @@ class _SplashFlowState extends State<SplashFlow>
           _transitionController,
         ]),
         builder: (context, child) {
-          final logoScale = _logoScale.value *
+          final logoScale =
+              _logoScale.value *
               (_breathingController.isAnimating ? _breathing.value : 1.0) *
               (_currentStage == 3 ? _logoTransition.value : 1.0);
 
@@ -414,7 +408,7 @@ class _SplashFlowState extends State<SplashFlow>
                       child: Transform.translate(
                         offset: Offset(0, 20 * (1 - _logoOpacity.value)),
                         child: Text(
-                          widget.appName ?? 'Lyvo',
+                          widget.appName ?? 'Hominode',
                           style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.w700,
@@ -438,8 +432,8 @@ class _SplashFlowState extends State<SplashFlow>
                 AnimatedBuilder(
                   animation: _transitionController,
                   builder: (context, child) {
-                    final delayedOpacity =
-                        (_logoOpacity.value * 1.5 - 0.5).clamp(0.0, 1.0);
+                    final delayedOpacity = (_logoOpacity.value * 1.5 - 0.5)
+                        .clamp(0.0, 1.0);
                     return Opacity(
                       opacity: delayedOpacity * _textFade.value,
                       child: Transform.translate(
@@ -564,7 +558,8 @@ class WavePainter extends CustomPainter {
 
     for (double x = 0; x <= size.width; x += 5) {
       final normalizedX = (x + horizontalOffset + offset * 100) / waveLength;
-      final y = size.height * 0.6 +
+      final y =
+          size.height * 0.6 +
           math.sin(normalizedX * 2 * math.pi * 2) * waveHeight;
       path.lineTo(x, y);
     }
@@ -590,7 +585,7 @@ class SmartWavePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = const Color(0xFF2563EB).withOpacity(0.03)
+      ..color = const Color(0xFF0E4778).withOpacity(0.03)
       ..style = PaintingStyle.fill;
 
     final path = Path();

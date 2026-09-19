@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // ============================================================================
 
 /// Primary blue color for RSVP button and accents
-const kPrimary = Color(0xFF2563EB);
+const kPrimary = Color(0xFF0E4778);
 
 /// Modal background (white)
 const kModalBackground = Color(0xFFFFFFFF);
@@ -79,8 +79,10 @@ class EventDetail {
     return EventDetail(
       id: '1',
       title: 'Holi Celebration 2025',
-      description: 'Join us for a colorful Holi celebration with your neighbors!',
-      imageUrl: 'https://images.unsplash.com/photo-1583241800698-2d3d3d0c6b2e?w=800',
+      description:
+          'Join us for a colorful Holi celebration with your neighbors!',
+      imageUrl:
+          'https://images.unsplash.com/photo-1583241800698-2d3d3d0c6b2e?w=800',
       date: 'Jan 1, 2026',
       startTime: '10:00 AM',
       endTime: '2:00 PM',
@@ -121,10 +123,7 @@ Future<void> showEventDetailModal(
     context: context,
     barrierColor: kOverlayColor,
     barrierDismissible: true,
-    builder: (context) => EventDetailModal(
-      event: event,
-      onRsvp: onRsvp,
-    ),
+    builder: (context) => EventDetailModal(event: event, onRsvp: onRsvp),
   );
 }
 
@@ -136,11 +135,7 @@ class EventDetailModal extends StatefulWidget {
   final EventDetail event;
   final Function(EventDetail)? onRsvp;
 
-  const EventDetailModal({
-    Key? key,
-    required this.event,
-    this.onRsvp,
-  }) : super(key: key);
+  const EventDetailModal({super.key, required this.event, this.onRsvp});
 
   @override
   State<EventDetailModal> createState() => _EventDetailModalState();
@@ -315,7 +310,9 @@ class _EventDetailModalState extends State<EventDetailModal>
 
                             // RSVP Button
                             PrimaryButton(
-                              text: widget.event.isRsvped ? 'Cancel RSVP' : 'RSVP Now',
+                              text: widget.event.isRsvped
+                                  ? 'Cancel RSVP'
+                                  : 'RSVP Now',
                               onPressed: _handleRsvp,
                               isActive: !widget.event.isRsvped,
                             ),
@@ -379,11 +376,7 @@ class HeaderImage extends StatelessWidget {
   final String imageUrl;
   final VoidCallback? onTap;
 
-  const HeaderImage({
-    Key? key,
-    required this.imageUrl,
-    this.onTap,
-  }) : super(key: key);
+  const HeaderImage({super.key, required this.imageUrl, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -402,11 +395,7 @@ class HeaderImage extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) {
               return Container(
                 color: Colors.grey[300],
-                child: const Icon(
-                  Icons.image,
-                  size: 60,
-                  color: Colors.grey,
-                ),
+                child: const Icon(Icons.image, size: 60, color: Colors.grey),
               );
             },
           ),
@@ -428,21 +417,13 @@ class IconMetaRow extends StatelessWidget {
   final IconData icon;
   final String text;
 
-  const IconMetaRow({
-    Key? key,
-    required this.icon,
-    required this.text,
-  }) : super(key: key);
+  const IconMetaRow({super.key, required this.icon, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(
-          icon,
-          color: kMetaColor,
-          size: kIconSize,
-        ),
+        Icon(icon, color: kMetaColor, size: kIconSize),
         const SizedBox(width: 12),
         Expanded(
           child: Text(
@@ -475,11 +456,11 @@ class PrimaryButton extends StatelessWidget {
   final bool isActive;
 
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.onPressed,
     this.isActive = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

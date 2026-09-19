@@ -14,7 +14,7 @@ class AuthLoadingButton extends StatelessWidget {
   final double borderRadius;
 
   const AuthLoadingButton({
-    Key? key,
+    super.key,
     required this.text,
     required this.isLoading,
     required this.onPressed,
@@ -23,7 +23,7 @@ class AuthLoadingButton extends StatelessWidget {
     this.width,
     this.height = 56,
     this.borderRadius = 12,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +33,9 @@ class AuthLoadingButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? const Color(0xFF2563EB),
-          disabledBackgroundColor: (backgroundColor ?? const Color(0xFF2563EB)).withOpacity(0.6),
+          backgroundColor: backgroundColor ?? const Color(0xFF0E4778),
+          disabledBackgroundColor: (backgroundColor ?? const Color(0xFF0E4778))
+              .withOpacity(0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
           ),

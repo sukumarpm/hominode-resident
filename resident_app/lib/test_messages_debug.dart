@@ -16,7 +16,7 @@ void main() async {
 }
 
 class TestMessagesDebugApp extends StatelessWidget {
-  const TestMessagesDebugApp({Key? key}) : super(key: key);
+  const TestMessagesDebugApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class TestMessagesDebugApp extends StatelessWidget {
 }
 
 class TestMessagesDebugScreen extends StatefulWidget {
-  const TestMessagesDebugScreen({Key? key}) : super(key: key);
+  const TestMessagesDebugScreen({super.key});
 
   @override
   State<TestMessagesDebugScreen> createState() => _TestMessagesDebugScreenState();

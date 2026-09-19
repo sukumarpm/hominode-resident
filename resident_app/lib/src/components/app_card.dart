@@ -61,7 +61,7 @@ class AppCard extends StatelessWidget {
   final Color? borderColor;
 
   const AppCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.onTap,
@@ -71,7 +71,7 @@ class AppCard extends StatelessWidget {
     this.hasShadow = true,
     this.borderRadius,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -134,12 +134,12 @@ class AppCardElevated extends StatelessWidget {
   final AppCardSize size;
 
   const AppCardElevated({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.onTap,
     this.size = AppCardSize.medium,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -174,13 +174,13 @@ class AppCardOutlined extends StatelessWidget {
   final Color? borderColor;
 
   const AppCardOutlined({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.onTap,
     this.size = AppCardSize.medium,
     this.borderColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,17 +1,16 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Production-ready Splash Screen with animated waves and logo zoom
-/// 
+///
 /// Features:
 /// - Deep blue gradient background (#2563EB → #1E40AF)
 /// - Animated translucent wave layers with parallax effect
 /// - Logo zoom-in animation with overshoot and breathing loop
 /// - Respects reduced motion accessibility settings
 /// - GPU-optimized animations
-/// 
+///
 /// Usage:
 /// ```dart
 /// SplashScreen(
@@ -28,13 +27,13 @@ class SplashScreen extends StatefulWidget {
   final String? tagline;
 
   const SplashScreen({
-    Key? key,
+    super.key,
     this.duration = const Duration(seconds: 10),
     this.logoAssetPath = 'assets/logo1.png',
     this.onFinish,
-    this.appName = 'Lyvo',
+    this.appName = 'Hominode',
     this.tagline = 'Your Community, Connected',
-  }) : super(key: key);
+  });
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -80,13 +79,17 @@ class _SplashScreenState extends State<SplashScreen>
     // Logo scale: 0.6 → 1.05 → 1.0 with overshoot
     _logoScale = TweenSequence<double>([
       TweenSequenceItem(
-        tween: Tween<double>(begin: 0.6, end: 1.05)
-            .chain(CurveTween(curve: Curves.easeOutBack)),
+        tween: Tween<double>(
+          begin: 0.6,
+          end: 1.05,
+        ).chain(CurveTween(curve: Curves.easeOutBack)),
         weight: 70,
       ),
       TweenSequenceItem(
-        tween: Tween<double>(begin: 1.05, end: 1.0)
-            .chain(CurveTween(curve: Curves.easeOut)),
+        tween: Tween<double>(
+          begin: 1.05,
+          end: 1.0,
+        ).chain(CurveTween(curve: Curves.easeOut)),
         weight: 30,
       ),
     ]).animate(_logoController);
@@ -106,10 +109,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _breathing = Tween<double>(begin: 0.95, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _breathingController,
-        curve: Curves.easeInOut,
-      ),
+      CurvedAnimation(parent: _breathingController, curve: Curves.easeInOut),
     );
 
     // Fade in animation
@@ -195,15 +195,20 @@ class _SplashScreenState extends State<SplashScreen>
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            Color(0xFF2563EB), // Primary blue
-            Color(0xFF1E40AF), // Secondary darker blue
+            Color(0xFF0E4778), // Primary blue
+            Color(0xFF061C4C), // Secondary darker blue
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWaveLayer(int index, double opacity, double speed, bool reverse) {
+  Widget _buildWaveLayer(
+    int index,
+    double opacity,
+    double speed,
+    bool reverse,
+  ) {
     return AnimatedBuilder(
       animation: _waveController,
       builder: (context, child) {
@@ -228,9 +233,13 @@ class _SplashScreenState extends State<SplashScreen>
         children: [
           // Logo with cool animations (no background card)
           AnimatedBuilder(
-            animation: Listenable.merge([_logoController, _breathingController]),
+            animation: Listenable.merge([
+              _logoController,
+              _breathingController,
+            ]),
             builder: (context, child) {
-              final scale = _logoScale.value *
+              final scale =
+                  _logoScale.value *
                   (_breathingController.isAnimating ? _breathing.value : 1.0);
 
               return Opacity(
@@ -265,7 +274,7 @@ class _SplashScreenState extends State<SplashScreen>
                 child: Transform.translate(
                   offset: Offset(0, 20 * (1 - _logoOpacity.value)),
                   child: Text(
-                    widget.appName ?? 'Lyvo',
+                    widget.appName ?? 'Hominode',
                     style: const TextStyle(
                       fontSize: 36,
                       fontWeight: FontWeight.w700,
@@ -291,8 +300,11 @@ class _SplashScreenState extends State<SplashScreen>
           AnimatedBuilder(
             animation: _logoController,
             builder: (context, child) {
-              final delayedOpacity = (_logoOpacity.value * 1.5 - 0.5).clamp(0.0, 1.0);
-              
+              final delayedOpacity = (_logoOpacity.value * 1.5 - 0.5).clamp(
+                0.0,
+                1.0,
+              );
+
               return Opacity(
                 opacity: delayedOpacity,
                 child: Transform.translate(
@@ -324,7 +336,7 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 /// Custom painter for animated wave layers
-/// 
+///
 /// Creates smooth sine waves that translate horizontally
 /// Optimized for GPU rendering with repaint boundaries
 class WavePainter extends CustomPainter {
@@ -364,7 +376,8 @@ class WavePainter extends CustomPainter {
     // Draw wave using sine function
     for (double x = 0; x <= size.width; x += 5) {
       final normalizedX = (x + horizontalOffset + offset * 100) / waveLength;
-      final y = size.height * 0.6 +
+      final y =
+          size.height * 0.6 +
           math.sin(normalizedX * 2 * math.pi * 2) * waveHeight;
       path.lineTo(x, y);
     }

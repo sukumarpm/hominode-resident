@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../providers/language_provider.dart';
 import '../widgets/language_selector.dart';
-import '../utils/localization_helper.dart';
 import '../widgets/localized_text.dart';
 
 /// App Settings Screen with Full Localization Support
 /// Demonstrates how to use localization throughout the app
 class AppSettingsScreenLocalized extends StatefulWidget {
-  const AppSettingsScreenLocalized({Key? key}) : super(key: key);
+  const AppSettingsScreenLocalized({super.key});
 
   @override
   State<AppSettingsScreenLocalized> createState() =>
       _AppSettingsScreenLocalizedState();
 }
 
-class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized> {
+class _AppSettingsScreenLocalizedState
+    extends State<AppSettingsScreenLocalized> {
   bool _notificationsEnabled = true;
   bool _emailNotificationsEnabled = true;
   bool _smsNotificationsEnabled = false;
@@ -28,7 +27,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
       builder: (context, languageProvider, _) {
         return Scaffold(
           appBar: AppBar(
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: const Color(0xFF0E4778),
             elevation: 0,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -52,10 +51,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
                 _buildSectionHeader(context, 'language'),
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: LanguageSelector(
-                    showTitle: true,
-                    isCompact: false,
-                  ),
+                  child: LanguageSelector(showTitle: true, isCompact: false),
                 ),
                 const Divider(height: 1),
 
@@ -97,18 +93,11 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
                     setState(() => _twoFactorEnabled = value);
                   },
                 ),
-                _buildSettingsTile(
-                  context,
-                  'change_password',
-                  Icons.lock,
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('change_password'),
-                      ),
-                    );
-                  },
-                ),
+                _buildSettingsTile(context, 'change_password', Icons.lock, () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: LocalizedText('change_password')),
+                  );
+                }),
                 const Divider(height: 1),
 
                 // Privacy Section
@@ -119,9 +108,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
                   Icons.privacy_tip,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('privacy_policy'),
-                      ),
+                      SnackBar(content: LocalizedText('privacy_policy')),
                     );
                   },
                 ),
@@ -131,9 +118,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
                   Icons.description,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('terms_conditions'),
-                      ),
+                      SnackBar(content: LocalizedText('terms_conditions')),
                     );
                   },
                 ),
@@ -141,27 +126,18 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
 
                 // About Section
                 _buildSectionHeader(context, 'about'),
-                _buildSettingsTile(
-                  context,
-                  'faq',
-                  Icons.help,
-                  () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('faq'),
-                      ),
-                    );
-                  },
-                ),
+                _buildSettingsTile(context, 'faq', Icons.help, () {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: LocalizedText('faq')));
+                }),
                 _buildSettingsTile(
                   context,
                   'contact_support',
                   Icons.support_agent,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('contact_support'),
-                      ),
+                      SnackBar(content: LocalizedText('contact_support')),
                     );
                   },
                 ),
@@ -171,9 +147,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
                   Icons.feedback,
                   () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: LocalizedText('send_feedback'),
-                      ),
+                      SnackBar(content: LocalizedText('send_feedback')),
                     );
                   },
                 ),
@@ -238,7 +212,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF2563EB),
+          color: Color(0xFF0E4778),
         ),
       ),
     );
@@ -251,7 +225,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
     VoidCallback onTap,
   ) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF2563EB)),
+      leading: Icon(icon, color: const Color(0xFF0E4778)),
       title: LocalizedText(translationKey),
       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
       onTap: onTap,
@@ -269,7 +243,7 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: const Color(0xFF2563EB),
+        activeThumbColor: const Color(0xFF0E4778),
       ),
     );
   }
@@ -290,11 +264,9 @@ class _AppSettingsScreenLocalizedState extends State<AppSettingsScreenLocalized>
             onPressed: () {
               Navigator.pop(context);
               // Perform logout
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: LocalizedText('logout'),
-                ),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: LocalizedText('logout')));
             },
           ),
         ],

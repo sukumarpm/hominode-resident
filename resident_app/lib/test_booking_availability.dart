@@ -2,7 +2,6 @@
 // Run this to check if availability checking is working properly
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   print('🧪 Testing Booking Availability System\n');
@@ -39,7 +38,7 @@ void main() async {
     return;
   }
   
-  print('\n' + '─' * 60);
+  print('\n${'─' * 60}');
   
   // Test 2: Check existing bookings
   print('\n📊 Test 2: Checking existing bookings...');
@@ -72,7 +71,7 @@ void main() async {
     print('❌ Error: $e');
   }
   
-  print('\n' + '─' * 60);
+  print('\n${'─' * 60}');
   
   // Test 3: Simulate availability check
   print('\n🔍 Test 3: Simulating availability check...');
@@ -149,7 +148,7 @@ void main() async {
     print('Stack trace: $stackTrace');
   }
   
-  print('\n' + '─' * 60);
+  print('\n${'─' * 60}');
   
   // Test 4: Check Firestore indexes
   print('\n📋 Test 4: Checking if Firestore indexes are needed...');
@@ -170,7 +169,7 @@ To create indexes:
 Or click the link in the error message to auto-create the index.
 ''');
   
-  print('\n' + '=' * 60);
+  print('\n${'=' * 60}');
   print('✅ Test complete!\n');
   print('Summary:');
   print('- If time slots show as "Full" but no bookings exist, check:');

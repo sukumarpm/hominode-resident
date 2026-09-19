@@ -2,19 +2,18 @@
 // Main Polls screen with tabs (Events | Notices | Polls)
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 import '../models/poll.dart';
 import '../services/poll_repository.dart';
 import '../components/poll_card.dart';
 
 // Design tokens
-const Color kPrimary = Color(0xFF2563EB);
+const Color kPrimary = Color(0xFF0E4778);
 const Color kTabBarBg = Color(0xFFF4F4F6);
 const Color kActivePillBg = Colors.white;
 
 class PollsScreen extends StatefulWidget {
-  const PollsScreen({Key? key}) : super(key: key);
+  const PollsScreen({super.key});
 
   @override
   State<PollsScreen> createState() => _PollsScreenState();
@@ -66,7 +65,10 @@ class _PollsScreenState extends State<PollsScreen> {
           final updatedOptions = poll.options.map((opt) {
             return opt.copyWith(votes: event.counts![opt.id] ?? opt.votes);
           }).toList();
-          final totalVotes = updatedOptions.fold<int>(0, (sum, opt) => sum + opt.votes);
+          final totalVotes = updatedOptions.fold<int>(
+            0,
+            (sum, opt) => sum + opt.votes,
+          );
           _polls[index] = poll.copyWith(
             options: updatedOptions,
             totalVotes: totalVotes,
@@ -124,28 +126,19 @@ class _PollsScreenState extends State<PollsScreen> {
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
     );
   }
 
   void _showInfo(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.orange,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.orange),
     );
   }
 

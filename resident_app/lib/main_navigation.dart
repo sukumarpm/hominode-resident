@@ -1,11 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:hominode_notifications/hominode_notifications.dart';
+
 import 'dashboard_screen.dart';
 import 'src/screens/visitor_management_screen_new.dart';
 import 'maintenance_billing_screen.dart';
 import 'events_announcements_screen.dart';
 import 'profile_screen.dart';
 import 'src/widgets/flat_access_wrapper.dart';
+import 'src/constants/app_colors.dart';
 
 /// Main Navigation Screen with Smooth Animated Bottom Navigation Bar
 /// Uses IndexedStack to preserve state of all screens while switching tabs
@@ -43,6 +49,7 @@ class _MainNavigationState extends State<MainNavigation>
       vsync: this,
     );
     _animationController.forward();
+    unawaited(HominodePushNotifications.instance.activate());
   }
 
   @override
@@ -66,10 +73,7 @@ class _MainNavigationState extends State<MainNavigation>
   Widget build(BuildContext context) {
     return FlatAccessWrapper(
       child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
-        ),
+        body: IndexedStack(index: _currentIndex, children: _screens),
         bottomNavigationBar: _buildAnimatedBottomNavBar(),
       ),
     );
@@ -80,9 +84,9 @@ class _MainNavigationState extends State<MainNavigation>
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(16),
-          topRight: Radius.circular(16),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(16.r),
+          topRight: Radius.circular(16.r),
         ),
         boxShadow: [
           BoxShadow(
@@ -94,7 +98,7 @@ class _MainNavigationState extends State<MainNavigation>
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -147,13 +151,13 @@ class _MainNavigationState extends State<MainNavigation>
     return Expanded(
       child: InkWell(
         onTap: () => _onTabTapped(index),
-        borderRadius: BorderRadius.circular(12),
-        splashColor: const Color(0xFF2563EB).withAlpha(25),
-        highlightColor: const Color(0xFF2563EB).withAlpha(13),
+        borderRadius: BorderRadius.circular(12.r),
+        splashColor: AppColors.primaryLight.withAlpha(25),
+        highlightColor: AppColors.primaryLight.withAlpha(13),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 4),
+          padding: EdgeInsets.symmetric(vertical: 4.h),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -164,28 +168,24 @@ class _MainNavigationState extends State<MainNavigation>
                 padding: EdgeInsets.all(isActive ? 6 : 4),
                 decoration: BoxDecoration(
                   color: isActive
-                      ? const Color(0xFF2563EB).withAlpha(25)
+                      ? AppColors.primaryLight.withAlpha(25)
                       : Colors.transparent,
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
                 child: Icon(
                   isActive ? activeIcon : icon,
-                  color: isActive
-                      ? const Color(0xFF2563EB)
-                      : inactiveColor,
+                  color: isActive ? AppColors.primary : inactiveColor,
                   size: isActive ? 24 : 22,
                 ),
               ),
-              const SizedBox(height: 3),
+              SizedBox(height: 3.h),
               // Animated Label with color and weight transition
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 250),
                 curve: Curves.easeInOut,
                 style: TextStyle(
-                  color: isActive
-                      ? const Color(0xFF2563EB)
-                      : inactiveColor,
-                  fontSize: 10,
+                  color: isActive ? const Color(0xFF0E4778) : inactiveColor,
+                  fontSize: 10.sp,
                   fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                 ),
                 child: Text(label),

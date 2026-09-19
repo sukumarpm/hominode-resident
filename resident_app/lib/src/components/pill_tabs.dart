@@ -13,11 +13,11 @@ class PillTabs extends StatelessWidget {
   final Function(int) onTabSelected;
 
   const PillTabs({
-    Key? key,
+    super.key,
     required this.tabs,
     required this.selectedIndex,
     required this.onTabSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,10 +1,23 @@
 // lib/src/services/resident_login_service.dart
 // Resident Login Service - Handles login validation and resident access checks
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+// lib/src/services/resident_login_service.dart
 
-/// Result class for resident login operations
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+enum ResidentLoginFailureReason {
+  userNotFound,
+  invalidPassword,
+  authenticationFailed,
+  roleNotConfigured,
+  notResident,
+  accountInactive,
+  noFlatAssignment,
+  configurationError,
+  unknown,
+}
+
 class ResidentLoginResult {
   final bool success;
   final String? message;
@@ -12,12 +25,17 @@ class ResidentLoginResult {
   final String? flatId;
   final String? buildingId;
 
-  ResidentLoginResult({
+  /// IMPORTANT:
+  /// Used by UI/navigation to determine what kind of failure occurred.
+  final ResidentLoginFailureReason? failureReason;
+
+  const ResidentLoginResult({
     required this.success,
     this.message,
     this.userData,
     this.flatId,
     this.buildingId,
+    this.failureReason,
   });
 
   factory ResidentLoginResult.success({
@@ -31,13 +49,18 @@ class ResidentLoginResult {
       userData: userData,
       flatId: flatId,
       buildingId: buildingId,
+      failureReason: null,
     );
   }
 
-  factory ResidentLoginResult.failure({required String message}) {
+  factory ResidentLoginResult.failure({
+    required String message,
+    required ResidentLoginFailureReason reason,
+  }) {
     return ResidentLoginResult(
       success: false,
       message: message,
+      failureReason: reason,
     );
   }
 }
@@ -54,7 +77,7 @@ class ResidentLoginService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Login with email/phone and password, then validate resident access
-  /// 
+  ///
   /// This method:
   /// 1. Validates credentials directly from Firestore
   /// 2. Fetches user document from Firestore
@@ -93,11 +116,7 @@ class ResidentLoginService {
         print('   Searching for phone: $cleanPhone');
 
         // Try multiple phone format variations
-        final phoneVariations = [
-          cleanPhone,
-          '+91$cleanPhone',
-          '91$cleanPhone',
-        ];
+        final phoneVariations = [cleanPhone, '+91$cleanPhone', '91$cleanPhone'];
 
         QuerySnapshot? foundQuery;
 
@@ -124,7 +143,7 @@ class ResidentLoginService {
         }
 
         userQuerySnapshot = foundQuery;
-        
+
         // Get email from Firestore
         final userData = foundQuery.docs.first.data() as Map<String, dynamic>;
         loginEmail = userData['email'] as String;
@@ -165,7 +184,7 @@ class ResidentLoginService {
 
       // Verify password
       print('🔐 Step 2: Verifying password...');
-      
+
       if (!userData.containsKey('password')) {
         print('❌ Password field not found in user document');
         return ResidentLoginResult.failure(
@@ -174,7 +193,7 @@ class ResidentLoginService {
       }
 
       final storedPassword = userData['password'] as String;
-      
+
       if (storedPassword != password) {
         print('❌ Password mismatch');
         return ResidentLoginResult.failure(
@@ -186,11 +205,11 @@ class ResidentLoginService {
 
       // Step 3: Sync with Firebase Auth (REQUIRED for Firestore rules)
       print('🔐 Step 3: Syncing with Firebase Auth...');
-      
+
       try {
         UserCredential? userCredential;
         String? firebaseUid;
-        
+
         try {
           // Try to sign in with Firebase Auth
           userCredential = await _auth.signInWithEmailAndPassword(
@@ -228,24 +247,22 @@ class ResidentLoginService {
 
         // CRITICAL: Update Firestore user document with Firebase UID
         // This is required for Firestore rules to work
-        if (firebaseUid != null) {
-          print('📝 Updating Firestore user document with Firebase UID...');
-          
-          // Update the user document with the Firebase UID
-          await _firestore.collection('users').doc(userDoc.id).update({
-            'uid': firebaseUid,
-            'authUid': firebaseUid,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
-          
-          print('✅ Firestore user document updated with Firebase UID');
-          print('   Document ID: ${userDoc.id}');
-          print('   Firebase UID: $firebaseUid');
-          
-          // Update userData with the new UID
-          userData['uid'] = firebaseUid;
-          userData['authUid'] = firebaseUid;
-        }
+        print('📝 Updating Firestore user document with Firebase UID...');
+
+        // Update the user document with the Firebase UID
+        await _firestore.collection('users').doc(userDoc.id).update({
+          'uid': firebaseUid,
+          'authUid': firebaseUid,
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+
+        print('✅ Firestore user document updated with Firebase UID');
+        print('   Document ID: ${userDoc.id}');
+        print('   Firebase UID: $firebaseUid');
+
+        // Update userData with the new UID
+        userData['uid'] = firebaseUid;
+        userData['authUid'] = firebaseUid;
       } catch (e) {
         print('❌ Firebase Auth sync failed: $e');
         return ResidentLoginResult.failure(
@@ -302,7 +319,8 @@ class ResidentLoginService {
       if (flatId == null || flatId.isEmpty) {
         print('❌ No flat assigned to user');
         return ResidentLoginResult.failure(
-          message: 'Access Restricted – Your account is not yet assigned to a flat',
+          message:
+              'Access Restricted – Your account is not yet assigned to a flat',
         );
       }
 

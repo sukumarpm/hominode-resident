@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "519479302451",
-    "project_id": "lyvo-app-9f0ca",
-    "storage_bucket": "lyvo-app-9f0ca.firebasestorage.app"
+    "project_number": "551984029668",
+    "project_id": "hominode-prod",
+    "storage_bucket": "hominode-prod.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:519479302451:android:2c33bd215708610ba54646",
+        "mobilesdk_app_id": "1:551984029668:android:ef652ea4d8e070ca0db1f1",
         "android_client_info": {
-          "package_name": "com.marantrix.lyvo.admin"
+          "package_name": "com.marantrix.hominode.resident"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAX_f489KaZv8TLKheJGhTOiebRn5X3l2w"
+          "current_key": "AIzaSyBX8rEtel0GIBrZIV7EI0yRcVNo7r3b9CU"
         }
       ],
       "services": {
@@ -26,7 +26,7 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:519479302451:android:0ffb7c8575c1bd7ca54646",
+        "mobilesdk_app_id": "1:551984029668:android:7fddd1772667ffe60db1f1",
         "android_client_info": {
           "package_name": "com.marantrix.lyvo.resident"
         }
@@ -34,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAX_f489KaZv8TLKheJGhTOiebRn5X3l2w"
+          "current_key": "AIzaSyBX8rEtel0GIBrZIV7EI0yRcVNo7r3b9CU"
         }
       ],
       "services": {

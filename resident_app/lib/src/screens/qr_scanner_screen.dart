@@ -2,17 +2,15 @@
 // QR Scanner Screen - Scans visitor QR codes and fetches data from Firestore
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:convert';
 import '../services/visitor_firestore_service.dart';
 
 /// QR Scanner Screen
 /// Scans visitor QR codes and displays visitor information from Firestore
 class QRScannerScreen extends StatefulWidget {
-  const QRScannerScreen({Key? key}) : super(key: key);
+  const QRScannerScreen({super.key});
 
   @override
   State<QRScannerScreen> createState() => _QRScannerScreenState();

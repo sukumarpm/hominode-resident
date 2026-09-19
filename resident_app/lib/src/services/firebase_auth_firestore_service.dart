@@ -236,7 +236,7 @@ class FirebaseAuthFirestoreService {
         );
       } else {
         // Update authUid if missing
-        final data = userDoc.data() as Map<String, dynamic>?;
+        final data = userDoc.data();
         if (data != null && !data.containsKey('authUid')) {
           print('⚠️ authUid missing, updating document...');
           await _firestore

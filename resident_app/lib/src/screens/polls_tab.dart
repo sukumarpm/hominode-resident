@@ -2,14 +2,13 @@
 // Polls tab with voting functionality
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:async';
 import '../models/poll.dart';
 import '../services/poll_repository.dart';
 import '../components/poll_card.dart';
 
 class PollsTab extends StatefulWidget {
-  const PollsTab({Key? key}) : super(key: key);
+  const PollsTab({super.key});
 
   @override
   State<PollsTab> createState() => _PollsTabState();

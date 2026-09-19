@@ -12,7 +12,7 @@ void main() async {
 }
 
 class LoginTestApp extends StatelessWidget {
-  const LoginTestApp({Key? key}) : super(key: key);
+  const LoginTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class LoginTestApp extends StatelessWidget {
 }
 
 class LoginTestScreen extends StatefulWidget {
-  const LoginTestScreen({Key? key}) : super(key: key);
+  const LoginTestScreen({super.key});
 
   @override
   State<LoginTestScreen> createState() => _LoginTestScreenState();

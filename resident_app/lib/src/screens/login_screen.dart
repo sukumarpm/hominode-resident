@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../components/auth_text_field.dart';
+
 import '../components/auth_primary_button.dart';
+import '../components/auth_text_field.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/flat_access_control_service.dart';
 import '../services/resident_login_service.dart';
@@ -11,27 +11,29 @@ import 'verify_otp_screen_single_field.dart';
 /// Login Screen with Phone OTP and Email/Password options
 /// Supports both authentication methods with resident access validation
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Phone OTP controllers
   final TextEditingController _phoneController = TextEditingController();
   final FocusNode _phoneFocusNode = FocusNode();
-  
+
   // Email/Password controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-  
+
   final FirebaseAuthService _authService = FirebaseAuthService();
-  final ResidentLoginService _residentLoginService = ResidentLoginService.instance;
+  final ResidentLoginService _residentLoginService =
+      ResidentLoginService.instance;
   bool _isLoading = false;
   bool _obscurePassword = true;
 
@@ -56,24 +58,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   /// Handle Phone OTP - Send OTP to phone number
   Future<void> _handleSendOTP() async {
     final phone = _phoneController.text.trim();
-    
+
     // Validate
     if (!_authService.validatePhoneNumber(phone)) {
       _showError('Please enter a valid 10-digit phone number');
       return;
     }
-    
+
     setState(() => _isLoading = true);
-    
+
     // Format to E.164
     final formattedPhone = _authService.formatPhoneNumber(phone);
-    
+
     await _authService.signInWithPhone(
       phoneNumber: formattedPhone,
       onCodeSent: (verificationId) {
         setState(() => _isLoading = false);
         _showSuccess('OTP sent to $phone');
-        
+
         // Navigate to OTP verification screen
         Navigator.push(
           context,
@@ -209,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Widget _buildForgotPasswordDialog() {
     final emailController = TextEditingController();
-    
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text('Reset Password'),
@@ -242,10 +244,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               _showError('Please enter a valid email');
               return;
             }
-            
+
             Navigator.pop(context);
-            
-            final result = await _authService.sendPasswordResetEmail(email: email);
+
+            final result = await _authService.sendPasswordResetEmail(
+              email: email,
+            );
             if (result.success) {
               _showSuccess('Password reset email sent!');
             } else {
@@ -271,8 +275,8 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [
-                Color(0xFF2F80ED), // Gradient Top
-                Color(0xFF2563EB), // Gradient Bottom
+                Color(0xFF3AA6C8), // Gradient Top
+                Color(0xFF0E4778), // Gradient Bottom
               ],
             ),
           ),
@@ -284,7 +288,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 child: Column(
                   children: [
                     const SizedBox(height: 120),
-                    
+
                     // Welcome Back Title
                     const Text(
                       'Welcome Back',
@@ -295,12 +299,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         letterSpacing: -0.5,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Subtitle
                     const Text(
-                      'Login to your Lyvo account',
+                      'Login to your Hominode account',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -308,12 +312,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         letterSpacing: 0.1,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
+
                     // White Card Container with Tabs
                     _buildLoginCard(),
-                    
+
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -345,15 +349,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                bottom: BorderSide(color: const Color(0xFFE0E0E0), width: 1),
               ),
             ),
             child: TabBar(
               controller: _tabController,
-              labelColor: const Color(0xFF2563EB),
+              labelColor: const Color(0xFF0E4778),
               unselectedLabelColor: const Color(0xFF666666),
               labelStyle: const TextStyle(
                 fontSize: 16,
@@ -363,7 +364,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
-              indicatorColor: const Color(0xFF2563EB),
+              indicatorColor: const Color(0xFF0E4778),
               indicatorWeight: 3,
               tabs: const [
                 Tab(text: 'Phone OTP'),
@@ -371,16 +372,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ],
             ),
           ),
-          
+
           // Tab Content
           SizedBox(
             height: 380,
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildPhoneOTPTab(),
-                _buildEmailPasswordTab(),
-              ],
+              children: [_buildPhoneOTPTab(), _buildEmailPasswordTab()],
             ),
           ),
         ],
@@ -449,7 +447,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     TextSpan(
                       text: 'Register',
                       style: TextStyle(
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -510,10 +508,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFFE0E0E0),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
             ),
             child: TextField(
               controller: _passwordController,
@@ -562,7 +557,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
             ),
@@ -590,7 +585,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                     TextSpan(
                       text: 'Register',
                       style: TextStyle(
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                         fontWeight: FontWeight.w600,
                       ),
                     ),

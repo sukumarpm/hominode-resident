@@ -2,14 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 
 /// Setup Profile Screen - Pixel-perfect implementation
-/// 
+///
 /// Design reference: /mnt/data/Setup Your Profile.png
 /// Target device: iPhone 13 (390px width)
-/// 
+///
 /// Features:
 /// - Gradient header with back button
 /// - Profile photo upload with circular placeholder
@@ -19,7 +18,7 @@ import 'dart:io';
 /// - Complete Setup button with loading state
 /// - Skip for now option
 class SetupProfileScreen extends StatefulWidget {
-  const SetupProfileScreen({Key? key}) : super(key: key);
+  const SetupProfileScreen({super.key});
 
   @override
   State<SetupProfileScreen> createState() => _SetupProfileScreenState();
@@ -27,14 +26,15 @@ class SetupProfileScreen extends StatefulWidget {
 
 class _SetupProfileScreenState extends State<SetupProfileScreen> {
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _emergencyContactController = TextEditingController();
-  
+  final TextEditingController _emergencyContactController =
+      TextEditingController();
+
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _emergencyContactFocusNode = FocusNode();
-  
+
   File? _profileImage;
   bool _isLoading = false;
-  
+
   String? _emailError;
   String? _emergencyContactError;
 
@@ -97,7 +97,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
         maxHeight: 512,
         imageQuality: 85,
       );
-      
+
       if (image != null) {
         setState(() {
           _profileImage = File(image.path);
@@ -121,23 +121,26 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
     }
 
     setState(() => _isLoading = true);
-    
+
     // Save emergency contact and email to SharedPreferences
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('emergency_contact', _emergencyContactController.text.trim());
+      await prefs.setString(
+        'emergency_contact',
+        _emergencyContactController.text.trim(),
+      );
       if (_emailController.text.trim().isNotEmpty) {
         await prefs.setString('user_email', _emailController.text.trim());
       }
     } catch (e) {
       debugPrint('Error saving profile data: $e');
     }
-    
+
     // Simulate API call
     await Future.delayed(const Duration(seconds: 2));
-    
+
     setState(() => _isLoading = false);
-    
+
     if (mounted) {
       // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
@@ -147,7 +150,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
           duration: Duration(seconds: 2),
         ),
       );
-      
+
       // Navigate to home
       Navigator.pushReplacementNamed(context, '/home');
     }
@@ -169,7 +172,10 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
             _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -184,11 +190,11 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 28),
-                    
+
                     // Profile photo upload
                     _buildProfilePhotoUpload(),
                     const SizedBox(height: 32),
-                    
+
                     // Email Address (Optional)
                     _buildInputField(
                       label: 'Email Address (Optional)',
@@ -198,10 +204,11 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       error: _emailError,
-                      onSubmitted: (_) => _emergencyContactFocusNode.requestFocus(),
+                      onSubmitted: (_) =>
+                          _emergencyContactFocusNode.requestFocus(),
                     ),
                     const SizedBox(height: 20),
-                    
+
                     // Emergency Contact
                     _buildInputField(
                       label: 'Emergency Contact',
@@ -218,11 +225,11 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                       },
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Complete Setup Button
                     _buildCompleteSetupButton(),
                     const SizedBox(height: 16),
-                    
+
                     // Skip for now
                     Center(
                       child: GestureDetector(
@@ -256,7 +263,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -315,8 +322,8 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
                 width: 120,
                 height: 120,
                 decoration: BoxDecoration(
-                  color: _profileImage != null 
-                      ? Colors.transparent 
+                  color: _profileImage != null
+                      ? Colors.transparent
                       : const Color(0xFFE5E5E5),
                   shape: BoxShape.circle,
                   boxShadow: [
@@ -442,7 +449,7 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
 
   Widget _buildCompleteSetupButton() {
     final isEnabled = _isFormValid && !_isLoading;
-    
+
     return Semantics(
       label: 'Complete setup button',
       button: true,
@@ -458,15 +465,15 @@ class _SetupProfileScreenState extends State<SetupProfileScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF2563EB).withOpacity(isEnabled ? 1.0 : 0.4),
-                Color(0xFF1E40AF).withOpacity(isEnabled ? 1.0 : 0.4),
+                Color(0xFF0E4778).withOpacity(isEnabled ? 1.0 : 0.4),
+                Color(0xFF061C4C).withOpacity(isEnabled ? 1.0 : 0.4),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: isEnabled
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      color: const Color(0xFF0E4778).withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

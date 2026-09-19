@@ -17,11 +17,11 @@ class SegmentedControl extends StatelessWidget {
   final Function(int) onTabChanged;
 
   const SegmentedControl({
-    Key? key,
+    super.key,
     required this.tabs,
     required this.selectedIndex,
     required this.onTabChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

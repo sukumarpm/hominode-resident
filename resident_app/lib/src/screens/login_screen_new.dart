@@ -2,12 +2,11 @@
 // Login screen with Firebase Auth + Firestore integration
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/firebase_auth_firestore_service.dart';
 import 'register_screen.dart';
 
 class LoginScreenNew extends StatefulWidget {
-  const LoginScreenNew({Key? key}) : super(key: key);
+  const LoginScreenNew({super.key});
 
   @override
   State<LoginScreenNew> createState() => _LoginScreenNewState();
@@ -61,10 +60,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
 
       if (result.success) {
         // Show success message
-        _showSnackBar(
-          result.message ?? 'Login successful!',
-          isError: false,
-        );
+        _showSnackBar(result.message ?? 'Login successful!', isError: false);
 
         // Navigate to dashboard/home
         await Future.delayed(const Duration(milliseconds: 500));
@@ -73,10 +69,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
         }
       } else {
         // Show error message
-        _showSnackBar(
-          result.message ?? 'Login failed',
-          isError: true,
-        );
+        _showSnackBar(result.message ?? 'Login failed', isError: true);
       }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -104,7 +97,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
 
     // Check if it's a phone number
     final isPhone = RegExp(r'^[\d+\s()-]+$').hasMatch(identifier);
-    
+
     if (isPhone) {
       _showSnackBar(
         'Password reset is only available via email. Please enter your email address.',
@@ -137,9 +130,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -175,10 +166,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                 const SizedBox(height: 8),
                 const Text(
                   'Login to your account',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF666666),
-                  ),
+                  style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
                 ),
                 const SizedBox(height: 40),
 
@@ -194,7 +182,9 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                       return 'Please enter your email or phone number';
                     }
                     // Check if it's a phone number or email
-                    final isPhone = RegExp(r'^[\d+\s()-]+$').hasMatch(value.trim());
+                    final isPhone = RegExp(
+                      r'^[\d+\s()-]+$',
+                    ).hasMatch(value.trim());
                     if (!isPhone) {
                       // Validate as email
                       final emailRegex = RegExp(
@@ -218,7 +208,9 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: const Color(0xFF666666),
                     ),
                     onPressed: () {
@@ -244,7 +236,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                       ),
                     ),
                   ),
@@ -258,8 +250,10 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      disabledBackgroundColor: const Color(0xFF2563EB).withOpacity(0.5),
+                      backgroundColor: const Color(0xFF0E4778),
+                      disabledBackgroundColor: const Color(
+                        0xFF0E4778,
+                      ).withOpacity(0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -271,7 +265,9 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(
@@ -308,7 +304,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
                           TextSpan(
                             text: 'Register',
                             style: TextStyle(
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF0E4778),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -356,16 +352,10 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
           keyboardType: keyboardType,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF111111),
-          ),
+          style: const TextStyle(fontSize: 15, color: Color(0xFF111111)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFFA3A3A3),
-            ),
+            hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFA3A3A3)),
             prefixIcon: Icon(icon, color: const Color(0xFF666666)),
             suffixIcon: suffixIcon,
             filled: true,
@@ -380,7 +370,7 @@ class _LoginScreenNewState extends State<LoginScreenNew> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

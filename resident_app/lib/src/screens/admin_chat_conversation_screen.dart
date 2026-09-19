@@ -2,7 +2,7 @@
 // Admin chat conversation screen with real-time messaging
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/admin_chat_model.dart';
 import '../services/admin_chat_service.dart';
 import '../constants/app_colors.dart';
@@ -12,16 +12,15 @@ import 'admin_chat_query_selection_screen.dart';
 class AdminChatConversationScreen extends StatefulWidget {
   final AdminChatModel chat;
 
-  const AdminChatConversationScreen({
-    Key? key,
-    required this.chat,
-  }) : super(key: key);
+  const AdminChatConversationScreen({super.key, required this.chat});
 
   @override
-  State<AdminChatConversationScreen> createState() => _AdminChatConversationScreenState();
+  State<AdminChatConversationScreen> createState() =>
+      _AdminChatConversationScreenState();
 }
 
-class _AdminChatConversationScreenState extends State<AdminChatConversationScreen> {
+class _AdminChatConversationScreenState
+    extends State<AdminChatConversationScreen> {
   final TextEditingController _messageController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final AdminChatService _adminChatService = AdminChatService.instance;
@@ -58,7 +57,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
             Text(
               widget.chat.adminName,
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
               ),
@@ -66,7 +65,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
             Text(
               widget.chat.category.displayName,
               style: TextStyle(
-                fontSize: 13,
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
                 color: AppColors.textSecondary,
               ),
@@ -76,16 +75,16 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
         actions: [
           // Status badge
           Container(
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: EdgeInsets.only(right: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
               color: _getStatusColor(widget.chat.status).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
             ),
             child: Text(
               _getStatusText(widget.chat.status),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
                 color: _getStatusColor(widget.chat.status),
               ),
@@ -94,10 +93,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: AppColors.border,
-          ),
+          child: Container(height: 1.h, color: AppColors.border),
         ),
       ),
       body: Column(
@@ -129,14 +125,14 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
                       children: [
                         Icon(
                           Icons.chat_bubble_outline,
-                          size: 64,
+                          size: 64.w,
                           color: AppColors.textSecondary.withOpacity(0.5),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         Text(
                           'No messages yet',
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -163,7 +159,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
                   itemBuilder: (context, index) {
                     final message = messages[index];
                     final isResident = message.senderRole == 'resident';
-                    
+
                     return _buildMessageBubble(message, isResident);
                   },
                 );
@@ -185,16 +181,18 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
 
   Widget _buildMessageBubble(AdminChatMessageModel message, bool isResident) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Column(
-        crossAxisAlignment: isResident ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isResident
+            ? CrossAxisAlignment.end
+            : CrossAxisAlignment.start,
         children: [
           // Sender name and time
           Padding(
             padding: EdgeInsets.only(
               left: isResident ? 0 : 12,
               right: isResident ? 12 : 0,
-              bottom: 4,
+              bottom: 4.h,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -202,34 +200,34 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
                 Text(
                   isResident ? 'You' : message.senderName,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 Text(
                   _formatTime(message.timestamp),
                   style: TextStyle(
-                    fontSize: 11,
+                    fontSize: 11.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
               ],
             ),
           ),
-          
+
           // Message bubble
           Container(
             constraints: BoxConstraints(
               maxWidth: MediaQuery.of(context).size.width * 0.75,
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: isResident ? AppColors.primary : Colors.white,
               borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
                 bottomLeft: Radius.circular(isResident ? 16 : 4),
                 bottomRight: Radius.circular(isResident ? 4 : 16),
               ),
@@ -248,40 +246,45 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
                 // Query badge (if it's a query)
                 if (message.isQuery)
                   Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    margin: EdgeInsets.only(bottom: 8.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
-                      color: isResident 
+                      color: isResident
                           ? Colors.white.withOpacity(0.2)
                           : AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
+                      borderRadius: BorderRadius.circular(4.r),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           Icons.help_outline,
-                          size: 12,
+                          size: 12.w,
                           color: isResident ? Colors.white : AppColors.primary,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4.w),
                         Text(
                           'Query',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
-                            color: isResident ? Colors.white : AppColors.primary,
+                            color: isResident
+                                ? Colors.white
+                                : AppColors.primary,
                           ),
                         ),
                       ],
                     ),
                   ),
-                
+
                 // Message text
                 Text(
                   message.text,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: isResident ? Colors.white : AppColors.textPrimary,
                     height: 1.4,
                   ),
@@ -296,7 +299,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
 
   Widget _buildResolvedBanner() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: const Color(0xFF10B981).withOpacity(0.1),
         border: Border(
@@ -306,37 +309,30 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             decoration: BoxDecoration(
               color: const Color(0xFF10B981),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            child: const Icon(
-              Icons.check_circle,
-              color: Colors.white,
-              size: 20,
-            ),
+            child: Icon(Icons.check_circle, color: Colors.white, size: 20.w),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'Query Resolved',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF10B981),
                   ),
                 ),
-                SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   'This query has been marked as resolved by admin',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF059669),
-                  ),
+                  style: TextStyle(fontSize: 12.sp, color: Color(0xFF059669)),
                 ),
               ],
             ),
@@ -352,14 +348,11 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
             },
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFF10B981),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             ),
-            child: const Text(
+            child: Text(
               'New Query',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600),
             ),
           ),
         ],
@@ -369,12 +362,10 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppColors.border),
-        ),
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
       child: SafeArea(
         child: Row(
@@ -383,7 +374,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
               child: Container(
                 decoration: BoxDecoration(
                   color: AppColors.background,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: TextField(
@@ -394,44 +385,42 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
                     hintText: 'Type your message...',
                     hintStyle: TextStyle(
                       color: AppColors.textSecondary,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 12.h,
                     ),
                   ),
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: AppColors.textPrimary,
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             GestureDetector(
               onTap: _isSending ? null : _sendMessage,
               child: Container(
-                width: 48,
-                height: 48,
+                width: 48.w,
+                height: 48.h,
                 decoration: BoxDecoration(
                   color: _isSending ? Colors.grey : AppColors.primary,
                   shape: BoxShape.circle,
                 ),
                 child: _isSending
-                    ? const Padding(
-                        padding: EdgeInsets.all(12),
+                    ? Padding(
+                        padding: EdgeInsets.all(12.w),
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       )
-                    : const Icon(
-                        Icons.send,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                    : Icon(Icons.send, color: Colors.white, size: 20.w),
               ),
             ),
           ],
@@ -442,7 +431,7 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
 
   Future<void> _sendMessage() async {
     final text = _messageController.text.trim();
-    
+
     if (text.isEmpty) {
       return;
     }
@@ -482,7 +471,9 @@ class _AdminChatConversationScreenState extends State<AdminChatConversationScree
     final difference = now.difference(timestamp);
 
     if (difference.inDays == 0) {
-      final hour = timestamp.hour > 12 ? timestamp.hour - 12 : (timestamp.hour == 0 ? 12 : timestamp.hour);
+      final hour = timestamp.hour > 12
+          ? timestamp.hour - 12
+          : (timestamp.hour == 0 ? 12 : timestamp.hour);
       final minute = timestamp.minute.toString().padLeft(2, '0');
       final period = timestamp.hour >= 12 ? 'PM' : 'AM';
       return '$hour:$minute $period';

@@ -14,7 +14,7 @@ void main() async {
 }
 
 class MessagingSystemTestApp extends StatelessWidget {
-  const MessagingSystemTestApp({Key? key}) : super(key: key);
+  const MessagingSystemTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class MessagingSystemTestApp extends StatelessWidget {
 }
 
 class MessagingSystemTestScreen extends StatefulWidget {
-  const MessagingSystemTestScreen({Key? key}) : super(key: key);
+  const MessagingSystemTestScreen({super.key});
 
   @override
   State<MessagingSystemTestScreen> createState() => _MessagingSystemTestScreenState();

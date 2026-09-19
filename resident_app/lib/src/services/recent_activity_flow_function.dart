@@ -10,7 +10,8 @@ class ActivityItem {
   final String title;
   final String subtitle;
   final String statusText;
-  final String activityType; // 'booking', 'package', 'visitor', 'complaint', 'payment'
+  final String
+  activityType; // 'booking', 'package', 'visitor', 'complaint', 'payment'
   final DateTime timestamp;
   final Map<String, dynamic> data;
 
@@ -25,11 +26,12 @@ class ActivityItem {
   });
 
   factory ActivityItem.fromBooking(Map<String, dynamic> data, String docId) {
-    final timestamp = (data['bookingDate'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final timestamp =
+        (data['bookingDate'] as Timestamp?)?.toDate() ?? DateTime.now();
     return ActivityItem(
       id: docId,
       title: '${data['amenityName'] ?? 'Amenity'} Booked',
-      subtitle: '${_formatDate(timestamp)}',
+      subtitle: _formatDate(timestamp),
       statusText: data['status'] ?? 'Pending',
       activityType: 'booking',
       timestamp: timestamp,
@@ -38,7 +40,8 @@ class ActivityItem {
   }
 
   factory ActivityItem.fromVisitor(Map<String, dynamic> data, String docId) {
-    final timestamp = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final timestamp =
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
     return ActivityItem(
       id: docId,
       title: 'Visitor - ${data['visitorName'] ?? 'Unknown'}',
@@ -51,11 +54,16 @@ class ActivityItem {
   }
 
   factory ActivityItem.fromComplaint(Map<String, dynamic> data, String docId) {
-    final timestamp = (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
+    final timestamp =
+        (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now();
     return ActivityItem(
       id: docId,
       title: 'Complaint - ${data['category'] ?? 'General'}',
-      subtitle: '${data['description']?.substring(0, 30) ?? ''} - ${_formatDate(timestamp)}',
+      subtitle:
+          '${(() {
+            final description = data['description']?.toString() ?? '';
+            return description.length > 30 ? '${description.substring(0, 30)}...' : description;
+          })()} - ${_formatDate(timestamp)}',
       statusText: data['status'] ?? 'Open',
       activityType: 'complaint',
       timestamp: timestamp,
@@ -142,9 +150,7 @@ class RecentActivityFlowFunction {
   /// Step 5: Fetch complaints from Firestore
   /// Step 6: Combine and sort by timestamp
   /// Step 7: Return recent activities (limit 5)
-  Future<RecentActivityResult> fetchRecentActivities({
-    int limit = 5,
-  }) async {
+  Future<RecentActivityResult> fetchRecentActivities({int limit = 5}) async {
     try {
       print('🔵 RECENT ACTIVITY FLOW: Starting fetch...');
 
@@ -182,8 +188,12 @@ class RecentActivityFlowFunction {
       final userData = userDoc.data() as Map<String, dynamic>;
       final flatId = userData['flatId'] as String?;
       final buildingId = userData['buildingId'] as String?;
+      final communityId = userData['communityId'] as String?;
 
-      if (flatId == null || buildingId == null) {
+      if (flatId == null ||
+          buildingId == null ||
+          communityId == null ||
+          communityId.isEmpty) {
         print('❌ STEP 2 FAILED: Flat ID or Building ID not found');
         return RecentActivityResult.failure(
           message: 'Flat ID or Building ID not found in user document',
@@ -205,6 +215,7 @@ class RecentActivityFlowFunction {
       try {
         final bookingsQuery = await _firestore
             .collection('bookings')
+            .where('communityId', isEqualTo: communityId)
             .where('flatId', isEqualTo: flatId)
             .orderBy('bookingDate', descending: true)
             .limit(10)
@@ -228,9 +239,16 @@ class RecentActivityFlowFunction {
       print('🔐 STEP 4: Fetching visitors...');
 
       try {
+        final uid = FirebaseAuth.instance.currentUser?.uid;
+
+        if (uid == null) {
+          throw StateError('Resident is not authenticated.');
+        }
+
         final visitorsQuery = await _firestore
             .collection('visitors')
-            .where('flatId', isEqualTo: flatId)
+            .where('communityId', isEqualTo: communityId)
+            .where('hostUserId', isEqualTo: uid)
             .orderBy('createdAt', descending: true)
             .limit(10)
             .get();
@@ -253,21 +271,38 @@ class RecentActivityFlowFunction {
       print('🔐 STEP 5: Fetching complaints...');
 
       try {
-        final complaintsQuery = await _firestore
-            .collection('complaints')
-            .where('flatId', isEqualTo: flatId)
-            .orderBy('createdAt', descending: true)
-            .limit(10)
-            .get();
+        final authenticatedUid = _auth.currentUser?.uid;
 
-        print('   Found ${complaintsQuery.docs.length} complaints');
+        if (authenticatedUid == null) {
+          print('⚠️  STEP 5 WARNING: No authenticated user for complaints');
+        } else {
+          final complaintsQuery = await _firestore
+              .collection('complaints')
+              .where('communityId', isEqualTo: communityId)
+              .where('userId', isEqualTo: authenticatedUid)
+              .get();
 
-        for (final doc in complaintsQuery.docs) {
-          final data = doc.data();
-          activities.add(ActivityItem.fromComplaint(data, doc.id));
+          print('   Found ${complaintsQuery.docs.length} complaints');
+
+          final complaintDocs = complaintsQuery.docs.toList()
+            ..sort((a, b) {
+              final aCreatedAt = a.data()['createdAt'] as Timestamp?;
+              final bCreatedAt = b.data()['createdAt'] as Timestamp?;
+
+              if (aCreatedAt == null && bCreatedAt == null) return 0;
+              if (aCreatedAt == null) return 1;
+              if (bCreatedAt == null) return -1;
+
+              return bCreatedAt.compareTo(aCreatedAt);
+            });
+
+          for (final doc in complaintDocs.take(10)) {
+            final data = doc.data();
+            activities.add(ActivityItem.fromComplaint(data, doc.id));
+          }
+
+          print('✅ STEP 5 PASSED: Complaints fetched');
         }
-
-        print('✅ STEP 5 PASSED: Complaints fetched');
       } catch (e) {
         print('⚠️  STEP 5 WARNING: Error fetching complaints: $e');
       }
@@ -312,9 +347,7 @@ class RecentActivityFlowFunction {
   // ============================================================================
 
   /// Stream recent activities in real-time
-  Stream<RecentActivityResult> streamRecentActivities({
-    int limit = 5,
-  }) async* {
+  Stream<RecentActivityResult> streamRecentActivities({int limit = 5}) async* {
     try {
       print('🔵 Setting up recent activities stream...');
 
@@ -338,8 +371,9 @@ class RecentActivityFlowFunction {
 
       final userData = userDoc.data() as Map<String, dynamic>;
       final flatId = userData['flatId'] as String?;
+      final communityId = userData['communityId'] as String?;
 
-      if (flatId == null) {
+      if (flatId == null || communityId == null || communityId.isEmpty) {
         yield RecentActivityResult.failure(
           message: 'Flat ID not found',
           errorCode: 'FLAT_ID_NOT_FOUND',
@@ -353,20 +387,29 @@ class RecentActivityFlowFunction {
       // Combine streams from multiple collections
       final bookingsStream = _firestore
           .collection('bookings')
+          .where('communityId', isEqualTo: communityId)
           .where('flatId', isEqualTo: flatId)
           .orderBy('bookingDate', descending: true)
           .limit(10)
           .snapshots();
 
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+
+      if (uid == null) {
+        throw StateError('Resident is not authenticated.');
+      }
+
       final visitorsStream = _firestore
           .collection('visitors')
-          .where('flatId', isEqualTo: flatId)
+          .where('communityId', isEqualTo: communityId)
+          .where('hostUserId', isEqualTo: uid)
           .orderBy('createdAt', descending: true)
           .limit(10)
           .snapshots();
 
       final complaintsStream = _firestore
           .collection('complaints')
+          .where('communityId', isEqualTo: communityId)
           .where('flatId', isEqualTo: flatId)
           .orderBy('createdAt', descending: true)
           .limit(10)

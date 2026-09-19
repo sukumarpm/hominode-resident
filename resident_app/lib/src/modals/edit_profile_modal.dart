@@ -2,7 +2,6 @@
 // Edit Profile modal with form validation
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:io';
 import '../models/user_profile_model.dart';
 import '../components/avatar_picker.dart';
@@ -18,10 +17,8 @@ Future<void> showEditProfileModal(
     context: context,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
-    builder: (context) => EditProfileModal(
-      currentProfile: currentProfile,
-      onSaved: onSaved,
-    ),
+    builder: (context) =>
+        EditProfileModal(currentProfile: currentProfile, onSaved: onSaved),
   );
 }
 
@@ -30,10 +27,10 @@ class EditProfileModal extends StatefulWidget {
   final Function(UserProfile) onSaved;
 
   const EditProfileModal({
-    Key? key,
+    super.key,
     required this.currentProfile,
     required this.onSaved,
-  }) : super(key: key);
+  });
 
   @override
   State<EditProfileModal> createState() => _EditProfileModalState();
@@ -58,9 +55,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
     _nameController = TextEditingController(
       text: widget.currentProfile.fullName,
     );
-    _phoneController = TextEditingController(
-      text: widget.currentProfile.phone,
-    );
+    _phoneController = TextEditingController(text: widget.currentProfile.phone);
     _emailController = TextEditingController(
       text: widget.currentProfile.email ?? '',
     );
@@ -211,9 +206,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: const Text('Change Avatar'),
         content: const Text(
           'Image picker not implemented yet.\n\n'
@@ -235,9 +228,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
       height: MediaQuery.of(context).size.height * 0.9,
       decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(20),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
         children: [
@@ -267,14 +258,11 @@ class _EditProfileModalState extends State<EditProfileModal> {
     );
   }
 
-
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 12, 16),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E7EB)),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
       ),
       child: Row(
         children: [
@@ -293,10 +281,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.close, size: 24),
             padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(
-              minWidth: 44,
-              minHeight: 44,
-            ),
+            constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
           ),
         ],
       ),
@@ -322,7 +307,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
           'Tap to change photo',
           style: TextStyle(
             fontSize: 14,
-            color: const Color(0xFF2563EB),
+            color: const Color(0xFF0E4778),
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -347,46 +332,28 @@ class _EditProfileModalState extends State<EditProfileModal> {
           controller: _nameController,
           decoration: InputDecoration(
             hintText: 'Enter your full name',
-            hintStyle: const TextStyle(
-              color: Color(0xFFB9BDC1),
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFFB9BDC1), fontSize: 16),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF2563EB),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             errorText: _nameError,
             contentPadding: const EdgeInsets.symmetric(
@@ -420,10 +387,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
             ),
             const SizedBox(width: 8),
             Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 2,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
                 color: const Color(0xFFDBEAFE),
                 borderRadius: BorderRadius.circular(6),
@@ -433,7 +397,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
                 style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
             ),
@@ -445,46 +409,28 @@ class _EditProfileModalState extends State<EditProfileModal> {
           keyboardType: TextInputType.phone,
           decoration: InputDecoration(
             hintText: '+91 98765 43210',
-            hintStyle: const TextStyle(
-              color: Color(0xFFB9BDC1),
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFFB9BDC1), fontSize: 16),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF2563EB),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             errorText: _phoneError,
             contentPadding: const EdgeInsets.symmetric(
@@ -501,10 +447,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
         const SizedBox(height: 8),
         Text(
           'Phone changes require OTP verification',
-          style: TextStyle(
-            fontSize: 13,
-            color: const Color(0xFF6B7280),
-          ),
+          style: TextStyle(fontSize: 13, color: const Color(0xFF6B7280)),
         ),
       ],
     );
@@ -527,10 +470,7 @@ class _EditProfileModalState extends State<EditProfileModal> {
             const SizedBox(width: 8),
             Text(
               '(Optional)',
-              style: TextStyle(
-                fontSize: 14,
-                color: const Color(0xFF9CA3AF),
-              ),
+              style: TextStyle(fontSize: 14, color: const Color(0xFF9CA3AF)),
             ),
           ],
         ),
@@ -540,46 +480,28 @@ class _EditProfileModalState extends State<EditProfileModal> {
           keyboardType: TextInputType.emailAddress,
           decoration: InputDecoration(
             hintText: 'your.email@example.com',
-            hintStyle: const TextStyle(
-              color: Color(0xFFB9BDC1),
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFFB9BDC1), fontSize: 16),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF2563EB),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             errorText: _emailError,
             contentPadding: const EdgeInsets.symmetric(
@@ -614,32 +536,20 @@ class _EditProfileModalState extends State<EditProfileModal> {
           controller: _apartmentController,
           decoration: InputDecoration(
             hintText: 'Block A, Flat 301',
-            hintStyle: const TextStyle(
-              color: Color(0xFFB9BDC1),
-              fontSize: 16,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFFB9BDC1), fontSize: 16),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFE6E9EC),
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFF2563EB),
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -658,9 +568,8 @@ class _EditProfileModalState extends State<EditProfileModal> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleSave,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          disabledBackgroundColor:
-              const Color(0xFF2563EB).withOpacity(0.4),
+          backgroundColor: const Color(0xFF0E4778),
+          disabledBackgroundColor: const Color(0xFF0E4778).withOpacity(0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

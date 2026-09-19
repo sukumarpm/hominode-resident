@@ -10,7 +10,7 @@ void main() {
 }
 
 class AddFamilyMemberDemoApp extends StatelessWidget {
-  const AddFamilyMemberDemoApp({Key? key}) : super(key: key);
+  const AddFamilyMemberDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class AddFamilyMemberDemoApp extends StatelessWidget {
 }
 
 class DemoHomePage extends StatelessWidget {
-  const DemoHomePage({Key? key}) : super(key: key);
+  const DemoHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

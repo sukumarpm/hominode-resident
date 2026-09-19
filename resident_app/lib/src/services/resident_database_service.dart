@@ -33,7 +33,10 @@ class ResidentDataResult<T> {
     );
   }
 
-  factory ResidentDataResult.failure({required String message, String? errorCode}) {
+  factory ResidentDataResult.failure({
+    required String message,
+    String? errorCode,
+  }) {
     return ResidentDataResult(
       success: false,
       message: message,
@@ -46,7 +49,8 @@ class ResidentDataResult<T> {
 /// Provides read-only access to resident's own data
 class ResidentDatabaseService {
   // Singleton pattern
-  static final ResidentDatabaseService instance = ResidentDatabaseService._internal();
+  static final ResidentDatabaseService instance =
+      ResidentDatabaseService._internal();
   factory ResidentDatabaseService() => instance;
   ResidentDatabaseService._internal();
 
@@ -81,7 +85,7 @@ class ResidentDatabaseService {
       print('👤 Full Name: $fullName');
       print('📧 Email: $email');
       print('📱 Phone: $phoneNumber');
-      
+
       final user = UserModel(
         id: userId,
         fullName: fullName,
@@ -98,14 +102,14 @@ class ResidentDatabaseService {
       print('💾 Attempting to write to Firestore...');
       print('📍 Collection: $usersCollection');
       print('📄 Document ID: $userId');
-      
+
       await _firestore
           .collection(usersCollection)
           .doc(userId)
           .set(user.toMap());
 
       print('✅ Firestore write successful!');
-      
+
       return ResidentDataResult.success(
         message: 'User created successfully',
         data: user,
@@ -121,9 +125,7 @@ class ResidentDatabaseService {
     } catch (e, stackTrace) {
       print('❌ General Exception: $e');
       print('📍 Stack trace: $stackTrace');
-      return ResidentDataResult.failure(
-        message: 'Failed to create user: $e',
-      );
+      return ResidentDataResult.failure(message: 'Failed to create user: $e');
     }
   }
 
@@ -144,7 +146,7 @@ class ResidentDatabaseService {
   Future<ResidentDataResult<UserModel>> getMyProfile() async {
     try {
       final currentUser = _authService.getCurrentUser();
-      
+
       if (currentUser == null) {
         return ResidentDataResult.failure(
           message: 'No user is currently signed in',
@@ -172,16 +174,14 @@ class ResidentDatabaseService {
         errorCode: e.code,
       );
     } catch (e) {
-      return ResidentDataResult.failure(
-        message: 'Failed to fetch profile: $e',
-      );
+      return ResidentDataResult.failure(message: 'Failed to fetch profile: $e');
     }
   }
 
   /// Stream current user's profile (real-time updates)
   Stream<UserModel?> streamMyProfile() {
     final currentUser = _authService.getCurrentUser();
-    
+
     if (currentUser == null) {
       return Stream.value(null);
     }
@@ -206,7 +206,7 @@ class ResidentDatabaseService {
   Future<ResidentDataResult<FlatModel>> getMyFlat() async {
     try {
       final currentUser = _authService.getCurrentUser();
-      
+
       if (currentUser == null) {
         return ResidentDataResult.failure(
           message: 'No user is currently signed in',
@@ -245,7 +245,7 @@ class ResidentDatabaseService {
   /// Stream current user's flat details (real-time updates)
   Stream<FlatModel?> streamMyFlat() {
     final currentUser = _authService.getCurrentUser();
-    
+
     if (currentUser == null) {
       return Stream.value(null);
     }
@@ -275,7 +275,7 @@ class ResidentDatabaseService {
     try {
       // First get the user's flat
       final flatResult = await getMyFlat();
-      
+
       if (!flatResult.success || flatResult.data == null) {
         return ResidentDataResult.failure(
           message: 'Unable to fetch bills: ${flatResult.message}',
@@ -312,9 +312,7 @@ class ResidentDatabaseService {
         errorCode: e.code,
       );
     } catch (e) {
-      return ResidentDataResult.failure(
-        message: 'Failed to fetch bills: $e',
-      );
+      return ResidentDataResult.failure(message: 'Failed to fetch bills: $e');
     }
   }
 
@@ -324,14 +322,16 @@ class ResidentDatabaseService {
   }
 
   /// Get paid bills for current user's flat
-  Future<ResidentDataResult<List<BillModel>>> getMyPaidBills({int? limit}) async {
+  Future<ResidentDataResult<List<BillModel>>> getMyPaidBills({
+    int? limit,
+  }) async {
     return await getMyBills(status: 'paid', limit: limit);
   }
 
   /// Stream bills for current user's flat (real-time updates)
   Stream<List<BillModel>> streamMyBills({String? status}) async* {
     final flatResult = await getMyFlat();
-    
+
     if (!flatResult.success || flatResult.data == null) {
       yield [];
       return;
@@ -349,9 +349,7 @@ class ResidentDatabaseService {
     }
 
     yield* query.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => BillModel.fromSnapshot(doc))
-          .toList();
+      return snapshot.docs.map((doc) => BillModel.fromSnapshot(doc)).toList();
     });
   }
 
@@ -359,17 +357,16 @@ class ResidentDatabaseService {
   Future<ResidentDataResult<double>> getMyTotalPendingAmount() async {
     try {
       final billsResult = await getMyPendingBills();
-      
+
       if (!billsResult.success) {
         return ResidentDataResult.failure(
           message: billsResult.message ?? 'Failed to calculate pending amount',
         );
       }
 
-      final total = billsResult.data?.fold<double>(
-        0,
-        (sum, bill) => sum + bill.amount,
-      ) ?? 0;
+      final total =
+          billsResult.data?.fold<double>(0, (sum, bill) => sum + bill.amount) ??
+          0;
 
       return ResidentDataResult.success(data: total);
     } catch (e) {
@@ -389,7 +386,7 @@ class ResidentDatabaseService {
   }) async {
     try {
       final flatResult = await getMyFlat();
-      
+
       if (!flatResult.success || flatResult.data == null) {
         return ResidentDataResult.failure(
           message: 'Unable to fetch payments: ${flatResult.message}',
@@ -433,7 +430,7 @@ class ResidentDatabaseService {
   /// Stream payments for current user's flat (real-time updates)
   Stream<List<PaymentModel>> streamMyPayments() async* {
     final flatResult = await getMyFlat();
-    
+
     if (!flatResult.success || flatResult.data == null) {
       yield [];
       return;
@@ -454,7 +451,9 @@ class ResidentDatabaseService {
   }
 
   /// Get payment history for a specific bill
-  Future<ResidentDataResult<List<PaymentModel>>> getPaymentsForBill(String billId) async {
+  Future<ResidentDataResult<List<PaymentModel>>> getPaymentsForBill(
+    String billId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection(paymentsCollection)
@@ -490,7 +489,7 @@ class ResidentDatabaseService {
   }) async {
     try {
       final flatResult = await getMyFlat();
-      
+
       if (!flatResult.success || flatResult.data == null) {
         return ResidentDataResult.failure(
           message: 'Unable to fetch visitors: ${flatResult.message}',
@@ -543,7 +542,7 @@ class ResidentDatabaseService {
   /// Stream visitors for current user's flat (real-time updates)
   Stream<List<VisitorModel>> streamMyVisitors({String? status}) async* {
     final flatResult = await getMyFlat();
-    
+
     if (!flatResult.success || flatResult.data == null) {
       yield [];
       return;
@@ -577,7 +576,7 @@ class ResidentDatabaseService {
   }) async {
     try {
       final flatResult = await getMyFlat();
-      
+
       Query query = _firestore
           .collection(noticesCollection)
           .where('isActive', isEqualTo: true)
@@ -587,7 +586,13 @@ class ResidentDatabaseService {
       if (flatResult.success && flatResult.data != null) {
         final flatId = flatResult.data!.id;
         // Get notices that target all flats or specifically this flat
-        query = query.where('targetFlats', whereIn: [[], [flatId]]);
+        query = query.where(
+          'targetFlats',
+          whereIn: [
+            [],
+            [flatId],
+          ],
+        );
       }
 
       if (limit != null) {
@@ -606,9 +611,7 @@ class ResidentDatabaseService {
         errorCode: e.code,
       );
     } catch (e) {
-      return ResidentDataResult.failure(
-        message: 'Failed to fetch notices: $e',
-      );
+      return ResidentDataResult.failure(message: 'Failed to fetch notices: $e');
     }
   }
 
@@ -663,39 +666,42 @@ class ResidentDatabaseService {
   // COMPLAINTS
   // ============================================================================
 
-  /// Get all complaints for current user's flat
+  /// Get all complaints owned by the current resident in their community.
   Future<ResidentDataResult<List<ComplaintModel>>> getMyComplaints({
     String? status,
     int? limit,
   }) async {
     try {
-      final flatResult = await getMyFlat();
-      
-      if (!flatResult.success || flatResult.data == null) {
+      final currentUser = _authService.getCurrentUser();
+      final profileResult = await getMyProfile();
+      if (currentUser == null ||
+          !profileResult.success ||
+          profileResult.data == null ||
+          profileResult.data!.communityId.trim().isEmpty) {
         return ResidentDataResult.failure(
-          message: 'Unable to fetch complaints: ${flatResult.message}',
+          message: 'Unable to resolve the resident complaint scope.',
         );
       }
 
-      final flatId = flatResult.data!.id;
+      final communityId = profileResult.data!.communityId.trim();
 
       Query query = _firestore
           .collection(complaintsCollection)
-          .where('flatId', isEqualTo: flatId)
-          .orderBy('createdAt', descending: true);
+          .where('communityId', isEqualTo: communityId)
+          .where('userId', isEqualTo: currentUser.uid);
 
       if (status != null) {
         query = query.where('status', isEqualTo: status);
       }
 
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-
       final snapshot = await query.get();
-      final complaints = snapshot.docs
+      var complaints = snapshot.docs
           .map((doc) => ComplaintModel.fromSnapshot(doc))
           .toList();
+      complaints.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      if (limit != null && complaints.length > limit) {
+        complaints = complaints.take(limit).toList();
+      }
 
       return ResidentDataResult.success(data: complaints);
     } on FirebaseException catch (e) {
@@ -716,34 +722,41 @@ class ResidentDatabaseService {
   }
 
   /// Get resolved complaints
-  Future<ResidentDataResult<List<ComplaintModel>>> getMyResolvedComplaints({int? limit}) async {
+  Future<ResidentDataResult<List<ComplaintModel>>> getMyResolvedComplaints({
+    int? limit,
+  }) async {
     return await getMyComplaints(status: 'resolved', limit: limit);
   }
 
-  /// Stream complaints for current user's flat (real-time updates)
+  /// Stream complaints owned by the current resident in their community.
   Stream<List<ComplaintModel>> streamMyComplaints({String? status}) async* {
-    final flatResult = await getMyFlat();
-    
-    if (!flatResult.success || flatResult.data == null) {
+    final currentUser = _authService.getCurrentUser();
+    final profileResult = await getMyProfile();
+    if (currentUser == null ||
+        !profileResult.success ||
+        profileResult.data == null ||
+        profileResult.data!.communityId.trim().isEmpty) {
       yield [];
       return;
     }
 
-    final flatId = flatResult.data!.id;
+    final communityId = profileResult.data!.communityId.trim();
 
     Query query = _firestore
         .collection(complaintsCollection)
-        .where('flatId', isEqualTo: flatId)
-        .orderBy('createdAt', descending: true);
+        .where('communityId', isEqualTo: communityId)
+        .where('userId', isEqualTo: currentUser.uid);
 
     if (status != null) {
       query = query.where('status', isEqualTo: status);
     }
 
     yield* query.snapshots().map((snapshot) {
-      return snapshot.docs
+      final complaints = snapshot.docs
           .map((doc) => ComplaintModel.fromSnapshot(doc))
           .toList();
+      complaints.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return complaints;
     });
   }
 
@@ -763,16 +776,20 @@ class ResidentDatabaseService {
       ]);
 
       final pendingBills = results[0] as ResidentDataResult<List<BillModel>>;
-      final expectedVisitors = results[1] as ResidentDataResult<List<VisitorModel>>;
-      final openComplaints = results[2] as ResidentDataResult<List<ComplaintModel>>;
+      final expectedVisitors =
+          results[1] as ResidentDataResult<List<VisitorModel>>;
+      final openComplaints =
+          results[2] as ResidentDataResult<List<ComplaintModel>>;
       final recentNotices = results[3] as ResidentDataResult<List<NoticeModel>>;
 
       final summary = DashboardSummary(
         pendingBillsCount: pendingBills.data?.length ?? 0,
-        totalPendingAmount: pendingBills.data?.fold<double>(
-          0,
-          (sum, bill) => sum + bill.amount,
-        ) ?? 0,
+        totalPendingAmount:
+            pendingBills.data?.fold<double>(
+              0,
+              (sum, bill) => sum + bill.amount,
+            ) ??
+            0,
         expectedVisitorsCount: expectedVisitors.data?.length ?? 0,
         openComplaintsCount: openComplaints.data?.length ?? 0,
         unreadNoticesCount: recentNotices.data?.length ?? 0,

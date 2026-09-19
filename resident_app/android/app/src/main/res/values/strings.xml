@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Lyvo</string>
+    <string name="app_name">Hominode</string>
     
     <!-- Firebase Configuration -->
     <string name="default_web_client_id" translatable="false">519479302451-PLACEHOLDER.apps.googleusercontent.com</string>

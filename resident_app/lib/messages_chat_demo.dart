@@ -9,7 +9,7 @@ void main() {
 }
 
 class MessagesChatDemoApp extends StatelessWidget {
-  const MessagesChatDemoApp({Key? key}) : super(key: key);
+  const MessagesChatDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {

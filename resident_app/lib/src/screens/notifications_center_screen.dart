@@ -2,13 +2,12 @@
 // Pixel-perfect Notifications screen matching reference design
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/notification_item.dart';
 import '../services/notifications_data_service.dart';
 import '../components/standard_screen.dart';
 
 class NotificationsCenterScreen extends StatefulWidget {
-  const NotificationsCenterScreen({Key? key}) : super(key: key);
+  const NotificationsCenterScreen({super.key});
 
   @override
   State<NotificationsCenterScreen> createState() =>
@@ -57,7 +56,9 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Notification'),
-        content: const Text('Are you sure you want to delete this notification?'),
+        content: const Text(
+          'Are you sure you want to delete this notification?',
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
@@ -66,7 +67,9 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFE53935)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFE53935),
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -118,10 +121,7 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF2563EB),
-            Color(0xFF1E40AF),
-          ],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -134,7 +134,11 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
           children: [
             IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
+              icon: const Icon(
+                Icons.arrow_back_ios,
+                color: Colors.white,
+                size: 20,
+              ),
               padding: const EdgeInsets.all(8),
             ),
             const SizedBox(width: 4),
@@ -191,7 +195,10 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 10,
+                ),
                 decoration: BoxDecoration(
                   color: isSelected ? Colors.white : Colors.transparent,
                   borderRadius: BorderRadius.circular(999),
@@ -211,7 +218,9 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w500,
-                    color: isSelected ? const Color(0xFF111111) : const Color(0xFF6B7280),
+                    color: isSelected
+                        ? const Color(0xFF111111)
+                        : const Color(0xFF6B7280),
                   ),
                 ),
               ),
@@ -251,11 +260,7 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_none,
-            size: 64,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.notifications_none, size: 64, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No notifications',
@@ -268,10 +273,7 @@ class _NotificationsCenterScreenState extends State<NotificationsCenterScreen>
           const SizedBox(height: 8),
           Text(
             'You\'re all caught up!',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -319,10 +321,7 @@ class _NotificationCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: const Color(0xFFE5E5E5),
-              width: 1,
-            ),
+            border: Border.all(color: const Color(0xFFE5E5E5), width: 1),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.04),

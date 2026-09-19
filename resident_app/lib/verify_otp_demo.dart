@@ -20,7 +20,7 @@ void main() {
 }
 
 class VerifyOTPDemoApp extends StatelessWidget {
-  const VerifyOTPDemoApp({Key? key}) : super(key: key);
+  const VerifyOTPDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -14,14 +14,14 @@ class AdaptiveCard extends StatelessWidget {
   final bool elevated;
 
   const AdaptiveCard({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
     this.margin,
     this.borderRadius,
     this.onTap,
     this.elevated = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

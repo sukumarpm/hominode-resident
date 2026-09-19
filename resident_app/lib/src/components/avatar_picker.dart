@@ -11,12 +11,12 @@ class AvatarPicker extends StatelessWidget {
   final double size;
 
   const AvatarPicker({
-    Key? key,
+    super.key,
     this.avatarUrl,
     this.avatarFile,
     required this.onTap,
     this.size = 100,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +31,9 @@ class AvatarPicker extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFFE5E7EB),
-              border: Border.all(
-                color: const Color(0xFF2563EB),
-                width: 3,
-              ),
+              border: Border.all(color: const Color(0xFF0E4778), width: 3),
             ),
-            child: ClipOval(
-              child: _buildAvatarContent(),
-            ),
+            child: ClipOval(child: _buildAvatarContent()),
           ),
           // Edit button
           Positioned(
@@ -48,12 +43,9 @@ class AvatarPicker extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: const Color(0xFF2563EB),
+                color: const Color(0xFF0E4778),
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2,
-                ),
+                border: Border.all(color: Colors.white, width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.2),

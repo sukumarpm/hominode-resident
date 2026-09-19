@@ -13,7 +13,7 @@ void main() async {
 }
 
 class FlatMemberVerificationTestApp extends StatelessWidget {
-  const FlatMemberVerificationTestApp({Key? key}) : super(key: key);
+  const FlatMemberVerificationTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class FlatMemberVerificationTestApp extends StatelessWidget {
 }
 
 class FlatMemberVerificationTestScreen extends StatefulWidget {
-  const FlatMemberVerificationTestScreen({Key? key}) : super(key: key);
+  const FlatMemberVerificationTestScreen({super.key});
 
   @override
   State<FlatMemberVerificationTestScreen> createState() =>
@@ -50,7 +50,7 @@ class _FlatMemberVerificationTestScreenState
     });
 
     try {
-      print('\n' + '=' * 60);
+      print('\n${'=' * 60}');
       print('🧪 FLAT MEMBER VERIFICATION TEST');
       print('=' * 60);
 
@@ -90,7 +90,7 @@ class _FlatMemberVerificationTestScreenState
         }
       }
 
-      print('\n' + '=' * 60);
+      print('\n${'=' * 60}');
       print('✅ TEST COMPLETED');
       print('=' * 60 + '\n');
     } catch (e) {

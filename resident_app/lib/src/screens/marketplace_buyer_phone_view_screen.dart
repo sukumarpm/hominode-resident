@@ -2,8 +2,8 @@
 // Screen for buyer to view accepted phone numbers from sellers
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/listing_model.dart';
 import '../services/listing_firestore_service.dart';
 import '../constants/app_colors.dart';
@@ -12,10 +12,7 @@ import '../constants/app_sizes.dart';
 class MarketplaceBuyerPhoneViewScreen extends StatefulWidget {
   final ListingModel listing;
 
-  const MarketplaceBuyerPhoneViewScreen({
-    Key? key,
-    required this.listing,
-  }) : super(key: key);
+  const MarketplaceBuyerPhoneViewScreen({super.key, required this.listing});
 
   @override
   State<MarketplaceBuyerPhoneViewScreen> createState() =>
@@ -25,7 +22,7 @@ class MarketplaceBuyerPhoneViewScreen extends StatefulWidget {
 class _MarketplaceBuyerPhoneViewScreenState
     extends State<MarketplaceBuyerPhoneViewScreen> {
   final ListingFirestoreService _listingService = ListingFirestoreService();
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -38,11 +35,11 @@ class _MarketplaceBuyerPhoneViewScreenState
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Seller Contact',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -74,10 +71,10 @@ class _MarketplaceBuyerPhoneViewScreenState
 
   Widget _buildProductCard() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -85,28 +82,25 @@ class _MarketplaceBuyerPhoneViewScreenState
         children: [
           Text(
             widget.listing.title,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: Colors.black,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             widget.listing.formattedPrice,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 18.sp,
               fontWeight: FontWeight.w700,
               color: AppColors.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'Seller: ${widget.listing.sellerName}',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 13.sp, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -125,21 +119,21 @@ class _MarketplaceBuyerPhoneViewScreenState
 
         if (phoneData == null) {
           return Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               color: Colors.orange.shade50,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: Colors.orange.shade200),
             ),
             child: Row(
               children: [
-                Icon(Icons.info, color: Colors.orange.shade600, size: 20),
-                const SizedBox(width: 12),
+                Icon(Icons.info, color: Colors.orange.shade600, size: 20.w),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     'Seller has not accepted your request yet',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: Colors.orange.shade600,
                       fontWeight: FontWeight.w500,
                     ),
@@ -154,10 +148,10 @@ class _MarketplaceBuyerPhoneViewScreenState
         final sellerName = phoneData['sellerName'] ?? 'Seller';
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: Colors.green.shade200),
           ),
           child: Column(
@@ -165,51 +159,55 @@ class _MarketplaceBuyerPhoneViewScreenState
             children: [
               Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green.shade600,
+                    size: 20.w,
+                  ),
+                  SizedBox(width: 8.w),
                   Text(
                     'Request Accepted',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.green.shade600,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 'Seller Name',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 4.h),
               Text(
                 sellerName,
-                style: const TextStyle(
-                  fontSize: 16,
+                style: TextStyle(
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
                 'Phone Number',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(color: Colors.green.shade200),
                 ),
                 child: Row(
@@ -217,8 +215,8 @@ class _MarketplaceBuyerPhoneViewScreenState
                   children: [
                     Text(
                       phone,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
@@ -226,22 +224,22 @@ class _MarketplaceBuyerPhoneViewScreenState
                     GestureDetector(
                       onTap: () => _copyToClipboard(phone),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(6.r),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.copy,
                           color: Colors.white,
-                          size: 16,
+                          size: 16.w,
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -252,7 +250,7 @@ class _MarketplaceBuyerPhoneViewScreenState
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
                 ),
@@ -266,10 +264,10 @@ class _MarketplaceBuyerPhoneViewScreenState
 
   Widget _buildInstructionsSection() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: Colors.blue.shade200),
       ),
       child: Column(
@@ -278,12 +276,12 @@ class _MarketplaceBuyerPhoneViewScreenState
           Text(
             'Tips for Contacting Seller',
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: Colors.blue.shade600,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildTipItem('Be polite and respectful'),
           _buildTipItem('Ask about product condition'),
           _buildTipItem('Arrange meeting in safe location'),
@@ -295,19 +293,16 @@ class _MarketplaceBuyerPhoneViewScreenState
 
   Widget _buildTipItem(String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(bottom: 8.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.check, size: 16, color: Colors.blue.shade600),
-          const SizedBox(width: 8),
+          Icon(Icons.check, size: 16.w, color: Colors.blue.shade600),
+          SizedBox(width: 8.w),
           Expanded(
             child: Text(
               text,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.blue.shade600,
-              ),
+              style: TextStyle(fontSize: 13.sp, color: Colors.blue.shade600),
             ),
           ),
         ],
@@ -318,10 +313,8 @@ class _MarketplaceBuyerPhoneViewScreenState
   Future<Map<String, dynamic>?> _getSellerPhoneNumber() async {
     try {
       // Get accepted phone numbers for this listing
-      final acceptedNumbers =
-          await _listingService.getAcceptedPhoneNumbersForBuyer(
-        widget.listing.id!,
-      );
+      final acceptedNumbers = await _listingService
+          .getAcceptedPhoneNumbersForBuyer(widget.listing.id!);
 
       if (acceptedNumbers.isNotEmpty) {
         return acceptedNumbers.first;
@@ -348,10 +341,7 @@ class _MarketplaceBuyerPhoneViewScreenState
     // In production, use url_launcher to make actual calls
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Call $phone'),
-        backgroundColor: Colors.green,
-      ),
+      SnackBar(content: Text('Call $phone'), backgroundColor: Colors.green),
     );
   }
 }

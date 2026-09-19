@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
-import '../utils/localization_helper.dart';
 
 /// Localized Text Widget
 /// Automatically rebuilds when language changes
@@ -15,13 +14,13 @@ class LocalizedText extends StatelessWidget {
 
   const LocalizedText(
     this.translationKey, {
-    Key? key,
+    super.key,
     this.style,
     this.textAlign,
     this.maxLines,
     this.overflow,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,11 +48,11 @@ class LocalizedButton extends StatelessWidget {
 
   const LocalizedButton(
     this.translationKey, {
-    Key? key,
+    super.key,
     required this.onPressed,
     this.style,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -79,11 +78,11 @@ class LocalizedTextButton extends StatelessWidget {
 
   const LocalizedTextButton(
     this.translationKey, {
-    Key? key,
+    super.key,
     required this.onPressed,
     this.style,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +110,11 @@ class LocalizedOutlinedButton extends StatelessWidget {
 
   const LocalizedOutlinedButton(
     this.translationKey, {
-    Key? key,
+    super.key,
     required this.onPressed,
     this.style,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -140,10 +139,10 @@ class LocalizedAppBarTitle extends StatelessWidget {
 
   const LocalizedAppBarTitle(
     this.translationKey, {
-    Key? key,
+    super.key,
     this.style,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -170,10 +169,10 @@ class LocalizedTooltip extends StatelessWidget {
 
   const LocalizedTooltip(
     this.translationKey, {
-    Key? key,
+    super.key,
     required this.child,
     this.params,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

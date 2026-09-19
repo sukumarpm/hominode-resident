@@ -15,7 +15,7 @@ void main() async {
 }
 
 class TestAdminChatApp extends StatelessWidget {
-  const TestAdminChatApp({Key? key}) : super(key: key);
+  const TestAdminChatApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class TestAdminChatApp extends StatelessWidget {
 }
 
 class TestAdminChatScreen extends StatefulWidget {
-  const TestAdminChatScreen({Key? key}) : super(key: key);
+  const TestAdminChatScreen({super.key});
 
   @override
   State<TestAdminChatScreen> createState() => _TestAdminChatScreenState();

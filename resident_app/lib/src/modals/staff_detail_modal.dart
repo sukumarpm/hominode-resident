@@ -31,12 +31,12 @@ class StaffDetailModal extends StatefulWidget {
   final Function(String, bool) onStatusChanged;
 
   const StaffDetailModal({
-    Key? key,
+    super.key,
     required this.staff,
     required this.onEdit,
     required this.onDelete,
     required this.onStatusChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<StaffDetailModal> createState() => _StaffDetailModalState();
@@ -104,7 +104,9 @@ class _StaffDetailModalState extends State<StaffDetailModal>
           content: Text(
             value ? 'Staff marked as active' : 'Staff marked as inactive',
           ),
-          backgroundColor: value ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+          backgroundColor: value
+              ? const Color(0xFF22C55E)
+              : const Color(0xFFEF4444),
           duration: const Duration(seconds: 2),
         ),
       );
@@ -123,10 +125,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text(
           'Delete Staff Member',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         content: Text(
           'Are you sure you want to remove ${widget.staff.name} from your staff list?',
@@ -224,9 +223,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 8, 14),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0), width: 1)),
       ),
       child: Row(
         children: [
@@ -246,10 +243,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
             onPressed: _handleClose,
             icon: const Icon(Icons.close, size: 24, color: Color(0xFF9CA3AF)),
             padding: const EdgeInsets.all(8),
-            constraints: const BoxConstraints(
-              minWidth: 40,
-              minHeight: 40,
-            ),
+            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
             splashRadius: 20,
           ),
         ],
@@ -281,7 +275,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
                             style: const TextStyle(
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF0E4778),
                             ),
                           ),
                         );
@@ -294,7 +288,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                       ),
                     ),
                   ),
@@ -321,7 +315,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF0E4778),
               ),
             ),
           ),
@@ -347,7 +341,9 @@ class _StaffDetailModalState extends State<StaffDetailModal>
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: _isActive ? const Color(0xFF22C55E) : const Color(0xFFEF4444),
+              color: _isActive
+                  ? const Color(0xFF22C55E)
+                  : const Color(0xFFEF4444),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -374,7 +370,9 @@ class _StaffDetailModalState extends State<StaffDetailModal>
                   _isActive ? 'Currently active' : 'Currently inactive',
                   style: TextStyle(
                     fontSize: 12,
-                    color: _isActive ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                    color: _isActive
+                        ? const Color(0xFF059669)
+                        : const Color(0xFFDC2626),
                   ),
                 ),
               ],
@@ -392,7 +390,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
               child: Switch(
                 value: _isActive,
                 onChanged: _handleStatusToggle,
-                activeColor: const Color(0xFF22C55E),
+                activeThumbColor: const Color(0xFF22C55E),
                 activeTrackColor: const Color(0xFFD1FAE5),
                 inactiveThumbColor: const Color(0xFFEF4444),
                 inactiveTrackColor: const Color(0xFFFEE2E2),
@@ -460,11 +458,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
               color: const Color(0xFFE0E7FF),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              color: const Color(0xFF2563EB),
-              size: 18,
-            ),
+            child: Icon(icon, color: const Color(0xFF0E4778), size: 18),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -504,7 +498,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
             onPressed: _handleEdit,
             style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 14),
-              side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+              side: const BorderSide(color: Color(0xFF0E4778), width: 1.5),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -514,7 +508,7 @@ class _StaffDetailModalState extends State<StaffDetailModal>
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF0E4778),
               ),
             ),
           ),

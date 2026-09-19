@@ -14,7 +14,7 @@ void main() async {
 }
 
 class LoginFixApp extends StatelessWidget {
-  const LoginFixApp({Key? key}) : super(key: key);
+  const LoginFixApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class LoginFixApp extends StatelessWidget {
 }
 
 class LoginFixScreen extends StatefulWidget {
-  const LoginFixScreen({Key? key}) : super(key: key);
+  const LoginFixScreen({super.key});
 
   @override
   State<LoginFixScreen> createState() => _LoginFixScreenState();

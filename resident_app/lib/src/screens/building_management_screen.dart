@@ -2,17 +2,17 @@
 // Building Management Screen
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/building_model.dart';
 import '../services/building_service.dart';
 import '../modals/add_edit_building_modal.dart';
 import '../components/standard_screen.dart';
 
 class BuildingManagementScreen extends StatefulWidget {
-  const BuildingManagementScreen({Key? key}) : super(key: key);
+  const BuildingManagementScreen({super.key});
 
   @override
-  State<BuildingManagementScreen> createState() => _BuildingManagementScreenState();
+  State<BuildingManagementScreen> createState() =>
+      _BuildingManagementScreenState();
 }
 
 class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
@@ -28,10 +28,10 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
 
   Future<void> _loadBuildings() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final buildings = await _buildingService.getBuildings();
-      
+
       if (mounted) {
         setState(() {
           _buildings = buildings;
@@ -80,9 +80,12 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
                     ),
                   ),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF0E4778),
                     elevation: 0,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 11,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -91,25 +94,27 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
               ],
             ),
           ),
-          
+
           // Buildings List
           Expanded(
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0E4778),
+                      ),
                     ),
                   )
                 : _buildings.isEmpty
-                    ? _buildEmptyState()
-                    : ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        itemCount: _buildings.length,
-                        itemBuilder: (context, index) {
-                          final building = _buildings[index];
-                          return _buildBuildingCard(building);
-                        },
-                      ),
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: _buildings.length,
+                    itemBuilder: (context, index) {
+                      final building = _buildings[index];
+                      return _buildBuildingCard(building);
+                    },
+                  ),
           ),
         ],
       ),
@@ -122,11 +127,7 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.business_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.business_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Buildings Added',
@@ -139,10 +140,7 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
           const SizedBox(height: 8),
           Text(
             'Tap the "Add Building" button to get started',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -186,13 +184,13 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
                       ),
                       child: const Icon(
                         Icons.business,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                         size: 24,
                       ),
                     ),
-                    
+
                     const SizedBox(width: 12),
-                    
+
                     // Building info
                     Expanded(
                       child: Column(
@@ -219,7 +217,7 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
                         ],
                       ),
                     ),
-                    
+
                     // Delete button
                     IconButton(
                       onPressed: () => _confirmDelete(building),
@@ -233,8 +231,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
                     ),
                   ],
                 ),
-                
-                if (building.description != null && building.description!.isNotEmpty) ...[
+
+                if (building.description != null &&
+                    building.description!.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
                     building.description!,
@@ -246,9 +245,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ],
-                
+
                 const SizedBox(height: 12),
-                
+
                 // Stats
                 Row(
                   children: [
@@ -315,7 +314,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
               content: const Text('Building added successfully'),
               backgroundColor: const Color(0xFF10B981),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           _loadBuildings();
@@ -325,7 +326,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
               content: const Text('Failed to add building'),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -346,7 +349,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
               content: const Text('Building updated successfully'),
               backgroundColor: const Color(0xFF10B981),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
           _loadBuildings();
@@ -356,7 +361,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
               content: const Text('Failed to update building'),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
           );
         }
@@ -373,9 +380,7 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
         content: Text(
           'Are you sure you want to delete "${building.name}"? This action cannot be undone.',
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -383,7 +388,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: const Color(0xFFEF4444)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFFEF4444),
+            ),
             child: const Text('Delete'),
           ),
         ],
@@ -398,7 +405,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
             content: const Text('Building deleted'),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
         _loadBuildings();
@@ -408,7 +417,9 @@ class _BuildingManagementScreenState extends State<BuildingManagementScreen> {
             content: const Text('Failed to delete building'),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
           ),
         );
       }

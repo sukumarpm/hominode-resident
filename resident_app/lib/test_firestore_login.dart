@@ -12,7 +12,7 @@ void main() async {
 }
 
 class FirestoreLoginTestApp extends StatelessWidget {
-  const FirestoreLoginTestApp({Key? key}) : super(key: key);
+  const FirestoreLoginTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +24,7 @@ class FirestoreLoginTestApp extends StatelessWidget {
 }
 
 class FirestoreLoginTestScreen extends StatefulWidget {
-  const FirestoreLoginTestScreen({Key? key}) : super(key: key);
+  const FirestoreLoginTestScreen({super.key});
 
   @override
   State<FirestoreLoginTestScreen> createState() => _FirestoreLoginTestScreenState();

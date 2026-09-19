@@ -2,7 +2,7 @@
 // Query template selection screen for admin chat
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/admin_chat_model.dart';
 import '../services/admin_chat_service.dart';
 import '../constants/app_colors.dart';
@@ -12,16 +12,15 @@ import 'admin_chat_conversation_screen.dart';
 class AdminChatQueryTemplateScreen extends StatefulWidget {
   final QueryCategory category;
 
-  const AdminChatQueryTemplateScreen({
-    Key? key,
-    required this.category,
-  }) : super(key: key);
+  const AdminChatQueryTemplateScreen({super.key, required this.category});
 
   @override
-  State<AdminChatQueryTemplateScreen> createState() => _AdminChatQueryTemplateScreenState();
+  State<AdminChatQueryTemplateScreen> createState() =>
+      _AdminChatQueryTemplateScreenState();
 }
 
-class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScreen> {
+class _AdminChatQueryTemplateScreenState
+    extends State<AdminChatQueryTemplateScreen> {
   final TextEditingController _customQueryController = TextEditingController();
   final AdminChatService _adminChatService = AdminChatService.instance;
   bool _isLoading = false;
@@ -50,17 +49,14 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
         title: Text(
           widget.category.displayName,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: AppColors.border,
-          ),
+          child: Container(height: 1.h, color: AppColors.border),
         ),
       ),
       body: SingleChildScrollView(
@@ -68,49 +64,51 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 8),
-            
+            SizedBox(height: 8.h),
+
             if (hasTemplates) ...[
               // Quick queries header
               Text(
                 'Quick queries:',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textPrimary,
                 ),
               ),
-              
-              const SizedBox(height: 4),
-              
+
+              SizedBox(height: 4.h),
+
               Text(
                 'Tap a query to send it to admin',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
-              
-              const SizedBox(height: 16),
-              
+
+              SizedBox(height: 16.h),
+
               // Template buttons
-              ...templates.map((template) => Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _buildTemplateButton(template),
-              )).toList(),
-              
-              const SizedBox(height: 24),
-              
+              ...templates.map(
+                (template) => Padding(
+                  padding: EdgeInsets.only(bottom: 12.h),
+                  child: _buildTemplateButton(template),
+                ),
+              ),
+
+              SizedBox(height: 24.h),
+
               // Divider
               Row(
                 children: [
                   Expanded(child: Divider(color: AppColors.border)),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
                     child: Text(
                       'OR',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textSecondary,
                       ),
@@ -119,26 +117,26 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
                   Expanded(child: Divider(color: AppColors.border)),
                 ],
               ),
-              
-              const SizedBox(height: 24),
+
+              SizedBox(height: 24.h),
             ],
-            
+
             // Custom query input
             Text(
               hasTemplates ? 'Type your own question:' : 'Type your question:',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
-            
-            const SizedBox(height: 12),
-            
+
+            SizedBox(height: 12.h),
+
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(color: AppColors.border),
               ),
               child: TextField(
@@ -148,51 +146,48 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
                   hintText: 'Describe your query in detail...',
                   hintStyle: TextStyle(
                     color: AppColors.textSecondary,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(16),
+                  contentPadding: EdgeInsets.all(16.w),
                 ),
-                style: TextStyle(
-                  fontSize: 14,
-                  color: AppColors.textPrimary,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: AppColors.textPrimary),
               ),
             ),
-            
-            const SizedBox(height: 24),
-            
+
+            SizedBox(height: 24.h),
+
             // Send button
             ElevatedButton(
               onPressed: _isLoading ? null : _sendCustomQuery,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
+                padding: EdgeInsets.symmetric(vertical: 16.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 elevation: 0,
               ),
               child: _isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
+                  ? SizedBox(
+                      height: 20.h,
+                      width: 20.w,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Send Query',
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
             ),
-            
-            const SizedBox(height: 24),
+
+            SizedBox(height: 24.h),
           ],
         ),
       ),
@@ -201,14 +196,14 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
 
   Widget _buildTemplateButton(String template) {
     final isSelected = _selectedTemplate == template;
-    
+
     return GestureDetector(
       onTap: () => _sendTemplateQuery(template),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isSelected ? AppColors.primary : AppColors.border,
             width: isSelected ? 2 : 1,
@@ -218,15 +213,15 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
           children: [
             Icon(
               Icons.chat_bubble_outline,
-              size: 20,
+              size: 20.w,
               color: isSelected ? AppColors.primary : AppColors.textSecondary,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 template,
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 14.sp,
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
                   color: isSelected ? AppColors.primary : AppColors.textPrimary,
                 ),
@@ -234,7 +229,7 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
             ),
             Icon(
               Icons.arrow_forward,
-              size: 18,
+              size: 18.w,
               color: isSelected ? AppColors.primary : AppColors.textSecondary,
             ),
           ],
@@ -254,7 +249,7 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
 
   Future<void> _sendCustomQuery() async {
     final query = _customQueryController.text.trim();
-    
+
     if (query.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -299,23 +294,18 @@ class _AdminChatQueryTemplateScreenState extends State<AdminChatQueryTemplateScr
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => AdminChatConversationScreen(
-            chat: chat,
-          ),
+          builder: (_) => AdminChatConversationScreen(chat: chat),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      
+
       setState(() {
         _isLoading = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }

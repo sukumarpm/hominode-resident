@@ -1,21 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/marketplace_item.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final MarketplaceItem item;
 
-  const ProductDetailScreen({
-    Key? key,
-    required this.item,
-  }) : super(key: key);
+  const ProductDetailScreen({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(item.name),
-        backgroundColor: const Color(0xFF2563EB),
+        backgroundColor: const Color(0xFF0E4778),
       ),
       body: Center(
         child: Padding(
@@ -26,7 +22,7 @@ class ProductDetailScreen extends StatelessWidget {
               const Icon(
                 Icons.shopping_bag_outlined,
                 size: 80,
-                color: Color(0xFF2563EB),
+                color: Color(0xFF0E4778),
               ),
               const SizedBox(height: 20),
               Text(
@@ -42,16 +38,13 @@ class ProductDetailScreen extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
               const SizedBox(height: 20),
               const Text(
                 'Product Detail Screen - Coming Soon',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: TextStyle(fontSize: 16, color: Colors.grey),
               ),
             ],
           ),

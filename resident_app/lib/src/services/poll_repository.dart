@@ -2,7 +2,6 @@
 // Repository for poll data with API stubs, offline queue, and caching
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import '../models/poll.dart';
 import '../models/poll_option.dart';

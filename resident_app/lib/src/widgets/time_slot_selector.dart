@@ -7,12 +7,12 @@ class TimeSlotSelector extends StatelessWidget {
   final Function(String) onSlotSelected;
 
   const TimeSlotSelector({
-    Key? key,
+    super.key,
     required this.timeSlots,
     this.selectedSlot,
     this.disabledSlots = const {},
     required this.onSlotSelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

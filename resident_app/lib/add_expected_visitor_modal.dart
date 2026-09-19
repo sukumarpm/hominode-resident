@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'src/services/visitor_firestore_service.dart';
 
 // Design Constants
-const kPrimary = Color(0xFF2563EB);
+const kPrimary = Color(0xFF0E4778);
 const kModalBackground = Color(0xFFFFFFFF);
 const kInputBorder = Color(0xFFE6E6E6);
 const kPlaceholder = Color(0xFFBDBDBD);
@@ -26,10 +27,11 @@ Future<bool?> showAddExpectedVisitorModal(BuildContext context) {
 
 /// Main modal widget - Add Expected Visitor form
 class AddExpectedVisitorModal extends StatefulWidget {
-  const AddExpectedVisitorModal({Key? key}) : super(key: key);
+  const AddExpectedVisitorModal({super.key});
 
   @override
-  State<AddExpectedVisitorModal> createState() => _AddExpectedVisitorModalState();
+  State<AddExpectedVisitorModal> createState() =>
+      _AddExpectedVisitorModalState();
 }
 
 class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
@@ -38,10 +40,10 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
   final _phoneController = TextEditingController();
   final _vehicleController = TextEditingController();
   final _visitorService = VisitorFirestoreService();
-  
+
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
-  
+
   bool _isFormValid = false;
   bool _isLoading = false;
 
@@ -63,7 +65,8 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = _nameController.text.isNotEmpty &&
+      _isFormValid =
+          _nameController.text.isNotEmpty &&
           _purposeController.text.isNotEmpty &&
           _selectedDate != null &&
           _selectedTime != null;
@@ -78,11 +81,9 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
       lastDate: DateTime.now().add(const Duration(days: 365)),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: kPrimary,
-            ),
-          ),
+          data: Theme.of(
+            context,
+          ).copyWith(colorScheme: const ColorScheme.light(primary: kPrimary)),
           child: child!,
         );
       },
@@ -101,11 +102,9 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
       initialTime: TimeOfDay.now(),
       builder: (context, child) {
         return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
-              primary: kPrimary,
-            ),
-          ),
+          data: Theme.of(
+            context,
+          ).copyWith(colorScheme: const ColorScheme.light(primary: kPrimary)),
           child: child!,
         );
       },
@@ -127,7 +126,9 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
     try {
       // Convert TimeOfDay to DateTime
       final expectedTime = DateTime(
-        2000, 1, 1, // Dummy date, only time matters
+        2000,
+        1,
+        1, // Dummy date, only time matters
         _selectedTime!.hour,
         _selectedTime!.minute,
       );
@@ -138,11 +139,11 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
         purpose: _purposeController.text.trim(),
         expectedDate: _selectedDate!,
         expectedTime: expectedTime,
-        phoneNumber: _phoneController.text.trim().isEmpty 
-            ? null 
+        phoneNumber: _phoneController.text.trim().isEmpty
+            ? null
             : _phoneController.text.trim(),
-        vehicleNumber: _vehicleController.text.trim().isEmpty 
-            ? null 
+        vehicleNumber: _vehicleController.text.trim().isEmpty
+            ? null
             : _vehicleController.text.trim(),
       );
 
@@ -153,7 +154,7 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
       if (result.success) {
         // Close modal
         Navigator.pop(context, true); // Return true to indicate success
-        
+
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -161,9 +162,9 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
             backgroundColor: const Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            margin: const EdgeInsets.all(16),
+            margin: EdgeInsets.all(16.w),
             duration: const Duration(seconds: 2),
           ),
         );
@@ -175,27 +176,27 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
             backgroundColor: const Color(0xFFDC2626),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
-            margin: const EdgeInsets.all(16),
+            margin: EdgeInsets.all(16.w),
             duration: const Duration(seconds: 3),
           ),
         );
       }
     } catch (e) {
       setState(() => _isLoading = false);
-      
+
       if (!mounted) return;
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('An error occurred: $e'),
           backgroundColor: const Color(0xFFDC2626),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          margin: const EdgeInsets.all(16),
+          margin: EdgeInsets.all(16.w),
         ),
       );
     }
@@ -216,7 +217,7 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
       child: SingleChildScrollView(
         child: Container(
           width: double.infinity,
@@ -239,45 +240,45 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
               children: [
                 // Header with title and close button
                 _buildHeader(),
-                
-                const SizedBox(height: 32),
-                
+
+                SizedBox(height: 32.h),
+
                 // Visitor Name field
                 _buildLabeledTextField(
                   label: 'Visitor Name',
                   placeholder: 'Enter name',
                   controller: _nameController,
                 ),
-                
+
                 const SizedBox(height: kLargeSpacing),
-                
+
                 // Purpose field
                 _buildLabeledTextField(
                   label: 'Purpose',
                   placeholder: 'e.g., Personal visit',
                   controller: _purposeController,
                 ),
-                
+
                 const SizedBox(height: kLargeSpacing),
-                
+
                 // Phone Number field (Optional)
                 _buildLabeledTextField(
                   label: 'Phone Number (Optional)',
                   placeholder: 'Enter phone number',
                   controller: _phoneController,
                 ),
-                
+
                 const SizedBox(height: kLargeSpacing),
-                
+
                 // Vehicle Number field (Optional)
                 _buildLabeledTextField(
                   label: 'Vehicle Number (Optional)',
                   placeholder: 'e.g., MH 01 AB 1234',
                   controller: _vehicleController,
                 ),
-                
+
                 const SizedBox(height: kLargeSpacing),
-                
+
                 // Date and Time row
                 Row(
                   children: [
@@ -285,7 +286,9 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
                       child: _buildDateTimeField(
                         label: 'Date',
                         placeholder: 'dd-mm-yyyy',
-                        value: _selectedDate != null ? _formatDate(_selectedDate!) : null,
+                        value: _selectedDate != null
+                            ? _formatDate(_selectedDate!)
+                            : null,
                         onTap: _selectDate,
                       ),
                     ),
@@ -294,15 +297,17 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
                       child: _buildDateTimeField(
                         label: 'Time',
                         placeholder: '-- / --',
-                        value: _selectedTime != null ? _formatTime(_selectedTime!) : null,
+                        value: _selectedTime != null
+                            ? _formatTime(_selectedTime!)
+                            : null,
                         onTap: _selectTime,
                       ),
                     ),
                   ],
                 ),
-                
-                const SizedBox(height: 32),
-                
+
+                SizedBox(height: 32.h),
+
                 // Add Visitor button
                 _buildPrimaryButton(),
               ],
@@ -318,17 +323,17 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
     return Stack(
       children: [
         // Centered title
-        const Center(
+        Center(
           child: Text(
             'Add Expected Visitor',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 22.sp,
               fontWeight: FontWeight.w600,
               color: Color(0xFF1E293B),
             ),
           ),
         ),
-        
+
         // Close button (top-right)
         Positioned(
           right: 0,
@@ -337,16 +342,12 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () => Navigator.pop(context),
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(24.r),
               child: Container(
-                width: 48,
-                height: 48,
+                width: 48.w,
+                height: 48.h,
                 alignment: Alignment.center,
-                child: const Icon(
-                  Icons.close,
-                  size: 28,
-                  color: Color(0xFF64748B),
-                ),
+                child: Icon(Icons.close, size: 28.w, color: Color(0xFF64748B)),
               ),
             ),
           ),
@@ -367,56 +368,47 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
         // Label
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1E293B),
           ),
         ),
-        
-        const SizedBox(height: 12),
-        
+
+        SizedBox(height: 12.h),
+
         // Text field
         TextField(
           controller: controller,
-          style: const TextStyle(
-            fontSize: 15,
+          style: TextStyle(
+            fontSize: 15.sp,
             fontWeight: FontWeight.w400,
             color: Color(0xFF1E293B),
           ),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: const TextStyle(
-              fontSize: 15,
+            hintStyle: TextStyle(
+              fontSize: 15.sp,
               fontWeight: FontWeight.w400,
               color: kPlaceholder,
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 16.h,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kInputRadius),
-              borderSide: const BorderSide(
-                color: kInputBorder,
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: kInputBorder, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kInputRadius),
-              borderSide: const BorderSide(
-                color: kInputBorder,
-                width: 1,
-              ),
+              borderSide: const BorderSide(color: kInputBorder, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(kInputRadius),
-              borderSide: const BorderSide(
-                color: kPrimary,
-                width: 2,
-              ),
+              borderSide: const BorderSide(color: kPrimary, width: 2),
             ),
           ),
         ),
@@ -437,36 +429,30 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
         // Label
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF1E293B),
           ),
         ),
-        
-        const SizedBox(height: 12),
-        
+
+        SizedBox(height: 12.h),
+
         // Tappable field
         InkWell(
           onTap: onTap,
           borderRadius: BorderRadius.circular(kInputRadius),
           child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(kInputRadius),
-              border: Border.all(
-                color: kInputBorder,
-                width: 1,
-              ),
+              border: Border.all(color: kInputBorder, width: 1),
             ),
             child: Text(
               value ?? placeholder,
               style: TextStyle(
-                fontSize: 15,
+                fontSize: 15.sp,
                 fontWeight: FontWeight.w400,
                 color: value != null ? const Color(0xFF1E293B) : kPlaceholder,
               ),
@@ -481,7 +467,7 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
   Widget _buildPrimaryButton() {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 56.h,
       child: ElevatedButton(
         onPressed: (_isFormValid && !_isLoading) ? _handleAddVisitor : null,
         style: ElevatedButton.styleFrom(
@@ -492,21 +478,21 @@ class _AddExpectedVisitorModalState extends State<AddExpectedVisitorModal> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(kInputRadius),
           ),
-          padding: const EdgeInsets.symmetric(vertical: 18),
+          padding: EdgeInsets.symmetric(vertical: 18.h),
         ),
         child: _isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
+            ? SizedBox(
+                width: 24.w,
+                height: 24.h,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Text(
+            : Text(
                 'Add Visitor',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                 ),

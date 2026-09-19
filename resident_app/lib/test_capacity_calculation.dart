@@ -14,7 +14,7 @@ void main() async {
 }
 
 class CapacityTestApp extends StatelessWidget {
-  const CapacityTestApp({Key? key}) : super(key: key);
+  const CapacityTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class CapacityTestApp extends StatelessWidget {
 }
 
 class CapacityTestScreen extends StatefulWidget {
-  const CapacityTestScreen({Key? key}) : super(key: key);
+  const CapacityTestScreen({super.key});
 
   @override
   State<CapacityTestScreen> createState() => _CapacityTestScreenState();

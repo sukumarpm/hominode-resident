@@ -17,7 +17,7 @@ void main() async {
 }
 
 class DiagnoseBillingFlowApp extends StatelessWidget {
-  const DiagnoseBillingFlowApp({Key? key}) : super(key: key);
+  const DiagnoseBillingFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,7 @@ class DiagnoseBillingFlowApp extends StatelessWidget {
 }
 
 class DiagnosticScreen extends StatefulWidget {
-  const DiagnosticScreen({Key? key}) : super(key: key);
+  const DiagnosticScreen({super.key});
 
   @override
   State<DiagnosticScreen> createState() => _DiagnosticScreenState();

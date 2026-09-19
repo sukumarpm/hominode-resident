@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -60,13 +61,13 @@ class Receipt {
   // Create receipt from bill data
   static Receipt fromBill(Map<String, dynamic> bill) {
     final billItems = <BillItem>[];
-    
+
     // Check if chargeBreakdown exists (nested structure)
     Map<String, dynamic>? breakdown;
     if (bill.containsKey('chargeBreakdown')) {
       breakdown = bill['chargeBreakdown'] as Map<String, dynamic>?;
     }
-    
+
     // Add charges from breakdown or direct fields
     final charges = {
       'Electricity': breakdown?['Electricity'] ?? bill['Electricity'] ?? 0,
@@ -76,14 +77,11 @@ class Receipt {
       'Service': breakdown?['Service'] ?? bill['Service'] ?? 0,
       'Water': breakdown?['Water'] ?? bill['Water'] ?? 0,
     };
-    
+
     charges.forEach((key, value) {
       final amount = (value as num?)?.toDouble() ?? 0;
       if (amount > 0) {
-        billItems.add(BillItem(
-          label: key,
-          amount: amount,
-        ));
+        billItems.add(BillItem(label: key, amount: amount));
       }
     });
 
@@ -91,7 +89,8 @@ class Receipt {
       transactionId: bill['transactionId'] as String? ?? 'N/A',
       dateTime: (bill['paidAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       residentName: bill['residentName'] as String? ?? 'Resident',
-      flatNumber: bill['flatLabel'] as String? ?? bill['flatId'] as String? ?? 'N/A',
+      flatNumber:
+          bill['flatLabel'] as String? ?? bill['flatId'] as String? ?? 'N/A',
       paymentMethod: bill['paymentMethod'] as String? ?? 'N/A',
       totalAmount: (bill['amount'] as num?)?.toDouble() ?? 0,
       billPeriod: bill['month'] as String? ?? 'N/A',
@@ -111,7 +110,7 @@ class BillItem {
 class ReceiptScreen extends StatefulWidget {
   final Receipt receipt;
 
-  const ReceiptScreen({Key? key, required this.receipt}) : super(key: key);
+  const ReceiptScreen({super.key, required this.receipt});
 
   @override
   State<ReceiptScreen> createState() => _ReceiptScreenState();
@@ -145,30 +144,30 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF2563EB),
+        backgroundColor: const Color(0xFF0E4778),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Payment Receipt',
           style: TextStyle(
             color: Colors.white,
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           children: [
             // Receipt Card
             _buildReceiptCard(),
-            
-            const SizedBox(height: 24),
-            
+
+            SizedBox(height: 24.h),
+
             // Action Buttons
             _buildActionButtons(),
           ],
@@ -179,13 +178,13 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   Widget _buildReceiptCard() {
     final receipt = widget.receipt;
-    
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
@@ -201,34 +200,34 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: 48.w,
+                height: 48.h,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF2563EB),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFF0E4778),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.receipt_long,
                   color: Colors.white,
-                  size: 28,
+                  size: 28.w,
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     receipt.societyName,
-                    style: const TextStyle(
-                      fontSize: 18,
+                    style: TextStyle(
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF111111),
                     ),
                   ),
-                  const Text(
+                  Text(
                     'Payment Receipt',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: Color(0xFF7A7A7A),
                     ),
@@ -237,190 +236,195 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               ),
             ],
           ),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // Paid Status Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: const Color(0xFFE9FCEB),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.check_circle, color: Color(0xFF12B76A), size: 20),
-                SizedBox(width: 8),
+              children: [
+                Icon(Icons.check_circle, color: Color(0xFF12B76A), size: 20.w),
+                SizedBox(width: 8.w),
                 Text(
                   'PAID',
                   style: TextStyle(
                     color: Color(0xFF12B76A),
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
               ],
             ),
           ),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // Transaction Details
           _buildDetailRow('Transaction ID', receipt.transactionId),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildDetailRow('Date & Time', _formatDateTime(receipt.dateTime)),
-          const SizedBox(height: 12),
-          _buildDetailRow('Paid By', '${receipt.residentName}\n${receipt.flatNumber}'),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
+          _buildDetailRow(
+            'Paid By',
+            '${receipt.residentName}\n${receipt.flatNumber}',
+          ),
+          SizedBox(height: 12.h),
           _buildDetailRow('Payment Method', receipt.paymentMethod),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildDetailRow('Bill Period', receipt.billPeriod),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // Divider
           const Divider(color: Color(0xFFE6E6E6), thickness: 1),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // Bill Breakdown
-          const Text(
+          Text(
             'Bill Breakdown',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: Color(0xFF111111),
             ),
           ),
-          
-          const SizedBox(height: 16),
-          
-          ...receipt.billItems.map((item) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  item.label,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF7A7A7A),
+
+          SizedBox(height: 16.h),
+
+          ...receipt.billItems.map(
+            (item) => Padding(
+              padding: EdgeInsets.only(bottom: 12.h),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    item.label,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF7A7A7A),
+                    ),
                   ),
-                ),
-                Text(
-                  '₹${item.amount.toStringAsFixed(0)}',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF333333),
+                  Text(
+                    '₹${item.amount.toStringAsFixed(0)}',
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF333333),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          )).toList(),
-          
-          const SizedBox(height: 16),
-          
+          ),
+
+          SizedBox(height: 16.h),
+
           const Divider(color: Color(0xFFE6E6E6), thickness: 1),
-          
-          const SizedBox(height: 16),
-          
+
+          SizedBox(height: 16.h),
+
           // Total Amount
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Total Amount',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF111111),
                 ),
               ),
               Text(
                 '₹${receipt.totalAmount.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 24,
+                style: TextStyle(
+                  fontSize: 24.sp,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
             ],
           ),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // QR Code
           Center(
             child: Container(
-              width: 152,
-              height: 152,
-              padding: const EdgeInsets.all(16),
+              width: 152.w,
+              height: 152.h,
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(color: const Color(0xFFE6E6E6)),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.qr_code_2,
-                    size: 80,
-                    color: Color(0xFF2563EB),
+                    size: 80.w,
+                    color: Color(0xFF0E4778),
                   ),
                 ),
               ),
             ),
           ),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: 24.h),
+
           // Footer
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FA),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   receipt.societyName,
-                  style: const TextStyle(
-                    fontSize: 14,
+                  style: TextStyle(
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111111),
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Text(
                   receipt.societyAddress,
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF7A7A7A),
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Email: ${receipt.contactEmail}',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF7A7A7A),
                   ),
                 ),
                 Text(
                   'Phone: ${receipt.contactPhone}',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF7A7A7A),
                   ),
@@ -438,11 +442,11 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 120,
+          width: 120.w,
           child: Text(
             label,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w500,
               color: Color(0xFF7A7A7A),
             ),
@@ -451,8 +455,8 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         Expanded(
           child: Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: Color(0xFF111111),
             ),
@@ -468,39 +472,36 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         // Download Button
         SizedBox(
           width: double.infinity,
-          height: 56,
+          height: 56.h,
           child: ElevatedButton.icon(
             onPressed: _isGenerating ? null : _handleDownload,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               foregroundColor: Colors.white,
               elevation: 0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
             icon: _isGenerating
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.h,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),
                   )
-                : const Icon(Icons.download, size: 24),
+                : Icon(Icons.download, size: 24.w),
             label: Text(
               _isGenerating ? 'Generating...' : 'Download Receipt',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
             ),
           ),
         ),
-        
-        const SizedBox(height: 12),
-        
+
+        SizedBox(height: 12.h),
+
         // Share and Email Buttons
         Row(
           children: [
@@ -508,42 +509,42 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               child: OutlinedButton.icon(
                 onPressed: _isGenerating ? null : _handleShare,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: const Color(0xFF0E4778),
+                  side: const BorderSide(color: Color(0xFF0E4778)),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
-                icon: const Icon(Icons.share, size: 20),
-                label: const Text(
+                icon: Icon(Icons.share, size: 20.w),
+                label: Text(
                   'Share',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ),
-            
-            const SizedBox(width: 12),
-            
+
+            SizedBox(width: 12.w),
+
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _isGenerating ? null : _handleEmail,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFF2563EB),
-                  side: const BorderSide(color: Color(0xFF2563EB)),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  foregroundColor: const Color(0xFF0E4778),
+                  side: const BorderSide(color: Color(0xFF0E4778)),
+                  padding: EdgeInsets.symmetric(vertical: 16.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
-                icon: const Icon(Icons.email_outlined, size: 20),
-                label: const Text(
+                icon: Icon(Icons.email_outlined, size: 20.w),
+                label: Text(
                   'Email',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -557,11 +558,14 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   Future<void> _handleDownload() async {
     setState(() => _isGenerating = true);
-    
+
     try {
       final bytes = _pdfBytes ?? await generatePdf(widget.receipt);
-      await saveAndOpenPdf(bytes, 'receipt_${widget.receipt.transactionId}.pdf');
-      
+      await saveAndOpenPdf(
+        bytes,
+        'receipt_${widget.receipt.transactionId}.pdf',
+      );
+
       if (mounted) {
         _showSuccessDialog();
       }
@@ -578,7 +582,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   Future<void> _handleShare() async {
     setState(() => _isGenerating = true);
-    
+
     try {
       final bytes = _pdfBytes ?? await generatePdf(widget.receipt);
       await sharePdf(bytes, 'receipt_${widget.receipt.transactionId}.pdf');
@@ -598,7 +602,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Email functionality coming soon'),
-        backgroundColor: Color(0xFF2563EB),
+        backgroundColor: Color(0xFF0E4778),
       ),
     );
   }
@@ -607,7 +611,9 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
         title: const Text('Receipt Downloaded'),
         content: const Text('Your receipt has been saved successfully.'),
         actions: [
@@ -621,7 +627,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
               _handleShare();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
             ),
             child: const Text('Share'),
           ),
@@ -632,10 +638,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
 
   void _showErrorSnackbar(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -665,19 +668,22 @@ Future<Uint8List> generatePdf(Receipt receipt) async {
                     pw.Text(
                       receipt.societyName,
                       style: pw.TextStyle(
-                        fontSize: 24,
+                        fontSize: 24.sp,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
                     pw.SizedBox(height: 4),
                     pw.Text(
                       'Payment Receipt',
-                      style: const pw.TextStyle(fontSize: 14),
+                      style: pw.TextStyle(fontSize: 14.sp),
                     ),
                   ],
                 ),
                 pw.Container(
-                  padding: const pw.EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: pw.EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
+                  ),
                   decoration: pw.BoxDecoration(
                     color: PdfColors.green100,
                     borderRadius: pw.BorderRadius.circular(8),
@@ -692,31 +698,43 @@ Future<Uint8List> generatePdf(Receipt receipt) async {
                 ),
               ],
             ),
-            
+
             pw.SizedBox(height: 32),
-            
+
             // Transaction Details
             pw.Text(
               'Transaction Details',
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(
+                fontSize: 16.sp,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
             pw.SizedBox(height: 16),
-            
+
             _buildPdfDetailRow('Transaction ID', receipt.transactionId),
-            _buildPdfDetailRow('Date & Time', '${receipt.dateTime.day}/${receipt.dateTime.month}/${receipt.dateTime.year} ${receipt.dateTime.hour}:${receipt.dateTime.minute.toString().padLeft(2, '0')}'),
-            _buildPdfDetailRow('Paid By', '${receipt.residentName} (${receipt.flatNumber})'),
+            _buildPdfDetailRow(
+              'Date & Time',
+              '${receipt.dateTime.day}/${receipt.dateTime.month}/${receipt.dateTime.year} ${receipt.dateTime.hour}:${receipt.dateTime.minute.toString().padLeft(2, '0')}',
+            ),
+            _buildPdfDetailRow(
+              'Paid By',
+              '${receipt.residentName} (${receipt.flatNumber})',
+            ),
             _buildPdfDetailRow('Payment Method', receipt.paymentMethod),
             _buildPdfDetailRow('Bill Period', receipt.billPeriod),
-            
+
             pw.SizedBox(height: 32),
-            
+
             // Bill Breakdown
             pw.Text(
               'Bill Breakdown',
-              style: pw.TextStyle(fontSize: 16, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(
+                fontSize: 16.sp,
+                fontWeight: pw.FontWeight.bold,
+              ),
             ),
             pw.SizedBox(height: 16),
-            
+
             pw.Table(
               border: pw.TableBorder.all(color: PdfColors.grey300),
               children: [
@@ -724,60 +742,83 @@ Future<Uint8List> generatePdf(Receipt receipt) async {
                   decoration: const pw.BoxDecoration(color: PdfColors.grey100),
                   children: [
                     pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text('Description', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      padding: pw.EdgeInsets.all(8.w),
+                      child: pw.Text(
+                        'Description',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
                     ),
                     pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text('Amount', style: pw.TextStyle(fontWeight: pw.FontWeight.bold), textAlign: pw.TextAlign.right),
+                      padding: pw.EdgeInsets.all(8.w),
+                      child: pw.Text(
+                        'Amount',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        textAlign: pw.TextAlign.right,
+                      ),
                     ),
                   ],
                 ),
-                ...receipt.billItems.map((item) => pw.TableRow(
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text(item.label),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text('₹${item.amount.toStringAsFixed(0)}', textAlign: pw.TextAlign.right),
-                    ),
-                  ],
-                )).toList(),
+                ...receipt.billItems.map(
+                  (item) => pw.TableRow(
+                    children: [
+                      pw.Padding(
+                        padding: pw.EdgeInsets.all(8.w),
+                        child: pw.Text(item.label),
+                      ),
+                      pw.Padding(
+                        padding: pw.EdgeInsets.all(8.w),
+                        child: pw.Text(
+                          '₹${item.amount.toStringAsFixed(0)}',
+                          textAlign: pw.TextAlign.right,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 pw.TableRow(
                   decoration: const pw.BoxDecoration(color: PdfColors.blue50),
                   children: [
                     pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text('Total Amount', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      padding: pw.EdgeInsets.all(8.w),
+                      child: pw.Text(
+                        'Total Amount',
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
                     ),
                     pw.Padding(
-                      padding: const pw.EdgeInsets.all(8),
-                      child: pw.Text('₹${receipt.totalAmount.toStringAsFixed(0)}', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16), textAlign: pw.TextAlign.right),
+                      padding: pw.EdgeInsets.all(8.w),
+                      child: pw.Text(
+                        '₹${receipt.totalAmount.toStringAsFixed(0)}',
+                        style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold,
+                          fontSize: 16.sp,
+                        ),
+                        textAlign: pw.TextAlign.right,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
-            
+
             pw.SizedBox(height: 32),
-            
+
             // QR Code
             pw.Center(
               child: pw.BarcodeWidget(
                 barcode: pw.Barcode.qrCode(),
-                data: 'TXN:${receipt.transactionId}|AMT:${receipt.totalAmount}|DATE:${receipt.dateTime.toIso8601String()}',
+                data:
+                    'TXN:${receipt.transactionId}|AMT:${receipt.totalAmount}|DATE:${receipt.dateTime.toIso8601String()}',
                 width: 120,
                 height: 120,
               ),
             ),
-            
+
             pw.Spacer(),
-            
+
             // Footer
             pw.Container(
-              padding: const pw.EdgeInsets.all(16),
+              padding: pw.EdgeInsets.all(16.w),
               decoration: pw.BoxDecoration(
                 color: PdfColors.grey100,
                 borderRadius: pw.BorderRadius.circular(8),
@@ -785,12 +826,24 @@ Future<Uint8List> generatePdf(Receipt receipt) async {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text(receipt.societyName, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                  pw.Text(
+                    receipt.societyName,
+                    style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                  ),
                   pw.SizedBox(height: 4),
-                  pw.Text(receipt.societyAddress, style: const pw.TextStyle(fontSize: 10)),
+                  pw.Text(
+                    receipt.societyAddress,
+                    style: pw.TextStyle(fontSize: 10.sp),
+                  ),
                   pw.SizedBox(height: 4),
-                  pw.Text('Email: ${receipt.contactEmail}', style: const pw.TextStyle(fontSize: 10)),
-                  pw.Text('Phone: ${receipt.contactPhone}', style: const pw.TextStyle(fontSize: 10)),
+                  pw.Text(
+                    'Email: ${receipt.contactEmail}',
+                    style: pw.TextStyle(fontSize: 10.sp),
+                  ),
+                  pw.Text(
+                    'Phone: ${receipt.contactPhone}',
+                    style: pw.TextStyle(fontSize: 10.sp),
+                  ),
                 ],
               ),
             ),
@@ -805,15 +858,21 @@ Future<Uint8List> generatePdf(Receipt receipt) async {
 
 pw.Widget _buildPdfDetailRow(String label, String value) {
   return pw.Padding(
-    padding: const pw.EdgeInsets.only(bottom: 8),
+    padding: pw.EdgeInsets.only(bottom: 8.h),
     child: pw.Row(
       children: [
         pw.SizedBox(
           width: 150,
-          child: pw.Text(label, style: const pw.TextStyle(fontSize: 12)),
+          child: pw.Text(label, style: pw.TextStyle(fontSize: 12.sp)),
         ),
         pw.Expanded(
-          child: pw.Text(value, style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
+          child: pw.Text(
+            value,
+            style: pw.TextStyle(
+              fontSize: 12.sp,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ),
         ),
       ],
     ),
@@ -825,11 +884,9 @@ Future<void> saveAndOpenPdf(Uint8List pdfBytes, String filename) async {
   final directory = await getApplicationDocumentsDirectory();
   final file = File('${directory.path}/$filename');
   await file.writeAsBytes(pdfBytes);
-  
+
   // Open PDF using printing package
-  await Printing.layoutPdf(
-    onLayout: (format) async => pdfBytes,
-  );
+  await Printing.layoutPdf(onLayout: (format) async => pdfBytes);
 }
 
 // Share PDF
@@ -837,7 +894,7 @@ Future<void> sharePdf(Uint8List pdfBytes, String filename) async {
   final directory = await getTemporaryDirectory();
   final file = File('${directory.path}/$filename');
   await file.writeAsBytes(pdfBytes);
-  
+
   await Share.shareXFiles(
     [XFile(file.path)],
     subject: 'Payment Receipt',

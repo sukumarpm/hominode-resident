@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class CreateTestBillingData extends StatefulWidget {
-  const CreateTestBillingData({Key? key}) : super(key: key);
+  const CreateTestBillingData({super.key});
 
   @override
   State<CreateTestBillingData> createState() => _CreateTestBillingDataState();
@@ -15,7 +15,7 @@ class CreateTestBillingData extends StatefulWidget {
 class _CreateTestBillingDataState extends State<CreateTestBillingData> {
   final _firestore = FirebaseFirestore.instance;
   final _auth = FirebaseAuth.instance;
-  
+
   String _log = '';
   bool _isLoading = false;
   String? _flatId;
@@ -147,7 +147,7 @@ class _CreateTestBillingDataState extends State<CreateTestBillingData> {
       _addLog('   Pending Bills: 1');
       _addLog('   Paid Bills: 2');
       _addLog('\n✅ Go back to Maintenance & Billing screen to see the data!');
-      
+
       // Show success dialog
       if (mounted) {
         showDialog(
@@ -170,7 +170,6 @@ class _CreateTestBillingDataState extends State<CreateTestBillingData> {
           ),
         );
       }
-      
     } catch (e, stackTrace) {
       _addLog('\n❌ ERROR: $e');
       _addLog('Stack trace: $stackTrace');
@@ -195,10 +194,7 @@ class _CreateTestBillingDataState extends State<CreateTestBillingData> {
               children: [
                 const Text(
                   'This will create test billing data in Firestore:',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 const Text('• 1 Flat (if not exists)'),

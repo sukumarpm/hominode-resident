@@ -2,7 +2,7 @@
 // Chat conversation screen with Firestore integration - Real data only
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/chat_model.dart';
 import '../services/chat_firestore_service.dart';
 import '../constants/app_colors.dart';
@@ -15,12 +15,12 @@ class ChatConversationScreen extends StatefulWidget {
   final bool isGroup;
 
   const ChatConversationScreen({
-    Key? key,
+    super.key,
     required this.chatId,
     required this.chatTitle,
     this.chatSubtitle,
     this.isGroup = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ChatConversationScreen> createState() => _ChatConversationScreenState();
@@ -46,14 +46,14 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     try {
       // Get current user ID and wait for it to complete
       final userId = await _chatService.getCurrentUserIdPublic();
-      
+
       if (userId != null) {
         setState(() {
           _currentUserId = userId;
           _userIdLoaded = true;
         });
         print('✅ ChatScreen: User ID loaded: $userId');
-        
+
         // Now mark chat as read after user ID is available
         await _chatService.markChatAsRead(widget.chatId);
       } else {
@@ -100,10 +100,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
     });
 
     try {
-      await _chatService.sendMessage(
-        chatId: widget.chatId,
-        text: text,
-      );
+      await _chatService.sendMessage(chatId: widget.chatId, text: text);
 
       _scrollToBottom();
     } catch (e) {
@@ -139,7 +136,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -154,48 +151,48 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         children: [
           IconButton(
             onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, size: 24),
+            icon: Icon(Icons.arrow_back, size: 24.w),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Container(
-            width: 44,
-            height: 44,
+            width: 44.w,
+            height: 44.h,
             decoration: BoxDecoration(
               color: AppColors.primary,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
             child: Center(
               child: Text(
                 widget.chatTitle[0].toUpperCase(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 18.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.chatTitle,
-                  style: const TextStyle(
-                    fontSize: 16,
+                  style: TextStyle(
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111111),
                   ),
                 ),
                 if (widget.chatSubtitle != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     widget.chatSubtitle!,
-                    style: const TextStyle(
-                      fontSize: 13,
+                    style: TextStyle(
+                      fontSize: 13.sp,
                       color: Color(0xFF6B7280),
                       fontWeight: FontWeight.w400,
                     ),
@@ -215,7 +212,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                   ),
                 );
               },
-              icon: const Icon(Icons.call_outlined, size: 22),
+              icon: Icon(Icons.call_outlined, size: 22.w),
               color: const Color(0xFF6B7280),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
@@ -237,18 +234,11 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.red.shade300,
-            ),
-            const SizedBox(height: 16),
-            const Text(
+            Icon(Icons.error_outline, size: 64.w, color: Colors.red.shade300),
+            SizedBox(height: 16.h),
+            Text(
               'Failed to load user information',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Color(0xFF6B7280)),
             ),
           ],
         ),
@@ -271,25 +261,22 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               children: [
                 Icon(
                   Icons.error_outline,
-                  size: 64,
+                  size: 64.w,
                   color: Colors.red.shade300,
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: 16.h),
+                Text(
                   'Error loading messages',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: Color(0xFF111111),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8.h),
+                Text(
                   'Please try again',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF6B7280),
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Color(0xFF6B7280)),
                 ),
               ],
             ),
@@ -307,25 +294,22 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               children: [
                 Icon(
                   Icons.chat_bubble_outline,
-                  size: 64,
+                  size: 64.w,
                   color: Colors.grey.shade300,
                 ),
-                const SizedBox(height: 16),
-                const Text(
+                SizedBox(height: 16.h),
+                Text(
                   'No messages yet',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     color: Color(0xFF111111),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 8),
-                const Text(
+                SizedBox(height: 8.h),
+                Text(
                   'Start the conversation',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF6B7280),
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Color(0xFF6B7280)),
                 ),
               ],
             ),
@@ -340,7 +324,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
         // Message list
         return ListView.builder(
           controller: _scrollController,
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           itemCount: messages.length,
           itemBuilder: (context, index) {
             return _MessageBubble(
@@ -355,9 +339,9 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
 
   Widget _buildMessageComposer() {
     final isMessageEmpty = _messageController.text.trim().isEmpty;
-    
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -373,10 +357,10 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                   border: Border.all(
                     color: _messageFocusNode.hasFocus
-                        ? const Color(0xFF2563EB)
+                        ? const Color(0xFF0E4778)
                         : const Color(0xFFE5E7EB),
                     width: _messageFocusNode.hasFocus ? 2 : 1,
                   ),
@@ -390,23 +374,20 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                     hintText: 'Type your message...',
                     hintStyle: TextStyle(
                       color: const Color(0xFF9CA3AF),
-                      fontSize: 14,
+                      fontSize: 14.sp,
                     ),
                     border: InputBorder.none,
-                    contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 12,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 12.h,
                     ),
                   ),
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF111111),
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Color(0xFF111111)),
                   onChanged: (value) => setState(() {}),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             // Send Button
             GestureDetector(
               onTap: isMessageEmpty ? null : _sendMessage,
@@ -417,13 +398,13 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 decoration: BoxDecoration(
                   color: isMessageEmpty
                       ? const Color(0xFFE5E7EB)
-                      : const Color(0xFF2563EB),
+                      : const Color(0xFF0E4778),
                   shape: BoxShape.circle,
                   boxShadow: isMessageEmpty
                       ? []
                       : [
                           BoxShadow(
-                            color: const Color(0xFF2563EB).withOpacity(0.3),
+                            color: const Color(0xFF0E4778).withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -431,9 +412,9 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                 ),
                 child: Center(
                   child: _isSending
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.h,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -446,7 +427,7 @@ class _ChatConversationScreenState extends State<ChatConversationScreen> {
                           color: isMessageEmpty
                               ? const Color(0xFF9CA3AF)
                               : Colors.white,
-                          size: 20,
+                          size: 20.w,
                         ),
                 ),
               ),
@@ -465,38 +446,32 @@ class _MessageBubble extends StatelessWidget {
   final MessageModel message;
   final String? currentUserId;
 
-  const _MessageBubble({
-    required this.message,
-    this.currentUserId,
-  });
+  const _MessageBubble({required this.message, this.currentUserId});
 
   @override
   Widget build(BuildContext context) {
     final maxWidth = MediaQuery.of(context).size.width * 0.72;
-    
+
     // Determine if message is from current user
     final isMe = currentUserId != null && message.senderId == currentUserId;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 12.h),
       child: Row(
-        mainAxisAlignment:
-            isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (isMe) const Spacer(),
           Container(
             constraints: BoxConstraints(maxWidth: maxWidth),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
             decoration: BoxDecoration(
-              color: isMe
-                  ? const Color(0xFF2563EB)
-                  : Colors.white,
-              border: isMe
-                  ? null
-                  : Border.all(color: const Color(0xFFE5E7EB)),
+              color: isMe ? const Color(0xFF0E4778) : Colors.white,
+              border: isMe ? null : Border.all(color: const Color(0xFFE5E7EB)),
               borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(16),
-                topRight: const Radius.circular(16),
+                topLeft: Radius.circular(16.r),
+                topRight: Radius.circular(16.r),
                 bottomLeft: Radius.circular(isMe ? 16 : 4),
                 bottomRight: Radius.circular(isMe ? 4 : 16),
               ),
@@ -515,37 +490,37 @@ class _MessageBubble extends StatelessWidget {
                 if (!isMe) ...[
                   Text(
                     message.senderName,
-                    style: const TextStyle(
-                      fontSize: 12,
+                    style: TextStyle(
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                 ],
                 Text(
                   message.text,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: isMe ? Colors.white : const Color(0xFF111111),
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 4.h),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       _formatTime(message.timestamp),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         color: isMe
                             ? Colors.white.withOpacity(0.8)
                             : const Color(0xFF9CA3AF),
                       ),
                     ),
                     if (isMe) ...[
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       _statusIcon(message.status),
                     ],
                   ],
@@ -560,7 +535,9 @@ class _MessageBubble extends StatelessWidget {
   }
 
   String _formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+    final hour = time.hour > 12
+        ? time.hour - 12
+        : (time.hour == 0 ? 12 : time.hour);
     final minute = time.minute.toString().padLeft(2, '0');
     final period = time.hour >= 12 ? 'PM' : 'AM';
     return '$hour:$minute $period';
@@ -569,22 +546,22 @@ class _MessageBubble extends StatelessWidget {
   Widget _statusIcon(MessageStatus status) {
     switch (status) {
       case MessageStatus.sending:
-        return const SizedBox(
-          width: 12,
-          height: 12,
+        return SizedBox(
+          width: 12.w,
+          height: 12.h,
           child: CircularProgressIndicator(
             strokeWidth: 1.5,
             color: Colors.white70,
           ),
         );
       case MessageStatus.sent:
-        return const Icon(Icons.check, size: 13, color: Colors.white70);
+        return Icon(Icons.check, size: 13.w, color: Colors.white70);
       case MessageStatus.delivered:
-        return const Icon(Icons.done_all, size: 13, color: Colors.white70);
+        return Icon(Icons.done_all, size: 13.w, color: Colors.white70);
       case MessageStatus.read:
-        return const Icon(Icons.done_all, size: 13, color: Colors.white);
+        return Icon(Icons.done_all, size: 13.w, color: Colors.white);
       case MessageStatus.failed:
-        return const Icon(Icons.error_outline, size: 13, color: Colors.white70);
+        return Icon(Icons.error_outline, size: 13.w, color: Colors.white70);
     }
   }
 }

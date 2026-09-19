@@ -13,10 +13,10 @@ class EventCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const EventCard({
-    Key? key,
+    super.key,
     required this.event,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,10 +113,10 @@ class PastEventCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const PastEventCard({
-    Key? key,
+    super.key,
     required this.event,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

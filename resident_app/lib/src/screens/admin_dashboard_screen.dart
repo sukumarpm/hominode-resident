@@ -3,15 +3,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/admin_statistics_service.dart';
-import '../components/standard_screen.dart';
 import '../widgets/skeleton_loader.dart';
 import 'building_management_screen.dart';
 import 'flat_management_screen.dart';
 
 // Design Constants
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 const kBackground = Color(0xFFF8F9FA);
 const kCardWhite = Color(0xFFFFFFFF);
 const kBorderColor = Color(0xFFE6E6E6);
@@ -19,7 +17,7 @@ const kTextPrimary = Color(0xFF111827);
 const kTextSecondary = Color(0xFF6B7280);
 
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({Key? key}) : super(key: key);
+  const AdminDashboardScreen({super.key});
 
   @override
   State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
@@ -45,7 +43,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               color: Colors.black,
               height: MediaQuery.of(context).padding.top,
             ),
-            
+
             // Main content
             Expanded(
               child: Container(
@@ -56,17 +54,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     children: [
                       // Header
                       _buildHeader(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Statistics Cards
                       _buildStatisticsSection(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Quick Actions
                       _buildQuickActionsSection(),
-                      
+
                       const SizedBox(height: 100),
                     ],
                   ),
@@ -87,7 +85,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -154,7 +152,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Row 1: Residents and Flats
           Row(
             children: [
@@ -197,9 +195,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Row 2: Pending Visitors and Complaints
           Row(
             children: [
@@ -242,9 +240,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Monthly Collection (full width)
           StreamBuilder<double>(
             stream: _adminService.streamMonthlyCollection(),
@@ -402,7 +400,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          
+
           // Row 1
           Row(
             children: [
@@ -434,9 +432,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Row 2
           Row(
             children: [
@@ -468,9 +466,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ],
           ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Row 3
           Row(
             children: [
@@ -544,16 +542,18 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   /// Show approve visitor dialog
   void _showApproveVisitorDialog() async {
     final visitors = await _adminService.getPendingVisitors();
-    
+
     if (!mounted) return;
-    
+
     if (visitors.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text('No pending visitors'),
           backgroundColor: const Color(0xFF6B7280),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
         ),
       );
       return;
@@ -571,14 +571,14 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             itemBuilder: (context, index) {
               final visitor = visitors[index];
               return ListTile(
-                leading: const CircleAvatar(
-                  child: Icon(Icons.person),
-                ),
+                leading: const CircleAvatar(child: Icon(Icons.person)),
                 title: Text(visitor['name'] ?? 'Unknown'),
                 subtitle: Text(visitor['purpose'] ?? 'No purpose'),
                 trailing: ElevatedButton(
                   onPressed: () async {
-                    final success = await _adminService.approveVisitor(visitor['id']);
+                    final success = await _adminService.approveVisitor(
+                      visitor['id'],
+                    );
                     if (success && mounted) {
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -586,7 +586,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           content: const Text('Visitor approved'),
                           backgroundColor: const Color(0xFF10B981),
                           behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                       );
                     }

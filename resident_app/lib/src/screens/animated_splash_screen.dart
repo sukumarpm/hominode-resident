@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Configuration for splash screen animations and timing
 class SplashConfig {
@@ -38,8 +37,8 @@ class SplashConfig {
   static const double transitionScale = 0.98;
 
   // Colors
-  static const Color gradientStart = Color(0xFF2F80ED);
-  static const Color gradientEnd = Color(0xFF2563EB);
+  static const Color gradientStart = Color(0xFF3AA6C8);
+  static const Color gradientEnd = Color(0xFF0E4778);
   static const Color textWhite = Color(0xFFFFFFFF);
   static const Color shadowColor = Color(0x59000000); // rgba(0,0,0,0.35)
 
@@ -62,11 +61,11 @@ class AnimatedSplashScreen extends StatefulWidget {
   final bool simulateSlowDevice;
 
   const AnimatedSplashScreen({
-    Key? key,
+    super.key,
     this.onAnimationComplete,
     this.reduceMotion = false,
     this.simulateSlowDevice = false,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedSplashScreen> createState() => _AnimatedSplashScreenState();
@@ -117,7 +116,8 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
   void _checkReducedMotion() {
     // Check platform accessibility settings
     final platformDispatcher = SchedulerBinding.instance.platformDispatcher;
-    _shouldReduceMotion = widget.reduceMotion ||
+    _shouldReduceMotion =
+        widget.reduceMotion ||
         widget.simulateSlowDevice ||
         platformDispatcher.accessibilityFeatures.reduceMotion;
   }
@@ -152,12 +152,24 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
     );
 
     _logoScale = Tween<double>(begin: 1.0, end: 1.0).animate(_masterController);
-    _logoRotation = Tween<double>(begin: 0.0, end: 0.0).animate(_masterController);
+    _logoRotation = Tween<double>(
+      begin: 0.0,
+      end: 0.0,
+    ).animate(_masterController);
     _logoY = Tween<double>(begin: 0.0, end: 0.0).animate(_masterController);
 
-    _shadowOpacity = Tween<double>(begin: 0.0, end: 0.0).animate(_masterController);
-    _shadowBlur = Tween<double>(begin: 0.0, end: 0.0).animate(_masterController);
-    _reflectionOpacity = Tween<double>(begin: 0.0, end: 0.0).animate(_masterController);
+    _shadowOpacity = Tween<double>(
+      begin: 0.0,
+      end: 0.0,
+    ).animate(_masterController);
+    _shadowBlur = Tween<double>(
+      begin: 0.0,
+      end: 0.0,
+    ).animate(_masterController);
+    _reflectionOpacity = Tween<double>(
+      begin: 0.0,
+      end: 0.0,
+    ).animate(_masterController);
 
     _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
@@ -173,54 +185,68 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         curve: const Interval(0.85, 1.0, curve: Curves.easeIn),
       ),
     );
-    _transitionScale = Tween<double>(begin: 1.0, end: 1.0).animate(_masterController);
+    _transitionScale = Tween<double>(
+      begin: 1.0,
+      end: 1.0,
+    ).animate(_masterController);
 
-    _squashScaleX = Tween<double>(begin: 1.0, end: 1.0).animate(_squashController);
-    _squashScaleY = Tween<double>(begin: 1.0, end: 1.0).animate(_squashController);
+    _squashScaleX = Tween<double>(
+      begin: 1.0,
+      end: 1.0,
+    ).animate(_squashController);
+    _squashScaleY = Tween<double>(
+      begin: 1.0,
+      end: 1.0,
+    ).animate(_squashController);
   }
 
   void _initializeFullAnimations() {
     // 1. LOGO ENTRY (0.0s → 0.6s)
-    _logoScale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(
-          begin: SplashConfig.logoInitialScale,
-          end: SplashConfig.logoOvershoot,
-        ).chain(CurveTween(curve: SplashConfig.logoEntryCurve)),
-        weight: 1.0,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: Interval(0.0, SplashConfig.logoEntryDuration / SplashConfig.totalDuration),
-      ),
-    );
+    _logoScale =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(
+              begin: SplashConfig.logoInitialScale,
+              end: SplashConfig.logoOvershoot,
+            ).chain(CurveTween(curve: SplashConfig.logoEntryCurve)),
+            weight: 1.0,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: Interval(
+              0.0,
+              SplashConfig.logoEntryDuration / SplashConfig.totalDuration,
+            ),
+          ),
+        );
 
     _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: Interval(0.0, SplashConfig.logoEntryDuration / SplashConfig.totalDuration),
-      ),
-    );
-
-    _logoRotation = Tween<double>(
-      begin: SplashConfig.logoInitialRotation,
-      end: 0.0,
-    ).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: Interval(
           0.0,
           SplashConfig.logoEntryDuration / SplashConfig.totalDuration,
-          curve: SplashConfig.logoEntryCurve,
         ),
       ),
     );
 
-    _logoY = Tween<double>(
-      begin: SplashConfig.logoInitialY,
-      end: 0.0,
-    ).animate(
+    _logoRotation =
+        Tween<double>(
+          begin: SplashConfig.logoInitialRotation,
+          end: 0.0,
+        ).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: Interval(
+              0.0,
+              SplashConfig.logoEntryDuration / SplashConfig.totalDuration,
+              curve: SplashConfig.logoEntryCurve,
+            ),
+          ),
+        );
+
+    _logoY = Tween<double>(begin: SplashConfig.logoInitialY, end: 0.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: Interval(
@@ -237,7 +263,8 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         parent: _masterController,
         curve: Interval(
           SplashConfig.shadowDelay / SplashConfig.totalDuration,
-          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) / SplashConfig.totalDuration,
+          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) /
+              SplashConfig.totalDuration,
           curve: SplashConfig.shadowCurve,
         ),
       ),
@@ -248,7 +275,8 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         parent: _masterController,
         curve: Interval(
           SplashConfig.shadowDelay / SplashConfig.totalDuration,
-          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) / SplashConfig.totalDuration,
+          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) /
+              SplashConfig.totalDuration,
           curve: SplashConfig.shadowCurve,
         ),
       ),
@@ -259,7 +287,8 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         parent: _masterController,
         curve: Interval(
           SplashConfig.shadowDelay / SplashConfig.totalDuration,
-          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) / SplashConfig.totalDuration,
+          (SplashConfig.shadowDelay + SplashConfig.shadowDuration) /
+              SplashConfig.totalDuration,
           curve: SplashConfig.shadowCurve,
         ),
       ),
@@ -294,25 +323,25 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         parent: _masterController,
         curve: Interval(
           SplashConfig.taglineDelay / SplashConfig.totalDuration,
-          (SplashConfig.taglineDelay + SplashConfig.taglineDuration) / SplashConfig.totalDuration,
+          (SplashConfig.taglineDelay + SplashConfig.taglineDuration) /
+              SplashConfig.totalDuration,
           curve: SplashConfig.taglineCurve,
         ),
       ),
     );
 
-    _taglineY = Tween<double>(
-      begin: SplashConfig.taglineInitialY,
-      end: 0.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: Interval(
-          SplashConfig.taglineDelay / SplashConfig.totalDuration,
-          (SplashConfig.taglineDelay + SplashConfig.taglineDuration) / SplashConfig.totalDuration,
-          curve: SplashConfig.taglineCurve,
-        ),
-      ),
-    );
+    _taglineY = Tween<double>(begin: SplashConfig.taglineInitialY, end: 0.0)
+        .animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: Interval(
+              SplashConfig.taglineDelay / SplashConfig.totalDuration,
+              (SplashConfig.taglineDelay + SplashConfig.taglineDuration) /
+                  SplashConfig.totalDuration,
+              curve: SplashConfig.taglineCurve,
+            ),
+          ),
+        );
 
     // 5. TRANSITION (1.9s → 2.2s)
     _transitionOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
@@ -326,19 +355,17 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
       ),
     );
 
-    _transitionScale = Tween<double>(
-      begin: 1.0,
-      end: SplashConfig.transitionScale,
-    ).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: Interval(
-          SplashConfig.transitionDelay / SplashConfig.totalDuration,
-          1.0,
-          curve: SplashConfig.transitionCurve,
-        ),
-      ),
-    );
+    _transitionScale =
+        Tween<double>(begin: 1.0, end: SplashConfig.transitionScale).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: Interval(
+              SplashConfig.transitionDelay / SplashConfig.totalDuration,
+              1.0,
+              curve: SplashConfig.transitionCurve,
+            ),
+          ),
+        );
 
     // 6. PARTICLES (optional, 0.6s → 1.6s)
     if (SplashConfig.enableParticles) {
@@ -355,11 +382,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
         Tween<double>(begin: 0.0, end: -80.0 - (i * 20)).animate(
           CurvedAnimation(
             parent: _masterController,
-            curve: Interval(
-              delay,
-              delay + duration,
-              curve: Curves.easeOut,
-            ),
+            curve: Interval(delay, delay + duration, curve: Curves.easeOut),
           ),
         ),
       );
@@ -468,7 +491,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
                             child: Transform.translate(
                               offset: Offset(0, _taglineY.value),
                               child: const Text(
-                                'Lyvo',
+                                'Hominode',
                                 style: TextStyle(
                                   fontSize: SplashConfig.appNameSize,
                                   fontWeight: SplashConfig.appNameWeight,
@@ -483,7 +506,9 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
 
                           // Tagline
                           Opacity(
-                            opacity: _taglineOpacity.value * SplashConfig.taglineOpacity,
+                            opacity:
+                                _taglineOpacity.value *
+                                SplashConfig.taglineOpacity,
                             child: Transform.translate(
                               offset: Offset(0, _taglineY.value),
                               child: const Text(
@@ -646,10 +671,7 @@ class _AnimatedSplashScreenState extends State<AnimatedSplashScreen>
   }
 }
 
-
-
-
-/// Fallback logo painter matching Lyvo design
+/// Fallback logo painter matching Hominode design
 class _LyvoLogoFallbackPainter extends CustomPainter {
   final double opacity;
 
@@ -662,7 +684,7 @@ class _LyvoLogoFallbackPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     final shadowPaint = Paint()
-      ..color = const Color(0xFF1E3A8A).withValues(alpha: opacity * 0.8)
+      ..color = const Color(0xFF061C4C).withValues(alpha: opacity * 0.8)
       ..style = PaintingStyle.fill;
 
     // Draw two stylized slanted rectangles matching your logo

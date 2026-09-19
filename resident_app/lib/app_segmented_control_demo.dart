@@ -5,7 +5,7 @@ import 'src/components/app_segmented_control.dart';
 /// Demo screen showcasing the AppSegmentedControl component
 /// with various use cases and configurations
 class AppSegmentedControlDemo extends StatefulWidget {
-  const AppSegmentedControlDemo({Key? key}) : super(key: key);
+  const AppSegmentedControlDemo({super.key});
 
   @override
   State<AppSegmentedControlDemo> createState() =>

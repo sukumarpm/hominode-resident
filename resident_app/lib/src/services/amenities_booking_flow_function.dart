@@ -460,6 +460,14 @@ class AmenitiesBookingFlowFunction {
   }
 }
 
+class FlowAmenityImage {
+  final String url;
+  final String? storagePath;
+  final String? name;
+
+  const FlowAmenityImage({required this.url, this.storagePath, this.name});
+}
+
 /// Amenity Model for flow function
 class AmenityModel {
   final String id;
@@ -473,6 +481,7 @@ class AmenityModel {
   final String? organizationId;
   final String? iconName;
   final String? imageUrl;
+  final List<FlowAmenityImage> images;
   final String? description;
   final bool hasSubscriptionPackages;
   final Map<String, double>? subscriptionPackages;
@@ -492,6 +501,7 @@ class AmenityModel {
     this.organizationId,
     this.iconName,
     this.imageUrl,
+    this.images = const <FlowAmenityImage>[],
     this.description,
     this.hasSubscriptionPackages = false,
     this.subscriptionPackages,
@@ -499,6 +509,54 @@ class AmenityModel {
     this.maxCapacity = 1,
     this.bookingDurations = const ['1 hour'],
   });
+
+  static String? _text(Object? value) =>
+      value is String && value.trim().isNotEmpty ? value.trim() : null;
+
+  static String? _safeImageUrl(Object? value) {
+    final text = _text(value);
+    if (text == null) return null;
+    final uri = Uri.tryParse(text);
+    return uri != null &&
+            {'http', 'https'}.contains(uri.scheme) &&
+            uri.host.isNotEmpty &&
+            !RegExp(r'\s').hasMatch(text)
+        ? text
+        : null;
+  }
+
+  static List<FlowAmenityImage> _facilityImages(
+    Object? value, {
+    Object? legacyImageUrl,
+  }) {
+    final images = <FlowAmenityImage>[];
+
+    if (value is List) {
+      for (final item in value) {
+        if (item is! Map) continue;
+
+        final map = Map<Object?, Object?>.from(item);
+        final url = _safeImageUrl(map['url']);
+        if (url == null) continue;
+
+        images.add(
+          FlowAmenityImage(
+            url: url,
+            storagePath: _text(map['storagePath']),
+            name: _text(map['name']),
+          ),
+        );
+        if (images.length == 6) break;
+      }
+    }
+
+    if (images.isNotEmpty) return images;
+
+    final legacy = _safeImageUrl(legacyImageUrl);
+    return legacy == null
+        ? const <FlowAmenityImage>[]
+        : [FlowAmenityImage(url: legacy)];
+  }
 
   factory AmenityModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>?;
@@ -548,6 +606,9 @@ class AmenityModel {
       bookingDurations = ['1 hour'];
     }
 
+    final imageUrl = _safeImageUrl(data['imageUrl']);
+    final images = _facilityImages(data['images'], legacyImageUrl: imageUrl);
+
     return AmenityModel(
       id: doc.id,
       name: (data['name'] as String?)?.trim() ?? 'Unknown Amenity',
@@ -559,7 +620,8 @@ class AmenityModel {
       buildingId: data['buildingId']?.toString(),
       organizationId: data['organizationId']?.toString(),
       iconName: data['iconName']?.toString(),
-      imageUrl: data['imageUrl']?.toString(),
+      imageUrl: imageUrl,
+      images: images,
       description: data['description']?.toString(),
       hasSubscriptionPackages: data['hasSubscriptionPackages'] ?? false,
       subscriptionPackages: packages,
@@ -568,6 +630,11 @@ class AmenityModel {
       bookingDurations: bookingDurations,
     );
   }
+
+  String? get primaryImageUrl =>
+      images.isNotEmpty ? images.first.url : _safeImageUrl(imageUrl);
+
+  bool get hasMultipleImages => images.length > 1;
 
   String get priceDisplay {
     if (isFree) return 'Free';

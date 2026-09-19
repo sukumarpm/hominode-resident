@@ -10,10 +10,10 @@ class AdminAccessWrapper extends StatelessWidget {
   final String screenName;
 
   const AdminAccessWrapper({
-    Key? key,
+    super.key,
     required this.child,
     this.screenName = 'Admin Screen',
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

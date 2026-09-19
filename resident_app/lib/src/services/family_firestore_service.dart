@@ -14,16 +14,26 @@ class FamilyFirestoreService {
   /// Get current user ID
   String? get _userId => _auth.currentUser?.uid;
 
+  Future<String?> _communityId() async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final profile = await _firestore.collection('users').doc(uid).get();
+    final communityId = profile.data()?['communityId']?.toString().trim();
+    return communityId == null || communityId.isEmpty ? null : communityId;
+  }
+
   /// Add a new family member
   Future<String?> addFamilyMember(FamilyMember member) async {
     try {
-      if (_userId == null) {
+      final communityId = await _communityId();
+      if (_userId == null || communityId == null) {
         print('❌ No user logged in');
         return null;
       }
 
       final docRef = await _firestore.collection(collectionName).add({
         'userId': _userId,
+        'communityId': communityId,
         'name': member.name,
         'relation': member.relation,
         'age': member.age,
@@ -44,13 +54,15 @@ class FamilyFirestoreService {
   /// Get all family members for current user
   Future<List<FamilyMember>> getFamilyMembers() async {
     try {
-      if (_userId == null) {
+      final communityId = await _communityId();
+      if (_userId == null || communityId == null) {
         print('❌ No user logged in');
         return [];
       }
 
       final snapshot = await _firestore
           .collection(collectionName)
+          .where('communityId', isEqualTo: communityId)
           .where('userId', isEqualTo: _userId)
           .get();
 
@@ -75,28 +87,36 @@ class FamilyFirestoreService {
   }
 
   /// Stream family members (real-time updates)
-  Stream<List<FamilyMember>> streamFamilyMembers() {
+  Stream<List<FamilyMember>> streamFamilyMembers() async* {
+    final communityId = await _communityId();
     if (_userId == null) {
-      return Stream.value([]);
+      yield [];
+      return;
     }
 
-    return _firestore
+    if (communityId == null) {
+      yield [];
+      return;
+    }
+
+    yield* _firestore
         .collection(collectionName)
+        .where('communityId', isEqualTo: communityId)
         .where('userId', isEqualTo: _userId)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return FamilyMember(
-          id: doc.id,
-          name: data['name'] ?? '',
-          relation: data['relation'] ?? '',
-          age: data['age'] ?? 0,
-          photoUrl: data['photoUrl'],
-          isPrimary: data['isPrimary'] ?? false,
-        );
-      }).toList();
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            return FamilyMember(
+              id: doc.id,
+              name: data['name'] ?? '',
+              relation: data['relation'] ?? '',
+              age: data['age'] ?? 0,
+              photoUrl: data['photoUrl'],
+              isPrimary: data['isPrimary'] ?? false,
+            );
+          }).toList();
+        });
   }
 
   /// Update family member

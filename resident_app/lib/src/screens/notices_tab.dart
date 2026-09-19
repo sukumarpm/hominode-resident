@@ -2,13 +2,11 @@
 // Notices tab with notice cards - Using Flow Function
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/announcement_model.dart';
 import '../services/events_announcements_flow_function.dart';
-import '../constants/app_colors.dart';
 
 class NoticesTab extends StatefulWidget {
-  const NoticesTab({Key? key}) : super(key: key);
+  const NoticesTab({super.key});
 
   @override
   State<NoticesTab> createState() => _NoticesTabState();
@@ -161,10 +159,10 @@ class AnnouncementCard extends StatelessWidget {
   final VoidCallback onTap;
 
   const AnnouncementCard({
-    Key? key,
+    super.key,
     required this.announcement,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

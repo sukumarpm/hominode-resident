@@ -4,9 +4,9 @@ class ConditionTagWidget extends StatelessWidget {
   final String condition;
 
   const ConditionTagWidget({
-    Key? key,
+    super.key,
     required this.condition,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/resident_database_service.dart';
 
 /// Create Account Screen with Email/Phone and Password
-/// 
+///
 /// Features:
 /// - Email or Phone Number input
 /// - Password with validation
@@ -13,7 +12,7 @@ import '../services/resident_database_service.dart';
 /// - Firebase Authentication integration
 /// - Firestore user data storage
 class CreateAccountScreen extends StatefulWidget {
-  const CreateAccountScreen({Key? key}) : super(key: key);
+  const CreateAccountScreen({super.key});
 
   @override
   State<CreateAccountScreen> createState() => _CreateAccountScreenState();
@@ -34,10 +33,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   final FirebaseAuthService _authService = FirebaseAuthService();
   final ResidentDatabaseService _databaseService = ResidentDatabaseService();
-  
+
   bool _isLoading = false;
   bool _obscurePassword = true;
-  
+
   String? _fullNameError;
   String? _emailPhoneError;
   String? _passwordError;
@@ -100,13 +99,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     if (emailOrPhone.isEmpty) {
       setState(() => _emailPhoneError = 'Email or phone number is required');
       isValid = false;
-    } else if (!_authService.validateEmail(emailOrPhone) && 
-               !_authService.validatePhoneNumber(emailOrPhone)) {
-      setState(() => _emailPhoneError = 'Please enter a valid email or 10-digit phone number');
+    } else if (!_authService.validateEmail(emailOrPhone) &&
+        !_authService.validatePhoneNumber(emailOrPhone)) {
+      setState(
+        () => _emailPhoneError =
+            'Please enter a valid email or 10-digit phone number',
+      );
       isValid = false;
     }
 
-    final passwordValidation = _authService.validatePassword(_passwordController.text);
+    final passwordValidation = _authService.validatePassword(
+      _passwordController.text,
+    );
     if (passwordValidation != null) {
       setState(() => _passwordError = passwordValidation);
       isValid = false;
@@ -131,22 +135,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
 
     setState(() => _isLoading = true);
-    
+
     try {
       final emailOrPhone = _emailPhoneController.text.trim();
       final password = _passwordController.text;
       final fullName = _fullNameController.text.trim();
       final block = _blockController.text.trim();
       final flat = _flatController.text.trim();
-      
+
       print('🔵 Starting registration process...');
       print('📧 Email/Phone: $emailOrPhone');
       print('👤 Full Name: $fullName');
-      
+
       AuthResult result;
       String actualEmail = emailOrPhone;
       String? phoneNumber;
-      
+
       // Check if input is email or phone number
       if (_authService.validateEmail(emailOrPhone)) {
         // Create account with email
@@ -165,17 +169,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           password: password,
         );
       }
-      
+
       print('✅ Auth result: ${result.success}');
       print('🆔 User ID: ${result.user?.uid}');
-      
+
       if (result.success && result.user != null) {
         // Update display name in Firebase Auth
-        await _authService.updateProfile(
-          displayName: fullName,
-        );
+        await _authService.updateProfile(displayName: fullName);
         print('✅ Display name updated');
-        
+
         // Create user document in Firestore
         print('💾 Creating Firestore document...');
         final dbResult = await _databaseService.createUser(
@@ -185,19 +187,19 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           phoneNumber: phoneNumber,
           role: 'resident',
         );
-        
+
         print('💾 Firestore result: ${dbResult.success}');
         print('💾 Message: ${dbResult.message}');
         if (!dbResult.success) {
           print('❌ Error code: ${dbResult.errorCode}');
         }
-        
+
         setState(() => _isLoading = false);
-        
+
         if (dbResult.success && mounted) {
           _showSuccess('Account created successfully!');
           await Future.delayed(const Duration(milliseconds: 500));
-          
+
           if (mounted) {
             // Navigate to Setup Profile screen or Home
             Navigator.pushReplacementNamed(context, '/setup-profile');
@@ -249,7 +251,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             _buildHeader(),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -264,7 +269,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    
+
                     // Full Name
                     _buildInputField(
                       label: 'Full Name',
@@ -277,7 +282,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       onSubmitted: (_) => _emailPhoneFocusNode.requestFocus(),
                     ),
                     const SizedBox(height: 18),
-                    
+
                     // Email or Phone Number
                     _buildInputField(
                       label: 'Email or Phone Number',
@@ -290,11 +295,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                     ),
                     const SizedBox(height: 18),
-                    
+
                     // Password
                     _buildPasswordField(),
                     const SizedBox(height: 18),
-                    
+
                     // Block and Flat Number (side by side)
                     Row(
                       children: [
@@ -329,7 +334,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ],
                     ),
                     const SizedBox(height: 32),
-                    
+
                     // Continue Button
                     _buildContinueButton(),
                   ],
@@ -348,7 +353,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(20),
@@ -495,7 +500,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: _passwordError != null ? Colors.red : const Color(0xFFE5E5E5),
+              color: _passwordError != null
+                  ? Colors.red
+                  : const Color(0xFFE5E5E5),
               width: 1,
             ),
             boxShadow: [
@@ -561,7 +568,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   Widget _buildContinueButton() {
     final isEnabled = _isFormValid && !_isLoading;
-    
+
     return Semantics(
       label: 'Continue button',
       button: true,
@@ -577,15 +584,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF2563EB).withOpacity(isEnabled ? 1.0 : 0.4),
-                Color(0xFF1E40AF).withOpacity(isEnabled ? 1.0 : 0.4),
+                Color(0xFF0E4778).withOpacity(isEnabled ? 1.0 : 0.4),
+                Color(0xFF061C4C).withOpacity(isEnabled ? 1.0 : 0.4),
               ],
             ),
             borderRadius: BorderRadius.circular(12),
             boxShadow: isEnabled
                 ? [
                     BoxShadow(
-                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      color: const Color(0xFF0E4778).withOpacity(0.3),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),

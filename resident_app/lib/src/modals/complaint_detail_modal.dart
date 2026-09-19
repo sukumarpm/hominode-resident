@@ -2,11 +2,11 @@
 // Centered modal overlay for complaint details with timeline
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/complaint.dart';
 import '../models/staff_model.dart';
 import '../screens/chat_with_technician_screen.dart';
 import '../services/complaint_firestore_service.dart';
-import '../services/complaint_image_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:convert';
@@ -14,7 +14,7 @@ import 'dart:convert';
 // ============================================================================
 // COLOR TOKENS
 // ============================================================================
-const kPrimary = Color(0xFF2563EB);
+const kPrimary = Color(0xFF0E4778);
 const kModalBackground = Color(0xFFFFFFFF);
 const kOverlayDim = Color(0x5C000000); // rgba(0,0,0,0.36)
 const kStatusInProgressBg = Color(0xFFFFF3E6);
@@ -77,9 +77,10 @@ void showComplaintDetailModal(
       return FadeTransition(
         opacity: anim1,
         child: ScaleTransition(
-          scale: Tween<double>(begin: 0.9, end: 1.0).animate(
-            CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic),
-          ),
+          scale: Tween<double>(
+            begin: 0.9,
+            end: 1.0,
+          ).animate(CurvedAnimation(parent: anim1, curve: Curves.easeOutCubic)),
           child: child,
         ),
       );
@@ -97,87 +98,110 @@ class ComplaintDetailModal extends StatefulWidget {
   final VoidCallback? onDelete;
 
   const ComplaintDetailModal({
-    Key? key,
+    super.key,
     required this.complaint,
     this.assignedStaff,
     this.onChat,
     this.onDelete,
-  }) : super(key: key);
+  });
 
   @override
   State<ComplaintDetailModal> createState() => _ComplaintDetailModalState();
 }
 
 class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
-  bool _isLoading = false;
-  final ComplaintFirestoreService _complaintService = ComplaintFirestoreService.instance;
+  final bool _isLoading = false;
+  final ComplaintFirestoreService _complaintService =
+      ComplaintFirestoreService.instance;
 
   // Generate timeline based on actual complaint status
   List<TimelineEvent> _getTimeline(Complaint complaint, StaffModel? staff) {
     final events = <TimelineEvent>[];
-    
+
     print('🔄 Generating timeline for complaint ${complaint.id}');
     print('📊 Current status: ${complaint.status}');
     print('👤 Assigned staff: ${staff?.name ?? "none"}');
-    
+
     // 1. Complaint Submitted (always done)
-    events.add(TimelineEvent(
-      id: '1',
-      text: 'Complaint Submitted',
-      datetime: _formatDate(complaint.createdDate),
-      status: TimelineStatus.done,
-    ));
+    events.add(
+      TimelineEvent(
+        id: '1',
+        text: 'Complaint Submitted',
+        datetime: _formatDate(complaint.createdDate),
+        status: TimelineStatus.done,
+      ),
+    );
 
     // 2. Assigned to Staff
     if (staff != null || complaint.assignedTo != null) {
       final staffName = staff?.name ?? complaint.assignedTo ?? 'Staff';
-      events.add(TimelineEvent(
-        id: '2',
-        text: 'Assigned to $staffName',
-        datetime: _formatDate(complaint.createdDate.add(const Duration(hours: 1))),
-        status: TimelineStatus.done,
-      ));
+      events.add(
+        TimelineEvent(
+          id: '2',
+          text: 'Assigned to $staffName',
+          datetime: _formatDate(
+            complaint.createdDate.add(const Duration(hours: 1)),
+          ),
+          status: TimelineStatus.done,
+        ),
+      );
     } else if (complaint.status == ComplaintStatus.pending) {
-      events.add(TimelineEvent(
-        id: '2',
-        text: 'Waiting for Staff Assignment',
-        datetime: 'Pending',
-        status: TimelineStatus.pending,
-      ));
+      events.add(
+        TimelineEvent(
+          id: '2',
+          text: 'Waiting for Staff Assignment',
+          datetime: 'Pending',
+          status: TimelineStatus.pending,
+        ),
+      );
       print('✅ Timeline: Pending assignment');
       return events; // Stop here if still pending
     }
 
     // 3. Work in Progress
     if (complaint.status == ComplaintStatus.inProgress) {
-      events.add(TimelineEvent(
-        id: '3',
-        text: 'Work in Progress',
-        datetime: _formatDate(complaint.createdDate.add(const Duration(hours: 2))),
-        status: TimelineStatus.inProgress,
-      ));
-      
-      events.add(TimelineEvent(
-        id: '4',
-        text: 'Work Completion',
-        datetime: 'In Progress',
-        status: TimelineStatus.pending,
-      ));
+      events.add(
+        TimelineEvent(
+          id: '3',
+          text: 'Work in Progress',
+          datetime: _formatDate(
+            complaint.createdDate.add(const Duration(hours: 2)),
+          ),
+          status: TimelineStatus.inProgress,
+        ),
+      );
+
+      events.add(
+        TimelineEvent(
+          id: '4',
+          text: 'Work Completion',
+          datetime: 'In Progress',
+          status: TimelineStatus.pending,
+        ),
+      );
       print('✅ Timeline: In Progress');
     } else if (complaint.status == ComplaintStatus.completed) {
-      events.add(TimelineEvent(
-        id: '3',
-        text: 'Work in Progress',
-        datetime: _formatDate(complaint.createdDate.add(const Duration(hours: 2))),
-        status: TimelineStatus.done,
-      ));
-      
-      events.add(TimelineEvent(
-        id: '4',
-        text: 'Work Completed',
-        datetime: _formatDate(complaint.createdDate.add(const Duration(days: 1))),
-        status: TimelineStatus.done,
-      ));
+      events.add(
+        TimelineEvent(
+          id: '3',
+          text: 'Work in Progress',
+          datetime: _formatDate(
+            complaint.createdDate.add(const Duration(hours: 2)),
+          ),
+          status: TimelineStatus.done,
+        ),
+      );
+
+      events.add(
+        TimelineEvent(
+          id: '4',
+          text: 'Work Completed',
+          datetime: _formatDate(
+            complaint.createdDate.add(const Duration(days: 1)),
+          ),
+          status: TimelineStatus.done,
+        ),
+      );
       print('✅ Timeline: Completed');
     }
 
@@ -185,7 +209,20 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     final hour = date.hour > 12 ? date.hour - 12 : date.hour;
     final period = date.hour >= 12 ? 'PM' : 'AM';
     return '${months[date.month - 1]} ${date.day}, ${hour == 0 ? 12 : hour}:${date.minute.toString().padLeft(2, '0')} $period';
@@ -196,7 +233,9 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
     if (complaint.assignedTo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No technician assigned yet. Please wait for assignment.'),
+          content: Text(
+            'No technician assigned yet. Please wait for assignment.',
+          ),
           duration: Duration(seconds: 3),
         ),
       );
@@ -205,7 +244,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
     // Close modal first
     Navigator.pop(context);
-    
+
     // Navigate to chat screen with actual technician data
     Navigator.push(
       context,
@@ -250,24 +289,26 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
       builder: (context, snapshot) {
         // Use real-time data if available, otherwise use widget data
         Complaint currentComplaint = widget.complaint;
-        
+
         if (snapshot.hasData && snapshot.data != null) {
           try {
-            currentComplaint = _complaintService.complaintFromFirestore(snapshot.data!);
+            currentComplaint = _complaintService.complaintFromFirestore(
+              snapshot.data!,
+            );
             print('🔄 Real-time update: ${currentComplaint.status}');
           } catch (e) {
             print('❌ Error parsing real-time data: $e');
           }
         }
-        
+
         return Center(
           child: Container(
             width: MediaQuery.of(context).size.width * 0.9,
-            constraints: const BoxConstraints(maxWidth: 500),
-            margin: const EdgeInsets.symmetric(vertical: 40),
+            constraints: BoxConstraints(maxWidth: 500.w),
+            margin: EdgeInsets.symmetric(vertical: 40.h),
             decoration: BoxDecoration(
               color: kModalBackground,
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
               boxShadow: [
                 BoxShadow(
                   color: Colors.black.withOpacity(0.08),
@@ -287,36 +328,36 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
                   // Scrollable content
                   Flexible(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                      padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // Icon + Title + Status + Date
                           _buildTitleSection(currentComplaint),
 
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h),
 
                           // Description
                           _buildDescriptionSection(currentComplaint),
 
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h),
 
                           // Image (if available)
                           _buildImageSection(currentComplaint),
 
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h),
 
                           // Assigned Staff Details
                           if (widget.assignedStaff != null)
                             _buildStaffDetailsSection(currentComplaint),
 
                           if (widget.assignedStaff != null)
-                            const SizedBox(height: 24),
+                            SizedBox(height: 24.h),
 
                           // Timeline
                           _buildTimelineSection(currentComplaint),
 
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h),
                         ],
                       ),
                     ),
@@ -335,47 +376,46 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
   Widget _buildHeader(Complaint complaint) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 20, 16, 20),
+      padding: EdgeInsets.fromLTRB(24.w, 20.h, 16.w, 20.h),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: kCardBorder, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: kCardBorder, width: 1)),
       ),
       child: Row(
         children: [
-          const Expanded(
+          Expanded(
             child: Text(
               'Complaint Details',
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
                 color: kTextTitle,
               ),
             ),
           ),
           // Delete button (only for pending complaints)
-          if (complaint.status == ComplaintStatus.pending && widget.onDelete != null)
+          if (complaint.status == ComplaintStatus.pending &&
+              widget.onDelete != null)
             SizedBox(
-              width: 44,
-              height: 44,
+              width: 44.w,
+              height: 44.h,
               child: IconButton(
                 onPressed: () {
                   Navigator.pop(context);
                   widget.onDelete?.call();
                 },
-                icon: const Icon(Icons.delete_outline, color: Colors.red, size: 24),
+                icon: Icon(Icons.delete_outline, color: Colors.red, size: 24.w),
                 padding: EdgeInsets.zero,
                 tooltip: 'Delete Complaint',
               ),
             ),
           // Close button (44x44 touch target)
           SizedBox(
-            width: 44,
-            height: 44,
+            width: 44.w,
+            height: 44.h,
             child: IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.close, color: kTextMuted, size: 24),
+              icon: Icon(Icons.close, color: kTextMuted, size: 24.w),
               padding: EdgeInsets.zero,
             ),
           ),
@@ -395,7 +435,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
           backgroundColor: _getIconBackgroundColor(complaint.category),
         ),
 
-        const SizedBox(width: 16),
+        SizedBox(width: 16.w),
 
         // Title, status, date
         Expanded(
@@ -404,22 +444,19 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
             children: [
               Text(
                 complaint.title,
-                style: const TextStyle(
-                  fontSize: 19,
+                style: TextStyle(
+                  fontSize: 19.sp,
                   fontWeight: FontWeight.w600,
                   color: kTextTitle,
                   height: 1.3,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               _buildDynamicStatusBadge(complaint.status),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
                 complaint.formattedDate,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: kTextMuted,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: kTextMuted),
               ),
             ],
           ),
@@ -462,22 +499,18 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Description',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: kTextTitle,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         Text(
           complaint.description,
-          style: const TextStyle(
-            fontSize: 15,
-            color: kTextMuted,
-            height: 1.6,
-          ),
+          style: TextStyle(fontSize: 15.sp, color: kTextMuted, height: 1.6),
         ),
       ],
     );
@@ -505,17 +538,17 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               'Attached Image',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: kTextTitle,
               ),
             ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             ClipRRect(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               child: _buildImageFromData(imageData),
             ),
           ],
@@ -539,10 +572,14 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) => Container(
             width: double.infinity,
-            height: 250,
+            height: 250.h,
             color: Colors.grey[200],
-            child: const Center(
-              child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
+            child: Center(
+              child: Icon(
+                Icons.image_not_supported,
+                size: 48.w,
+                color: Colors.grey,
+              ),
             ),
           ),
         );
@@ -555,18 +592,20 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
           fit: BoxFit.cover,
           placeholder: (context, url) => Container(
             width: double.infinity,
-            height: 250,
+            height: 250.h,
             color: Colors.grey[200],
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
+            child: const Center(child: CircularProgressIndicator()),
           ),
           errorWidget: (context, url, error) => Container(
             width: double.infinity,
-            height: 250,
+            height: 250.h,
             color: Colors.grey[200],
-            child: const Center(
-              child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
+            child: Center(
+              child: Icon(
+                Icons.image_not_supported,
+                size: 48.w,
+                color: Colors.grey,
+              ),
             ),
           ),
         );
@@ -575,10 +614,14 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
       print('❌ Error displaying image: $e');
       return Container(
         width: double.infinity,
-        height: 250,
+        height: 250.h,
         color: Colors.grey[200],
-        child: const Center(
-          child: Icon(Icons.image_not_supported, size: 48, color: Colors.grey),
+        child: Center(
+          child: Icon(
+            Icons.image_not_supported,
+            size: 48.w,
+            color: Colors.grey,
+          ),
         ),
       );
     }
@@ -586,75 +629,68 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
   Widget _buildStaffDetailsSection(Complaint complaint) {
     final staff = widget.assignedStaff!;
-    
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F9FF),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: const Color(0xFFBAE6FD), width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Assigned Staff',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: kTextTitle,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Row(
             children: [
               Container(
-                width: 56,
-                height: 56,
+                width: 56.w,
+                height: 56.h,
                 decoration: BoxDecoration(
                   color: kPrimary.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: kPrimary,
-                  size: 28,
-                ),
+                child: Icon(Icons.person, color: kPrimary, size: 28.w),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: 16.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       staff.name,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: kTextTitle,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       staff.roleDisplayName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: kTextMuted,
-                      ),
+                      style: TextStyle(fontSize: 14.sp, color: kTextMuted),
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildStaffActionRow(
             Icons.phone_outlined,
             staff.phone,
             'Call',
             () => _handleCallStaff(staff.phone),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           _buildStaffActionRow(
             Icons.chat_bubble_outline,
             'Chat with ${staff.name.split(' ').first}',
@@ -662,7 +698,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
             () => _handleChatPressed(complaint),
           ),
           if (staff.email != null) ...[
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             _buildStaffInfoRow(Icons.email_outlined, staff.email!),
           ],
         ],
@@ -670,26 +706,31 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
     );
   }
 
-  Widget _buildStaffActionRow(IconData icon, String text, String action, VoidCallback onTap) {
+  Widget _buildStaffActionRow(
+    IconData icon,
+    String text,
+    String action,
+    VoidCallback onTap,
+  ) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(8.r),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(color: kPrimary.withOpacity(0.3)),
         ),
         child: Row(
           children: [
-            Icon(icon, size: 20, color: kPrimary),
-            const SizedBox(width: 12),
+            Icon(icon, size: 20.w, color: kPrimary),
+            SizedBox(width: 12.w),
             Expanded(
               child: Text(
                 text,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: 14.sp,
                   color: kTextTitle,
                   fontWeight: FontWeight.w500,
                 ),
@@ -697,14 +738,14 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
             ),
             Text(
               action,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 13.sp,
                 color: kPrimary,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(width: 4),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: kPrimary),
+            SizedBox(width: 4.w),
+            Icon(Icons.arrow_forward_ios, size: 14.w, color: kPrimary),
           ],
         ),
       ),
@@ -713,22 +754,19 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
   Widget _buildStaffInfoRow(IconData icon, String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 12.w),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: kTextMuted),
-          const SizedBox(width: 12),
+          Icon(icon, size: 18.w, color: kTextMuted),
+          SizedBox(width: 12.w),
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 14,
-                color: kTextMuted,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: kTextMuted),
             ),
           ),
         ],
@@ -739,7 +777,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
   void _handleCallStaff(String phoneNumber) async {
     // Remove any formatting from phone number
     final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^\d+]'), '');
-    
+
     // Show confirmation dialog
     final confirmed = await showDialog<bool>(
       context: context,
@@ -762,7 +800,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
     if (confirmed == true) {
       // In a real app, use url_launcher package
       // await launchUrl(Uri.parse('tel:$cleanNumber'));
-      
+
       // For now, show a message
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -778,24 +816,24 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
   Widget _buildTimelineSection(Complaint complaint) {
     final timeline = _getTimeline(complaint, widget.assignedStaff);
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: const Color(0xFFFAFAFA),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: kCardBorder, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'Timeline',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: kTextTitle,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ...timeline.map((event) => TimelineRow(event: event)),
         ],
       ),
@@ -806,24 +844,28 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
     // Show different buttons based on status
     if (complaint.status == ComplaintStatus.pending) {
       return Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.w),
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 color: const Color(0xFFFFF3E8),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
-                children: const [
-                  Icon(Icons.info_outline, color: Color(0xFFF97316), size: 20),
-                  SizedBox(width: 12),
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: Color(0xFFF97316),
+                    size: 20.w,
+                  ),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Text(
                       'Waiting for staff assignment',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: Color(0xFFF97316),
                         fontWeight: FontWeight.w500,
                       ),
@@ -839,22 +881,26 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
     if (complaint.status == ComplaintStatus.completed) {
       return Container(
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.w),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: const Color(0xFFE8FDEB),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           child: Row(
-            children: const [
-              Icon(Icons.check_circle_outline, color: Color(0xFF10B981), size: 24),
-              SizedBox(width: 12),
+            children: [
+              Icon(
+                Icons.check_circle_outline,
+                color: Color(0xFF10B981),
+                size: 24.w,
+              ),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   'Work completed successfully',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: Color(0xFF10B981),
                     fontWeight: FontWeight.w600,
                   ),
@@ -868,7 +914,7 @@ class _ComplaintDetailModalState extends State<ComplaintDetailModal> {
 
     // In Progress - show chat button
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(24.w),
       child: PrimaryButton(
         label: 'Chat With Technician',
         icon: Icons.chat_bubble_outline,
@@ -942,22 +988,22 @@ class IconBox extends StatelessWidget {
   final Color backgroundColor;
 
   const IconBox({
-    Key? key,
+    super.key,
     required this.icon,
     required this.color,
     required this.backgroundColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 64,
-      height: 64,
+      width: 64.w,
+      height: 64.h,
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
-      child: Icon(icon, color: color, size: 32),
+      child: Icon(icon, color: color, size: 32.w),
     );
   }
 }
@@ -969,24 +1015,24 @@ class StatusBadge extends StatelessWidget {
   final Color textColor;
 
   const StatusBadge({
-    Key? key,
+    super.key,
     required this.label,
     required this.backgroundColor,
     required this.textColor,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 14,
+          fontSize: 14.sp,
           fontWeight: FontWeight.w500,
           color: textColor,
         ),
@@ -999,38 +1045,31 @@ class StatusBadge extends StatelessWidget {
 class TimelineRow extends StatelessWidget {
   final TimelineEvent event;
 
-  const TimelineRow({
-    Key? key,
-    required this.event,
-  }) : super(key: key);
+  const TimelineRow({super.key, required this.event});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Colored dot (12x12)
           Container(
-            width: 12,
-            height: 12,
-            margin: const EdgeInsets.only(top: 4),
+            width: 12.w,
+            height: 12.h,
+            margin: EdgeInsets.only(top: 4.h),
             decoration: BoxDecoration(
               color: dotColorForStatus(event.status),
               shape: BoxShape.circle,
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           // Text
           Expanded(
             child: Text(
               '${event.text} - ${event.datetime}',
-              style: const TextStyle(
-                fontSize: 15,
-                color: kTextMuted,
-                height: 1.4,
-              ),
+              style: TextStyle(fontSize: 15.sp, color: kTextMuted, height: 1.4),
             ),
           ),
         ],
@@ -1047,18 +1086,18 @@ class PrimaryButton extends StatelessWidget {
   final bool isLoading;
 
   const PrimaryButton({
-    Key? key,
+    super.key,
     required this.label,
     this.icon,
     this.onPressed,
     this.isLoading = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 56.h,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -1066,13 +1105,13 @@ class PrimaryButton extends StatelessWidget {
           foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
         ),
         child: isLoading
-            ? const SizedBox(
-                width: 24,
-                height: 24,
+            ? SizedBox(
+                width: 24.w,
+                height: 24.h,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
@@ -1082,13 +1121,13 @@ class PrimaryButton extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
-                    Icon(icon, size: 22),
-                    const SizedBox(width: 12),
+                    Icon(icon, size: 22.w),
+                    SizedBox(width: 12.w),
                   ],
                   Text(
                     label,
-                    style: const TextStyle(
-                      fontSize: 17,
+                    style: TextStyle(
+                      fontSize: 17.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),

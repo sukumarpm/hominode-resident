@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/family_member.dart';
 
 class FamilyCard extends StatelessWidget {
@@ -7,19 +8,19 @@ class FamilyCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   const FamilyCard({
-    Key? key,
+    super.key,
     required this.member,
     this.onDelete,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         border: Border.all(color: const Color(0xFFE5E7EB)),
         boxShadow: [
           BoxShadow(
@@ -33,26 +34,26 @@ class FamilyCard extends StatelessWidget {
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Row(
               children: [
                 // Icon container
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 48.w,
+                  height: 48.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFFDCFCE7),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.people,
                     color: Color(0xFF16A34A),
-                    size: 24,
+                    size: 24.w,
                   ),
                 ),
-                const SizedBox(width: 14),
+                SizedBox(width: 14.w),
                 // Text content
                 Expanded(
                   child: Column(
@@ -60,18 +61,18 @@ class FamilyCard extends StatelessWidget {
                     children: [
                       Text(
                         member.name,
-                        style: const TextStyle(
-                          fontSize: 17,
+                        style: TextStyle(
+                          fontSize: 17.sp,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF1F2937),
                           height: 1.3,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Text(
                         '${member.relation} • ${member.age} years',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           color: Color(0xFF6B7280),
                           height: 1.3,
                         ),
@@ -83,15 +84,15 @@ class FamilyCard extends StatelessWidget {
                 if (onDelete != null)
                   IconButton(
                     onPressed: onDelete,
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete_outline,
                       color: Color(0xFFEF4444),
-                      size: 22,
+                      size: 22.w,
                     ),
-                    padding: const EdgeInsets.all(8),
-                    constraints: const BoxConstraints(
-                      minWidth: 44,
-                      minHeight: 44,
+                    padding: EdgeInsets.all(8.w),
+                    constraints: BoxConstraints(
+                      minWidth: 44.w,
+                      minHeight: 44.h,
                     ),
                     splashRadius: 20,
                   ),

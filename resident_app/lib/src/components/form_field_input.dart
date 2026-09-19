@@ -11,7 +11,7 @@ class FormFieldInput extends StatelessWidget {
   final int maxLines;
 
   const FormFieldInput({
-    Key? key,
+    super.key,
     required this.label,
     required this.placeholder,
     required this.controller,
@@ -19,7 +19,7 @@ class FormFieldInput extends StatelessWidget {
     this.keyboardType,
     this.inputFormatters,
     this.maxLines = 1,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +44,7 @@ class FormFieldInput extends StatelessWidget {
           style: const TextStyle(fontSize: 15),
           decoration: InputDecoration(
             hintText: placeholder,
-            hintStyle: const TextStyle(
-              color: Color(0xFFBDBDBD),
-              fontSize: 15,
-            ),
+            hintStyle: const TextStyle(color: Color(0xFFBDBDBD), fontSize: 15),
             filled: true,
             fillColor: Colors.white,
             contentPadding: EdgeInsets.symmetric(
@@ -64,7 +61,7 @@ class FormFieldInput extends StatelessWidget {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
@@ -74,10 +71,7 @@ class FormFieldInput extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Colors.red, width: 2),
             ),
-            errorStyle: const TextStyle(
-              fontSize: 12,
-              color: Colors.red,
-            ),
+            errorStyle: const TextStyle(fontSize: 12, color: Colors.red),
           ),
         ),
       ],

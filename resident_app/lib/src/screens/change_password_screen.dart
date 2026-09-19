@@ -2,12 +2,11 @@
 // Secure Change Password Screen with validation and strength meter
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/auth_service.dart';
 import '../components/standard_screen.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
-  const ChangePasswordScreen({Key? key}) : super(key: key);
+  const ChangePasswordScreen({super.key});
 
   @override
   State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
@@ -69,7 +68,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     try {
       // Check if 2FA is enabled (stub - replace with actual check)
       final requires2FA = await AuthService.instance.isTwoFactorEnabled();
-      
+
       if (requires2FA) {
         // Show 2FA verification dialog
         final verified = await _show2FADialog();
@@ -115,7 +114,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
 
     // Verify 2FA code (stub - replace with actual verification)
     final verified = await AuthService.instance.verify2FACode(code);
-    
+
     if (!verified && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -124,7 +123,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
         ),
       );
     }
-    
+
     return verified;
   }
 
@@ -230,7 +229,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0E4778),
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -238,11 +240,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureCurrentPassword ? Icons.visibility_off : Icons.visibility,
+                  _obscureCurrentPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                   color: const Color(0xFF6B7280),
                 ),
                 onPressed: () {
-                  setState(() => _obscureCurrentPassword = !_obscureCurrentPassword);
+                  setState(
+                    () => _obscureCurrentPassword = !_obscureCurrentPassword,
+                  );
                 },
               ),
             ),
@@ -291,7 +297,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0E4778),
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -424,7 +433,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0E4778),
+                  width: 2,
+                ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
@@ -432,11 +444,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               suffixIcon: IconButton(
                 icon: Icon(
-                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                  _obscureConfirmPassword
+                      ? Icons.visibility_off
+                      : Icons.visibility,
                   color: const Color(0xFF6B7280),
                 ),
                 onPressed: () {
-                  setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                  setState(
+                    () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                  );
                 },
               ),
             ),
@@ -488,14 +504,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_outline, size: 14, color: Color(0xFF6B7280)),
+          const Icon(
+            Icons.check_circle_outline,
+            size: 14,
+            color: Color(0xFF6B7280),
+          ),
           const SizedBox(width: 6),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 11,
-              color: Color(0xFF6B7280),
-            ),
+            style: const TextStyle(fontSize: 11, color: Color(0xFF6B7280)),
           ),
         ],
       ),
@@ -509,7 +526,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleSubmit,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: const Color(0xFF0E4778),
           disabledBackgroundColor: const Color(0xFF93C5FD),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -562,10 +579,7 @@ class _TwoFactorDialogState extends State<_TwoFactorDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text(
         'Two-Factor Authentication',
-        style: TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -573,10 +587,7 @@ class _TwoFactorDialogState extends State<_TwoFactorDialog> {
         children: [
           const Text(
             'Enter the 6-digit code from your authenticator app',
-            style: TextStyle(
-              fontSize: 14,
-              color: Color(0xFF6B7280),
-            ),
+            style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -597,7 +608,10 @@ class _TwoFactorDialogState extends State<_TwoFactorDialog> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+                borderSide: const BorderSide(
+                  color: Color(0xFF0E4778),
+                  width: 2,
+                ),
               ),
             ),
           ),
@@ -615,7 +629,7 @@ class _TwoFactorDialogState extends State<_TwoFactorDialog> {
             }
           },
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: const Color(0xFF0E4778),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),

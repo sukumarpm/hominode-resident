@@ -1,14 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 // ============================================================================
 // THEME CONSTANTS
 // ============================================================================
-const Color kPrimary = Color(0xFF2563EB);
+const Color kPrimary = Color(0xFF0E4778);
 const Color kIncomingBubbleBg = Color(0xFFFFFFFF);
 const Color kIncomingBubbleBorder = Color(0xFFE6E6E6);
-const Color kOutgoingBubbleBg = Color(0xFF2563EB);
+const Color kOutgoingBubbleBg = Color(0xFF0E4778);
 const Color kTextDark = Color(0xFF111111);
 const Color kTextMuted = Color(0xFF8C8C8C);
 const Color kTimestampColor = Color(0xFFC4C4C4);
@@ -42,10 +42,7 @@ class ChatMessage {
     this.imageUrl,
   });
 
-  ChatMessage copyWith({
-    MessageStatus? status,
-    String? text,
-  }) {
+  ChatMessage copyWith({MessageStatus? status, String? text}) {
     return ChatMessage(
       id: id,
       senderId: senderId,
@@ -68,41 +65,46 @@ class ChatEvent {
   final MessageStatus? newStatus;
 
   ChatEvent.message(this.message)
-      : type = ChatEventType.message,
-        isTyping = null,
-        messageId = null,
-        newStatus = null;
+    : type = ChatEventType.message,
+      isTyping = null,
+      messageId = null,
+      newStatus = null;
 
   ChatEvent.typing(this.isTyping)
-      : type = ChatEventType.typing,
-        message = null,
-        messageId = null,
-        newStatus = null;
+    : type = ChatEventType.typing,
+      message = null,
+      messageId = null,
+      newStatus = null;
 
   ChatEvent.statusUpdate(this.messageId, this.newStatus)
-      : type = ChatEventType.statusUpdate,
-        message = null,
-        isTyping = null;
+    : type = ChatEventType.statusUpdate,
+      message = null,
+      isTyping = null;
 }
 
 // ============================================================================
 // CHAT REPOSITORY (Mock Implementation)
 // ============================================================================
 class ChatRepository {
-  final StreamController<ChatEvent> _streamController = StreamController<ChatEvent>.broadcast();
+  final StreamController<ChatEvent> _streamController =
+      StreamController<ChatEvent>.broadcast();
   final List<ChatMessage> _queuedMessages = [];
   bool isOnline = true;
 
   // Mock: Fetch initial messages
-  Future<List<ChatMessage>> fetchMessages({required String chatId, int page = 1}) async {
+  Future<List<ChatMessage>> fetchMessages({
+    required String chatId,
+    int page = 1,
+  }) async {
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     // Sample conversation matching screenshot
     return [
       ChatMessage(
         id: 'msg_1',
         senderId: 'tech_001',
-        text: 'Hello! I have checked the issue. Will arrive at your flat in 30 minutes.',
+        text:
+            'Hello! I have checked the issue. Will arrive at your flat in 30 minutes.',
         timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
         status: MessageStatus.read,
         isMe: false,
@@ -135,20 +137,24 @@ class ChatRepository {
 
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 800));
-    
+
     // Simulate 10% failure rate for testing retry
     // if (Random().nextInt(10) == 0) throw Exception('Send failed');
 
     final sentMsg = msg.copyWith(status: MessageStatus.sent);
-    
+
     // Simulate delivery after 1 second
     Future.delayed(const Duration(seconds: 1), () {
-      _streamController.add(ChatEvent.statusUpdate(sentMsg.id, MessageStatus.delivered));
+      _streamController.add(
+        ChatEvent.statusUpdate(sentMsg.id, MessageStatus.delivered),
+      );
     });
 
     // Simulate read after 3 seconds
     Future.delayed(const Duration(seconds: 3), () {
-      _streamController.add(ChatEvent.statusUpdate(sentMsg.id, MessageStatus.read));
+      _streamController.add(
+        ChatEvent.statusUpdate(sentMsg.id, MessageStatus.read),
+      );
     });
 
     return sentMsg;
@@ -163,16 +169,18 @@ class ChatRepository {
 
     Future.delayed(const Duration(seconds: 7), () {
       _streamController.add(ChatEvent.typing(false));
-      _streamController.add(ChatEvent.message(
-        ChatMessage(
-          id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-          senderId: 'tech_001',
-          text: 'I am on my way now.',
-          timestamp: DateTime.now(),
-          status: MessageStatus.delivered,
-          isMe: false,
+      _streamController.add(
+        ChatEvent.message(
+          ChatMessage(
+            id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
+            senderId: 'tech_001',
+            text: 'I am on my way now.',
+            timestamp: DateTime.now(),
+            status: MessageStatus.delivered,
+            isMe: false,
+          ),
         ),
-      ));
+      );
     });
 
     return _streamController.stream;
@@ -212,17 +220,20 @@ String formatTimestamp(DateTime timestamp) {
 Widget messageStatusIcon(MessageStatus status) {
   switch (status) {
     case MessageStatus.sending:
-      return const SizedBox(
-        width: 12,
-        height: 12,
-        child: CircularProgressIndicator(strokeWidth: 1.5, color: Colors.white70),
+      return SizedBox(
+        width: 12.w,
+        height: 12.h,
+        child: CircularProgressIndicator(
+          strokeWidth: 1.5,
+          color: Colors.white70,
+        ),
       );
     case MessageStatus.sent:
-      return const Icon(Icons.check, size: 14, color: Colors.white70);
+      return Icon(Icons.check, size: 14.w, color: Colors.white70);
     case MessageStatus.delivered:
-      return const Icon(Icons.done_all, size: 14, color: Colors.white70);
+      return Icon(Icons.done_all, size: 14.w, color: Colors.white70);
     case MessageStatus.read:
-      return const Icon(Icons.done_all, size: 14, color: Colors.white);
+      return Icon(Icons.done_all, size: 14.w, color: Colors.white);
   }
 }
 
@@ -237,16 +248,17 @@ class ChatWithTechnicianScreen extends StatefulWidget {
   final String? technicianPhone;
 
   const ChatWithTechnicianScreen({
-    Key? key,
+    super.key,
     required this.chatId,
     this.technicianName = 'Ramesh Kumar',
     this.technicianRole = 'Plumbing Technician',
     this.technicianAvatar,
     this.technicianPhone,
-  }) : super(key: key);
+  });
 
   @override
-  State<ChatWithTechnicianScreen> createState() => _ChatWithTechnicianScreenState();
+  State<ChatWithTechnicianScreen> createState() =>
+      _ChatWithTechnicianScreenState();
 }
 
 class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
@@ -294,9 +306,13 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
         case ChatEventType.statusUpdate:
           if (event.messageId != null && event.newStatus != null) {
             setState(() {
-              final index = _messages.indexWhere((m) => m.id == event.messageId);
+              final index = _messages.indexWhere(
+                (m) => m.id == event.messageId,
+              );
               if (index != -1) {
-                _messages[index] = _messages[index].copyWith(status: event.newStatus);
+                _messages[index] = _messages[index].copyWith(
+                  status: event.newStatus,
+                );
               }
             });
           }
@@ -338,7 +354,10 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
     _scrollToBottom();
 
     try {
-      final sentMessage = await _repository.sendMessage(widget.chatId, tempMessage);
+      final sentMessage = await _repository.sendMessage(
+        widget.chatId,
+        tempMessage,
+      );
       setState(() {
         final index = _messages.indexWhere((m) => m.id == tempMessage.id);
         if (index != -1) {
@@ -351,7 +370,9 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
       setState(() {
         final index = _messages.indexWhere((m) => m.id == tempMessage.id);
         if (index != -1) {
-          _messages[index] = tempMessage.copyWith(status: MessageStatus.sending);
+          _messages[index] = tempMessage.copyWith(
+            status: MessageStatus.sending,
+          );
         }
         _isSending = false;
       });
@@ -404,7 +425,7 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: kHeaderBg,
         border: Border(
@@ -418,46 +439,40 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
             backgroundColor: kPrimary,
             child: Text(
               widget.technicianName[0].toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   widget.technicianName,
-                  style: const TextStyle(
-                    fontSize: 18,
+                  style: TextStyle(
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: kTextDark,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   widget.technicianRole,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: kTextMuted,
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: kTextMuted),
                 ),
                 if (widget.technicianPhone != null) ...[
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Row(
                     children: [
-                      const Icon(Icons.phone, size: 12, color: kTextMuted),
-                      const SizedBox(width: 4),
+                      Icon(Icons.phone, size: 12.w, color: kTextMuted),
+                      SizedBox(width: 4.w),
                       Text(
                         widget.technicianPhone!,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: kTextMuted,
-                        ),
+                        style: TextStyle(fontSize: 13.sp, color: kTextMuted),
                       ),
                     ],
                   ),
@@ -469,12 +484,12 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
             color: Colors.transparent,
             child: InkWell(
               onTap: () => Navigator.of(context).pop(),
-              borderRadius: BorderRadius.circular(22),
+              borderRadius: BorderRadius.circular(22.r),
               child: Container(
-                width: 44,
-                height: 44,
+                width: 44.w,
+                height: 44.h,
                 alignment: Alignment.center,
-                child: const Icon(Icons.close, size: 24, color: kTextMuted),
+                child: Icon(Icons.close, size: 24.w, color: kTextMuted),
               ),
             ),
           ),
@@ -486,7 +501,7 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
   Widget _buildMessageList() {
     return ListView.builder(
       controller: _scrollController,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       itemCount: _messages.length,
       itemBuilder: (context, index) {
         final message = _messages[index];
@@ -497,10 +512,10 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
 
   Widget _buildTypingIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
       alignment: Alignment.centerLeft,
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
         decoration: BoxDecoration(
           color: kIncomingBubbleBg,
           border: Border.all(color: kIncomingBubbleBorder),
@@ -511,9 +526,9 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
           children: [
             Text(
               'Typing',
-              style: TextStyle(fontSize: 14, color: kTextMuted),
+              style: TextStyle(fontSize: 14.sp, color: kTextMuted),
             ),
-            const SizedBox(width: 4),
+            SizedBox(width: 4.w),
             _buildTypingDots(),
           ],
         ),
@@ -530,8 +545,8 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
           builder: (context, value, child) {
             return Container(
               margin: EdgeInsets.only(left: index > 0 ? 3 : 0),
-              width: 6,
-              height: 6,
+              width: 6.w,
+              height: 6.h,
               decoration: BoxDecoration(
                 color: kTextMuted.withOpacity(0.3 + (value * 0.7)),
                 shape: BoxShape.circle,
@@ -545,7 +560,7 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -561,56 +576,58 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
                 controller: _messageController,
                 decoration: InputDecoration(
                   hintText: 'Type your message...',
-                  hintStyle: const TextStyle(
+                  hintStyle: TextStyle(
                     color: Color(0xFF8C8C8C),
-                    fontSize: 14,
+                    fontSize: 14.sp,
                   ),
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(24.r),
                     borderSide: const BorderSide(color: Color(0xFFE6E6E6)),
                   ),
                   enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(24.r),
                     borderSide: const BorderSide(color: Color(0xFFE6E6E6)),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
+                    borderRadius: BorderRadius.circular(24.r),
                     borderSide: const BorderSide(color: kPrimary, width: 2),
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 12.h,
+                  ),
                 ),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: kTextDark,
-                ),
+                style: TextStyle(fontSize: 14.sp, color: kTextDark),
                 maxLines: null,
                 textCapitalization: TextCapitalization.sentences,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _sendMessage(),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Container(
-              width: 44,
-              height: 44,
+              width: 44.w,
+              height: 44.h,
               decoration: BoxDecoration(
                 color: kPrimary,
                 shape: BoxShape.circle,
               ),
               child: _isSending
-                  ? const Center(
+                  ? Center(
                       child: SizedBox(
-                        width: 20,
-                        height: 20,
+                        width: 20.w,
+                        height: 20.h,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
                         ),
                       ),
                     )
                   : IconButton(
                       onPressed: _sendMessage,
-                      icon: const Icon(Icons.send, color: Colors.white, size: 20),
+                      icon: Icon(Icons.send, color: Colors.white, size: 20.w),
                       padding: EdgeInsets.zero,
                     ),
             ),
@@ -627,7 +644,7 @@ class _ChatWithTechnicianScreenState extends State<ChatWithTechnicianScreen> {
 class MessageBubble extends StatelessWidget {
   final ChatMessage message;
 
-  const MessageBubble({Key? key, required this.message}) : super(key: key);
+  const MessageBubble({super.key, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -635,18 +652,22 @@ class MessageBubble extends StatelessWidget {
     final maxWidth = screenWidth * kBubbleMaxWidth;
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Row(
-        mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: message.isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           if (message.isMe) const Spacer(),
           Container(
             constraints: BoxConstraints(maxWidth: maxWidth),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: message.isMe ? kOutgoingBubbleBg : kIncomingBubbleBg,
-              border: message.isMe ? null : Border.all(color: kIncomingBubbleBorder),
+              border: message.isMe
+                  ? null
+                  : Border.all(color: kIncomingBubbleBorder),
               borderRadius: BorderRadius.only(
                 topLeft: const Radius.circular(kBubbleRadius),
                 topRight: const Radius.circular(kBubbleRadius),
@@ -667,24 +688,24 @@ class MessageBubble extends StatelessWidget {
                 Text(
                   message.text,
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     color: message.isMe ? Colors.white : kTextDark,
                     height: 1.4,
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       formatTimestamp(message.timestamp),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         color: message.isMe ? Colors.white70 : kTimestampColor,
                       ),
                     ),
                     if (message.isMe) ...[
-                      const SizedBox(width: 6),
+                      SizedBox(width: 6.w),
                       messageStatusIcon(message.status),
                     ],
                   ],

@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import '../models/notice.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 const kBadgeHighBg = Color(0xFFFFF1EB);
 const kBadgeHighText = Color(0xFFFF6B35);
 const kBadgeMediumBg = Color(0xFFEEF5FF);
@@ -20,10 +20,7 @@ void showNoticeDetailModal(BuildContext context, Notice notice) {
 class NoticeDetailModal extends StatelessWidget {
   final Notice notice;
 
-  const NoticeDetailModal({
-    Key? key,
-    required this.notice,
-  }) : super(key: key);
+  const NoticeDetailModal({super.key, required this.notice});
 
   @override
   Widget build(BuildContext context) {

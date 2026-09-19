@@ -11,13 +11,13 @@ class UnifiedChatComposer extends StatefulWidget {
   final bool showAttachment;
 
   const UnifiedChatComposer({
-    Key? key,
+    super.key,
     required this.controller,
     required this.onSend,
     this.isSending = false,
     this.hintText = 'Type your message...',
     this.showAttachment = false,
-  }) : super(key: key);
+  });
 
   @override
   State<UnifiedChatComposer> createState() => _UnifiedChatComposerState();
@@ -77,10 +77,7 @@ class _UnifiedChatComposerState extends State<UnifiedChatComposer> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: const Color(0xFFE5E7EB),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -98,7 +95,9 @@ class _UnifiedChatComposerState extends State<UnifiedChatComposer> {
                           ),
                           border: InputBorder.none,
                           isDense: true,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                         ),
                         style: const TextStyle(
                           fontSize: 15,
@@ -127,7 +126,7 @@ class _UnifiedChatComposerState extends State<UnifiedChatComposer> {
                 decoration: BoxDecoration(
                   color: widget.controller.text.trim().isEmpty
                       ? const Color(0xFFE5E7EB)
-                      : const Color(0xFF2563EB),
+                      : const Color(0xFF0E4778),
                   shape: BoxShape.circle,
                 ),
                 child: Center(

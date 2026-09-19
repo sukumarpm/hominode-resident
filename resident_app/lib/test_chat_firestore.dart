@@ -14,7 +14,7 @@ void main() async {
 }
 
 class ChatFirestoreTestApp extends StatelessWidget {
-  const ChatFirestoreTestApp({Key? key}) : super(key: key);
+  const ChatFirestoreTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class ChatFirestoreTestApp extends StatelessWidget {
 }
 
 class ChatFirestoreTestScreen extends StatefulWidget {
-  const ChatFirestoreTestScreen({Key? key}) : super(key: key);
+  const ChatFirestoreTestScreen({super.key});
 
   @override
   State<ChatFirestoreTestScreen> createState() => _ChatFirestoreTestScreenState();

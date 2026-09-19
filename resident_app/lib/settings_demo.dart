@@ -9,7 +9,7 @@ void main() {
 }
 
 class SettingsDemoApp extends StatelessWidget {
-  const SettingsDemoApp({Key? key}) : super(key: key);
+  const SettingsDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class SettingsDemoApp extends StatelessWidget {
 }
 
 class SettingsDemoHome extends StatelessWidget {
-  const SettingsDemoHome({Key? key}) : super(key: key);
+  const SettingsDemoHome({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -28,7 +28,10 @@ class ComplaintResult {
     );
   }
 
-  factory ComplaintResult.failure({required String message, String? errorCode}) {
+  factory ComplaintResult.failure({
+    required String message,
+    String? errorCode,
+  }) {
     return ComplaintResult(
       success: false,
       message: message,
@@ -40,7 +43,8 @@ class ComplaintResult {
 /// Complaint Firestore Service
 class ComplaintFirestoreService {
   // Singleton pattern
-  static final ComplaintFirestoreService instance = ComplaintFirestoreService._internal();
+  static final ComplaintFirestoreService instance =
+      ComplaintFirestoreService._internal();
   factory ComplaintFirestoreService() => instance;
   ComplaintFirestoreService._internal();
 
@@ -68,15 +72,18 @@ class ComplaintFirestoreService {
 
       // Get user ID using the same logic as UserDataService
       String? userId;
-      
+
       // First try Firebase Auth
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         print('🆔 ComplaintService: Firebase Auth User: ${firebaseUser.uid}');
-        
+
         // Try to find user document by Firebase Auth UID
-        final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-        
+        final doc = await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+
         if (doc.exists) {
           userId = doc.id;
           print('✅ ComplaintService: Found user document by Firebase Auth UID');
@@ -88,20 +95,22 @@ class ComplaintFirestoreService {
               .where('authUid', isEqualTo: firebaseUser.uid)
               .limit(1)
               .get();
-          
+
           if (querySnapshot.docs.isNotEmpty) {
             userId = querySnapshot.docs.first.id;
             print('✅ ComplaintService: Found user document by authUid field');
           }
         }
       }
-      
+
       // Fallback to SharedPreferences
       if (userId == null) {
-        print('⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences...');
+        print(
+          '⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences...',
+        );
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ ComplaintService: No user ID found');
           return ComplaintResult.failure(
@@ -109,14 +118,14 @@ class ComplaintFirestoreService {
             errorCode: 'not-authenticated',
           );
         }
-        
+
         print('🆔 ComplaintService: Using stored User ID: $userId');
       }
 
       // Fetch user data from Firestore
       print('📥 Fetching user data from Firestore...');
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      
+
       if (!userDoc.exists) {
         print('❌ User document not found in Firestore');
         print('   User ID: $userId');
@@ -125,14 +134,22 @@ class ComplaintFirestoreService {
           errorCode: 'user-not-found',
         );
       }
-      
+
       final userData = userDoc.data();
-      final userName = userData?['name'] ?? _auth.currentUser?.displayName ?? 'Unknown User';
+      final userName =
+          userData?['name'] ?? _auth.currentUser?.displayName ?? 'Unknown User';
       final userEmail = userData?['email'] ?? _auth.currentUser?.email ?? '';
       final flatId = userData?['flatId'] ?? '';
       final flatLabel = userData?['flatLabel'] ?? userData?['flatId'] ?? '';
       final adminId = userData?['adminId'];
-      
+      final communityId = userData?['communityId']?.toString().trim() ?? '';
+      if (communityId.isEmpty) {
+        return ComplaintResult.failure(
+          message: 'Your resident account is not assigned to a community.',
+          errorCode: 'community-not-assigned',
+        );
+      }
+
       print('✅ User data fetched: $userName ($userEmail)');
       print('🏢 Flat ID: $flatId');
       print('🏢 Flat Label: $flatLabel');
@@ -140,13 +157,16 @@ class ComplaintFirestoreService {
 
       // Create complaint document
       final complaintData = {
-        'userId': _auth.currentUser?.uid ?? userId,  // Use Firebase Auth UID
-        'residentId': _auth.currentUser?.uid ?? userId,  // Also store as residentId for rules
+        'userId': _auth.currentUser?.uid ?? userId, // Use Firebase Auth UID
+        'residentId':
+            _auth.currentUser?.uid ??
+            userId, // Also store as residentId for rules
         'userName': userName,
         'userEmail': userEmail,
         'flatId': flatId,
         'flatLabel': flatLabel,
         'adminId': adminId,
+        'communityId': communityId,
         'title': title,
         'description': description,
         'category': category.name, // Store enum name
@@ -196,15 +216,18 @@ class ComplaintFirestoreService {
     try {
       // Get user ID using the same logic as UserDataService
       String? userId;
-      
+
       // First try Firebase Auth
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         print('🆔 ComplaintService: Firebase Auth User: ${firebaseUser.uid}');
-        
+
         // Try to find user document by Firebase Auth UID
-        final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-        
+        final doc = await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+
         if (doc.exists) {
           userId = doc.id;
           print('✅ ComplaintService: Found user document by Firebase Auth UID');
@@ -216,31 +239,50 @@ class ComplaintFirestoreService {
               .where('authUid', isEqualTo: firebaseUser.uid)
               .limit(1)
               .get();
-          
+
           if (querySnapshot.docs.isNotEmpty) {
             userId = querySnapshot.docs.first.id;
             print('✅ ComplaintService: Found user document by authUid field');
           }
         }
       }
-      
+
       // Fallback to SharedPreferences
       if (userId == null) {
-        print('⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences...');
+        print(
+          '⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences...',
+        );
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ ComplaintService: No user ID found');
           return [];
         }
-        
+
         print('🆔 ComplaintService: Using stored User ID: $userId');
+      }
+
+      final authenticatedUid = _auth.currentUser?.uid;
+      if (authenticatedUid == null || userId != authenticatedUid) {
+        print('❌ ComplaintService: Canonical authenticated user unavailable');
+        return [];
+      }
+      final profile = await _firestore
+          .collection('users')
+          .doc(authenticatedUid)
+          .get();
+      final communityId =
+          profile.data()?['communityId']?.toString().trim() ?? '';
+      if (!profile.exists || communityId.isEmpty) {
+        print('❌ ComplaintService: Canonical community unavailable');
+        return [];
       }
 
       final snapshot = await _firestore
           .collection(complaintsCollection)
-          .where('userId', isEqualTo: userId)
+          .where('communityId', isEqualTo: communityId)
+          .where('userId', isEqualTo: authenticatedUid)
           .get();
 
       final complaints = snapshot.docs.map((doc) {
@@ -263,7 +305,7 @@ class ComplaintFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -272,12 +314,12 @@ class ComplaintFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
         }
-        
+
         print('🆔 Using Firestore User ID: $userId');
       }
 
@@ -290,7 +332,7 @@ class ComplaintFirestoreService {
 
       final userData = userDoc.data();
       final userRole = userData?['role'] ?? 'resident';
-      
+
       if (userRole != 'admin') {
         print('⚠️  User is not an admin, returning personal complaints only');
         return await getMyComplaints();
@@ -310,9 +352,9 @@ class ComplaintFirestoreService {
 
       // Sort in memory by createdAt (newest first)
       complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
-      
+
       print('✅ Found ${complaints.length} complaints for admin');
-      
+
       return complaints;
     } catch (e) {
       print('❌ Error fetching admin complaints: $e');
@@ -337,9 +379,9 @@ class ComplaintFirestoreService {
 
       // Sort in memory by createdAt (newest first)
       complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
-      
+
       print('✅ Found ${complaints.length} complaints for flat $flatId');
-      
+
       return complaints;
     } catch (e) {
       print('❌ Error fetching complaints by flat: $e');
@@ -353,7 +395,7 @@ class ComplaintFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -361,7 +403,7 @@ class ComplaintFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
@@ -377,7 +419,7 @@ class ComplaintFirestoreService {
 
       final userData = userDoc.data();
       final userRole = userData?['role'] ?? 'resident';
-      
+
       if (userRole == 'admin') {
         print('👤 User is admin, fetching admin complaints');
         return await getAdminComplaints();
@@ -396,18 +438,25 @@ class ComplaintFirestoreService {
   Stream<List<Complaint>> streamMyComplaints() async* {
     // Get user ID using the same logic as UserDataService
     String? userId;
-    
+
     // First try Firebase Auth
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
-      print('🆔 ComplaintService: Firebase Auth User for stream: ${firebaseUser.uid}');
-      
+      print(
+        '🆔 ComplaintService: Firebase Auth User for stream: ${firebaseUser.uid}',
+      );
+
       // Try to find user document by Firebase Auth UID
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final doc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
       if (doc.exists) {
         userId = doc.id;
-        print('✅ ComplaintService: Found user document by Firebase Auth UID for stream');
+        print(
+          '✅ ComplaintService: Found user document by Firebase Auth UID for stream',
+        );
       } else {
         // Try to find by authUid field
         print('🔍 ComplaintService: Searching by authUid field for stream...');
@@ -416,43 +465,65 @@ class ComplaintFirestoreService {
             .where('authUid', isEqualTo: firebaseUser.uid)
             .limit(1)
             .get();
-        
+
         if (querySnapshot.docs.isNotEmpty) {
           userId = querySnapshot.docs.first.id;
-          print('✅ ComplaintService: Found user document by authUid field for stream');
+          print(
+            '✅ ComplaintService: Found user document by authUid field for stream',
+          );
         }
       }
     }
-    
+
     // Fallback to SharedPreferences
     if (userId == null) {
-      print('⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences for stream...');
+      print(
+        '⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences for stream...',
+      );
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ ComplaintService: No user ID found for stream');
         yield [];
         return;
       }
-      
+
       print('🆔 ComplaintService: Using stored User ID for stream: $userId');
+    }
+
+    final authenticatedUid = _auth.currentUser?.uid;
+    if (authenticatedUid == null || userId != authenticatedUid) {
+      print('❌ ComplaintService: Canonical authenticated user unavailable');
+      yield [];
+      return;
+    }
+    final profile = await _firestore
+        .collection('users')
+        .doc(authenticatedUid)
+        .get();
+    final communityId = profile.data()?['communityId']?.toString().trim() ?? '';
+    if (!profile.exists || communityId.isEmpty) {
+      print('❌ ComplaintService: Canonical community unavailable');
+      yield [];
+      return;
     }
 
     yield* _firestore
         .collection(complaintsCollection)
-        .where('userId', isEqualTo: userId)
+        .where('communityId', isEqualTo: communityId)
+        .where('userId', isEqualTo: authenticatedUid)
         .snapshots()
         .map((snapshot) {
-      final complaints = snapshot.docs.map((doc) {
-        return complaintFromFirestore(doc);
-      }).toList();
+          final complaints = snapshot.docs.map((doc) {
+            return complaintFromFirestore(doc);
+          }).toList();
 
-      // Sort in memory by createdAt (newest first)
-      complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
+          // Sort in memory by createdAt (newest first)
+          complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
 
-      return complaints;
-    });
+          return complaints;
+        });
   }
 
   /// Stream admin complaints (real-time updates for admin)
@@ -460,47 +531,62 @@ class ComplaintFirestoreService {
   Stream<List<Complaint>> streamAdminComplaints() async* {
     // Get user ID using the same logic as UserDataService
     String? userId;
-    
+
     // First try Firebase Auth
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
-      print('🆔 ComplaintService: Firebase Auth User for admin stream: ${firebaseUser.uid}');
-      
+      print(
+        '🆔 ComplaintService: Firebase Auth User for admin stream: ${firebaseUser.uid}',
+      );
+
       // Try to find user document by Firebase Auth UID
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final doc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
       if (doc.exists) {
         userId = doc.id;
-        print('✅ ComplaintService: Found user document by Firebase Auth UID for admin stream');
+        print(
+          '✅ ComplaintService: Found user document by Firebase Auth UID for admin stream',
+        );
       } else {
         // Try to find by authUid field
-        print('🔍 ComplaintService: Searching by authUid field for admin stream...');
+        print(
+          '🔍 ComplaintService: Searching by authUid field for admin stream...',
+        );
         final querySnapshot = await _firestore
             .collection('users')
             .where('authUid', isEqualTo: firebaseUser.uid)
             .limit(1)
             .get();
-        
+
         if (querySnapshot.docs.isNotEmpty) {
           userId = querySnapshot.docs.first.id;
-          print('✅ ComplaintService: Found user document by authUid field for admin stream');
+          print(
+            '✅ ComplaintService: Found user document by authUid field for admin stream',
+          );
         }
       }
     }
-    
+
     // Fallback to SharedPreferences
     if (userId == null) {
-      print('⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences for admin stream...');
+      print(
+        '⚠️  ComplaintService: No Firebase Auth user, checking SharedPreferences for admin stream...',
+      );
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ ComplaintService: No user ID found for admin stream');
         yield [];
         return;
       }
-      
-      print('🆔 ComplaintService: Using stored User ID for admin stream: $userId');
+
+      print(
+        '🆔 ComplaintService: Using stored User ID for admin stream: $userId',
+      );
     }
 
     // Check if user is admin
@@ -513,7 +599,7 @@ class ComplaintFirestoreService {
 
     final userData = userDoc.data();
     final userRole = userData?['role'] ?? 'resident';
-    
+
     if (userRole != 'admin') {
       print('⚠️  User is not an admin, returning personal complaints stream');
       yield* streamMyComplaints();
@@ -527,22 +613,22 @@ class ComplaintFirestoreService {
         .where('adminId', isEqualTo: userId)
         .snapshots()
         .map((snapshot) {
-      final complaints = snapshot.docs.map((doc) {
-        return complaintFromFirestore(doc);
-      }).toList();
+          final complaints = snapshot.docs.map((doc) {
+            return complaintFromFirestore(doc);
+          }).toList();
 
-      // Sort in memory by createdAt (newest first)
-      complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
+          // Sort in memory by createdAt (newest first)
+          complaints.sort((a, b) => b.createdDate.compareTo(a.createdDate));
 
-      return complaints;
-    });
+          return complaints;
+        });
   }
 
   /// Stream complaints based on user role
   Stream<List<Complaint>> streamComplaintsForCurrentUser() async* {
     // Try to get user ID from Firebase Auth first
     String? userId;
-    
+
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
       userId = firebaseUser.uid;
@@ -550,7 +636,7 @@ class ComplaintFirestoreService {
       // Fallback to Firestore-only authentication
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ No user ID found');
         yield [];
@@ -568,7 +654,7 @@ class ComplaintFirestoreService {
 
     final userData = userDoc.data();
     final userRole = userData?['role'] ?? 'resident';
-    
+
     if (userRole == 'admin') {
       print('👤 User is admin, streaming admin complaints');
       yield* streamAdminComplaints();
@@ -588,17 +674,11 @@ class ComplaintFirestoreService {
     required ComplaintStatus status,
   }) async {
     try {
-      await _firestore
-          .collection(complaintsCollection)
-          .doc(complaintId)
-          .update({
-        'status': status.name,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      return ComplaintResult.success(
-        message: 'Complaint status updated',
+      await _firestore.collection(complaintsCollection).doc(complaintId).update(
+        {'status': status.name, 'updatedAt': FieldValue.serverTimestamp()},
       );
+
+      return ComplaintResult.success(message: 'Complaint status updated');
     } catch (e) {
       return ComplaintResult.failure(
         message: 'Failed to update complaint status',
@@ -619,21 +699,17 @@ class ComplaintFirestoreService {
           .collection(complaintsCollection)
           .doc(complaintId)
           .update({
-        'assignedTo': technicianName,
-        'technicianPhone': technicianPhone,
-        'assignedStaffId': staffId,
-        'assignedStaffRole': staffRole,
-        'status': ComplaintStatus.inProgress.name,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+            'assignedTo': technicianName,
+            'technicianPhone': technicianPhone,
+            'assignedStaffId': staffId,
+            'assignedStaffRole': staffRole,
+            'status': ComplaintStatus.inProgress.name,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
 
-      return ComplaintResult.success(
-        message: 'Technician assigned',
-      );
+      return ComplaintResult.success(message: 'Technician assigned');
     } catch (e) {
-      return ComplaintResult.failure(
-        message: 'Failed to assign technician',
-      );
+      return ComplaintResult.failure(message: 'Failed to assign technician');
     }
   }
 
@@ -649,13 +725,9 @@ class ComplaintFirestoreService {
           .doc(complaintId)
           .delete();
 
-      return ComplaintResult.success(
-        message: 'Complaint deleted',
-      );
+      return ComplaintResult.success(message: 'Complaint deleted');
     } catch (e) {
-      return ComplaintResult.failure(
-        message: 'Failed to delete complaint',
-      );
+      return ComplaintResult.failure(message: 'Failed to delete complaint');
     }
   }
 
@@ -666,13 +738,13 @@ class ComplaintFirestoreService {
   /// Convert Firestore document to Complaint object (public for real-time updates)
   Complaint complaintFromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
-    
+
     // Debug logging
     print('🔍 Parsing complaint: ${doc.id}');
     print('📊 Raw status from Firestore: ${data['status']}');
     print('📊 Assigned to: ${data['assignedTo']}');
     print('📊 Staff ID: ${data['assignedStaffId']}');
-    
+
     // Parse category enum
     ComplaintCategory category;
     try {
@@ -690,11 +762,11 @@ class ComplaintFirestoreService {
       final statusString = data['status'] as String?;
       final isResolved = data['isResolved'] as bool?;
       final resolvedAt = data['resolvedAt'];
-      
+
       print('📊 Status string: "$statusString"');
       print('📊 isResolved: $isResolved');
       print('📊 resolvedAt: $resolvedAt');
-      
+
       // Check if complaint is resolved (admin app might use isResolved field)
       if (isResolved == true || resolvedAt != null) {
         status = ComplaintStatus.completed;
@@ -702,27 +774,27 @@ class ComplaintFirestoreService {
       }
       // Map different status values to our enum
       // Support both resident app and admin app status values
-      else if (statusString == 'completed' || 
-          statusString == 'resolved' || 
+      else if (statusString == 'completed' ||
+          statusString == 'resolved' ||
           statusString == 'closed') {
         status = ComplaintStatus.completed;
         print('✅ Mapped to: completed');
-      } else if (statusString == 'inProgress' || 
-                 statusString == 'in_progress' ||
-                 statusString == 'in-progress' ||
-                 statusString == 'assigned') {
+      } else if (statusString == 'inProgress' ||
+          statusString == 'in_progress' ||
+          statusString == 'in-progress' ||
+          statusString == 'assigned') {
         status = ComplaintStatus.inProgress;
         print('✅ Mapped to: inProgress');
-      } else if (statusString == 'pending' || 
-                 statusString == 'open' ||
-                 statusString == null) {
+      } else if (statusString == 'pending' ||
+          statusString == 'open' ||
+          statusString == null) {
         status = ComplaintStatus.pending;
         print('✅ Mapped to: pending');
       } else {
         print('⚠️ Unknown status "$statusString", defaulting to pending');
         status = ComplaintStatus.pending;
       }
-      
+
       print('✅ Final parsed status: $status');
     } catch (e) {
       print('❌ Error parsing status: $e');
@@ -750,10 +822,10 @@ class ComplaintFirestoreService {
       assignedStaffId: data['assignedStaffId'] as String?,
       assignedStaffRole: data['assignedStaffRole'] as String?,
     );
-    
+
     print('🎯 Final complaint status: ${complaint.status}');
     print('---');
-    
+
     return complaint;
   }
 

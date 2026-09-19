@@ -1,4 +1,4 @@
-package com.marantrix.lyvo.resident
+package com.marantrix.hominode.resident
 
 import io.flutter.embedding.android.FlutterActivity
 

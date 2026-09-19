@@ -3,7 +3,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../components/auth_text_field.dart';
 import '../components/auth_primary_button.dart';
 import '../services/admin_login_service.dart';
@@ -11,7 +10,7 @@ import '../services/admin_login_service.dart';
 /// Admin Login Screen
 /// Allows building administrators to login with email/phone and password
 class AdminLoginScreen extends StatefulWidget {
-  const AdminLoginScreen({Key? key}) : super(key: key);
+  const AdminLoginScreen({super.key});
 
   @override
   State<AdminLoginScreen> createState() => _AdminLoginScreenState();
@@ -95,12 +94,12 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
-        statusBarColor: Color(0xFF2563EB),
+        statusBarColor: Color(0xFF0E4778),
         statusBarIconBrightness: Brightness.light,
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: const Color(0xFF2563EB),
+        backgroundColor: const Color(0xFF0E4778),
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
@@ -122,10 +121,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                   const SizedBox(height: 8),
                   const Text(
                     'Login to your admin account',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFFE0E7FF),
-                    ),
+                    style: TextStyle(fontSize: 16, color: Color(0xFFE0E7FF)),
                   ),
                   const SizedBox(height: 40),
 
@@ -235,7 +231,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               'Forgot Password?',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Color(0xFF2563EB),
+                                color: Color(0xFF0E4778),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -251,9 +247,7 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.white.withOpacity(0.2),
-                      ),
+                      border: Border.all(color: Colors.white.withOpacity(0.2)),
                     ),
                     padding: const EdgeInsets.all(16),
                     child: const Column(

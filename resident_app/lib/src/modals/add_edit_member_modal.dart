@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -8,11 +9,7 @@ class AddEditMemberModal extends StatefulWidget {
   final FamilyMember? member;
   final Function(FamilyMember) onSave;
 
-  const AddEditMemberModal({
-    Key? key,
-    this.member,
-    required this.onSave,
-  }) : super(key: key);
+  const AddEditMemberModal({super.key, this.member, required this.onSave});
 
   /// Static helper to show the modal
   static Future<void> show(
@@ -24,10 +21,7 @@ class AddEditMemberModal extends StatefulWidget {
       context: context,
       barrierDismissible: false,
       barrierColor: Colors.black.withOpacity(0.35),
-      builder: (context) => AddEditMemberModal(
-        member: member,
-        onSave: onSave,
-      ),
+      builder: (context) => AddEditMemberModal(member: member, onSave: onSave),
     );
   }
 
@@ -40,7 +34,7 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
   late TextEditingController _nameController;
   late TextEditingController _relationController;
   late TextEditingController _ageController;
-  
+
   bool _isLoading = false;
   String? _nameError;
   String? _relationError;
@@ -57,8 +51,12 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.member?.name ?? '');
-    _relationController = TextEditingController(text: widget.member?.relation ?? '');
-    _ageController = TextEditingController(text: widget.member?.age.toString() ?? '');
+    _relationController = TextEditingController(
+      text: widget.member?.relation ?? '',
+    );
+    _ageController = TextEditingController(
+      text: widget.member?.age.toString() ?? '',
+    );
     _photoUrl = widget.member?.photoUrl;
 
     _animationController = AnimationController(
@@ -167,81 +165,81 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
       final ImageSource? source = await showModalBottomSheet<ImageSource>(
         context: context,
         backgroundColor: Colors.white,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
         ),
         builder: (context) => SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: EdgeInsets.all(20.w),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: 40,
-                  height: 4,
+                  width: 40.w,
+                  height: 4.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFFE5E7EB),
-                    borderRadius: BorderRadius.circular(2),
+                    borderRadius: BorderRadius.circular(2.r),
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
+                SizedBox(height: 20.h),
+                Text(
                   'Select Photo Source',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111827),
                   ),
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 ListTile(
                   leading: Container(
-                    width: 48,
-                    height: 48,
+                    width: 48.w,
+                    height: 48.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFDBEAFE),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: const Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
-                  title: const Text(
+                  title: Text(
                     'Camera',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: const Text('Take a new photo'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 ListTile(
                   leading: Container(
-                    width: 48,
-                    height: 48,
+                    width: 48.w,
+                    height: 48.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFDCFCE7),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                     child: const Icon(
                       Icons.photo_library,
                       color: Color(0xFF16A34A),
                     ),
                   ),
-                  title: const Text(
+                  title: Text(
                     'Gallery',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   subtitle: const Text('Choose from gallery'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
               ],
             ),
           ),
@@ -285,7 +283,8 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final modalWidth = screenWidth < 720 ? screenWidth * 0.92 : 720.0;
-    final isFormValid = _nameController.text.trim().isNotEmpty &&
+    final isFormValid =
+        _nameController.text.trim().isNotEmpty &&
         _relationController.text.trim().isNotEmpty &&
         _ageController.text.trim().isNotEmpty &&
         (int.tryParse(_ageController.text.trim()) ?? 0) > 0;
@@ -301,12 +300,12 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
               width: modalWidth,
               constraints: BoxConstraints(
                 maxHeight: MediaQuery.of(context).size.height * 0.8,
-                maxWidth: 720,
+                maxWidth: 720.w,
               ),
-              margin: const EdgeInsets.symmetric(horizontal: 16),
+              margin: EdgeInsets.symmetric(horizontal: 16.w),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(18.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.15),
@@ -320,15 +319,17 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                 children: [
                   // Header with close button
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 12, 16),
+                    padding: EdgeInsets.fromLTRB(24.w, 20.h, 12.w, 16.h),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
-                            widget.member == null ? 'Add Family Member' : 'Edit Family Member',
+                            widget.member == null
+                                ? 'Add Family Member'
+                                : 'Edit Family Member',
                             textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 22,
+                            style: TextStyle(
+                              fontSize: 22.sp,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF111827),
                               letterSpacing: -0.3,
@@ -337,11 +338,15 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                         ),
                         IconButton(
                           onPressed: _isLoading ? null : _handleCancel,
-                          icon: const Icon(Icons.close, size: 26, color: Color(0xFF9CA3AF)),
-                          padding: const EdgeInsets.all(10),
-                          constraints: const BoxConstraints(
-                            minWidth: 44,
-                            minHeight: 44,
+                          icon: Icon(
+                            Icons.close,
+                            size: 26.w,
+                            color: Color(0xFF9CA3AF),
+                          ),
+                          padding: EdgeInsets.all(10.w),
+                          constraints: BoxConstraints(
+                            minWidth: 44.w,
+                            minHeight: 44.h,
                           ),
                           splashRadius: 22,
                         ),
@@ -351,7 +356,7 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                   // Content
                   Flexible(
                     child: SingleChildScrollView(
-                      padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                      padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 24.h),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -362,7 +367,7 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                             error: _nameError,
                             hint: 'Enter name',
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20.h),
                           // Relation field
                           _buildTextField(
                             label: 'Relation',
@@ -370,7 +375,7 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                             error: _relationError,
                             hint: 'e.g., Spouse, Son, Daughter',
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20.h),
                           // Age field
                           _buildTextField(
                             label: 'Age',
@@ -379,47 +384,56 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                             hint: 'Enter age',
                             keyboardType: TextInputType.number,
                           ),
-                          const SizedBox(height: 24),
+                          SizedBox(height: 24.h),
                           // Photo upload section
-                          const Text(
+                          Text(
                             'Attach photo (optional)',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF111827),
                             ),
                           ),
-                          const SizedBox(height: 12),
+                          SizedBox(height: 12.h),
                           _buildPhotoUploadButton(),
-                          const SizedBox(height: 32),
+                          SizedBox(height: 32.h),
                           // Add Member button
                           SizedBox(
                             width: double.infinity,
-                            height: 54,
+                            height: 54.h,
                             child: ElevatedButton(
-                              onPressed: (_isLoading || !isFormValid) ? null : _handleSave,
+                              onPressed: (_isLoading || !isFormValid)
+                                  ? null
+                                  : _handleSave,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2563EB),
-                                disabledBackgroundColor: const Color(0xFF2563EB).withOpacity(0.4),
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                backgroundColor: const Color(0xFF0E4778),
+                                disabledBackgroundColor: const Color(
+                                  0xFF0E4778,
+                                ).withOpacity(0.4),
+                                padding: EdgeInsets.symmetric(vertical: 16.h),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 elevation: 0,
                               ),
                               child: _isLoading
-                                  ? const SizedBox(
-                                      height: 22,
-                                      width: 22,
+                                  ? SizedBox(
+                                      height: 22.h,
+                                      width: 22.w,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
                                       ),
                                     )
                                   : Text(
-                                      widget.member == null ? 'Add Member' : 'Update Member',
-                                      style: const TextStyle(
-                                        fontSize: 17,
+                                      widget.member == null
+                                          ? 'Add Member'
+                                          : 'Update Member',
+                                      style: TextStyle(
+                                        fontSize: 17.sp,
                                         fontWeight: FontWeight.w600,
                                         color: Colors.white,
                                         letterSpacing: -0.2,
@@ -452,13 +466,13 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Color(0xFF111827),
           ),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         TextField(
           controller: controller,
           keyboardType: keyboardType,
@@ -477,44 +491,41 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
           },
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
+            hintStyle: TextStyle(
               color: Color(0xFFB9BDC1),
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w400,
             ),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: const BorderSide(color: Color(0xFFE6E9EC), width: 1),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+              borderRadius: BorderRadius.circular(12.r),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               borderSide: const BorderSide(color: Color(0xFFEF4444), width: 2),
             ),
             errorText: error,
-            errorStyle: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFFEF4444),
+            errorStyle: TextStyle(fontSize: 13.sp, color: Color(0xFFEF4444)),
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 16.h,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
           ),
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color(0xFF111827),
-          ),
+          style: TextStyle(fontSize: 16.sp, color: Color(0xFF111827)),
         ),
       ],
     );
@@ -524,22 +535,22 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
     if (_photoUrl != null) {
       // Show thumbnail with change option
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFE6E9EC)),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
           children: [
             Container(
-              width: 48,
-              height: 48,
+              width: 48.w,
+              height: 48.h,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
                 color: const Color(0xFFF3F4F6),
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(24),
+                borderRadius: BorderRadius.circular(24.r),
                 child: _photoFile != null
                     ? Image.file(
                         _photoFile!,
@@ -548,55 +559,55 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                         height: 48,
                       )
                     : _photoUrl!.startsWith('http')
-                        ? Image.network(
-                            _photoUrl!,
-                            fit: BoxFit.cover,
-                            width: 48,
-                            height: 48,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person,
-                                size: 24,
-                                color: Color(0xFF9CA3AF),
-                              );
-                            },
-                          )
-                        : Image.file(
-                            File(_photoUrl!),
-                            fit: BoxFit.cover,
-                            width: 48,
-                            height: 48,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.person,
-                                size: 24,
-                                color: Color(0xFF9CA3AF),
-                              );
-                            },
-                          ),
+                    ? Image.network(
+                        _photoUrl!,
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: 24.w,
+                            color: Color(0xFF9CA3AF),
+                          );
+                        },
+                      )
+                    : Image.file(
+                        File(_photoUrl!),
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Icon(
+                            Icons.person,
+                            size: 24.w,
+                            color: Color(0xFF9CA3AF),
+                          );
+                        },
+                      ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Photo attached',
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF111827),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   GestureDetector(
                     onTap: _pickPhoto,
-                    child: const Text(
+                    child: Text(
                       'Change photo',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF2563EB),
+                        fontSize: 14.sp,
+                        color: Color(0xFF0E4778),
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -611,9 +622,9 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
                   _photoFile = null;
                 });
               },
-              icon: const Icon(Icons.close, size: 20, color: Color(0xFF9CA3AF)),
-              padding: const EdgeInsets.all(8),
-              constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+              icon: Icon(Icons.close, size: 20.w, color: Color(0xFF9CA3AF)),
+              padding: EdgeInsets.all(8.w),
+              constraints: BoxConstraints(minWidth: 36.w, minHeight: 36.h),
             ),
           ],
         ),
@@ -623,27 +634,27 @@ class _AddEditMemberModalState extends State<AddEditMemberModal>
     // Show upload button
     return InkWell(
       onTap: _pickPhoto,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: Container(
         width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 18),
+        padding: EdgeInsets.symmetric(vertical: 18.h),
         decoration: BoxDecoration(
           border: Border.all(color: const Color(0xFFE6E9EC), width: 1.5),
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
             Icon(
               Icons.file_upload_outlined,
-              size: 24,
+              size: 24.w,
               color: Color(0xFF111827),
             ),
-            SizedBox(width: 10),
+            SizedBox(width: 10.w),
             Text(
               'Upload photo',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF111827),
               ),

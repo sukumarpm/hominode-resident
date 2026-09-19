@@ -8,10 +8,7 @@ import '../components/read_more_text.dart';
 class ProductDetailModal extends StatelessWidget {
   final MarketplaceItem product;
 
-  const ProductDetailModal({
-    Key? key,
-    required this.product,
-  }) : super(key: key);
+  const ProductDetailModal({super.key, required this.product});
 
   static Future<void> show(BuildContext context, MarketplaceItem product) {
     return showGeneralDialog(
@@ -21,16 +18,11 @@ class ProductDetailModal extends StatelessWidget {
       barrierColor: Colors.black.withOpacity(0.35),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return Center(
-          child: ProductDetailModal(product: product),
-        );
+        return Center(child: ProductDetailModal(product: product));
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: ScaleTransition(
             scale: CurvedAnimation(
               parent: animation,
@@ -98,7 +90,11 @@ class ProductDetailModal extends StatelessWidget {
                     height: 260,
                     width: double.infinity,
                     color: Colors.grey[200],
-                    child: const Icon(Icons.image, size: 80, color: Colors.grey),
+                    child: const Icon(
+                      Icons.image,
+                      size: 80,
+                      color: Colors.grey,
+                    ),
                   );
                 },
               ),
@@ -121,11 +117,7 @@ class ProductDetailModal extends StatelessWidget {
                   color: Colors.black.withOpacity(0.5),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.white,
-                  size: 20,
-                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 20),
               ),
             ),
           ),
@@ -157,12 +149,15 @@ class ProductDetailModal extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 34,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
               const SizedBox(width: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   border: Border.all(color: const Color(0xFFD1D5DB)),
                   borderRadius: BorderRadius.circular(16),

@@ -2,7 +2,6 @@
 // Locale management service for app language
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 /// Service to manage app locale/language preferences
 /// This is a stub implementation - integrate with your state management

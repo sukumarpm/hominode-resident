@@ -17,10 +17,7 @@ void showDocumentPreviewModal(
 class DocumentPreviewModal extends StatelessWidget {
   final Document document;
 
-  const DocumentPreviewModal({
-    Key? key,
-    required this.document,
-  }) : super(key: key);
+  const DocumentPreviewModal({super.key, required this.document});
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +62,7 @@ class DocumentPreviewModal extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Content
             Flexible(
               child: SingleChildScrollView(
@@ -85,13 +82,13 @@ class DocumentPreviewModal extends StatelessWidget {
                         child: const Icon(
                           Icons.description_outlined,
                           size: 60,
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF0E4778),
                         ),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Title
                     Text(
                       document.title,
@@ -101,9 +98,9 @@ class DocumentPreviewModal extends StatelessWidget {
                         color: Color(0xFF111111),
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Description
                     Text(
                       document.description,
@@ -113,9 +110,9 @@ class DocumentPreviewModal extends StatelessWidget {
                         height: 1.5,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 20),
-                    
+
                     // Meta information
                     _buildMetaRow(
                       icon: Icons.calendar_today,
@@ -140,9 +137,9 @@ class DocumentPreviewModal extends StatelessWidget {
                       label: 'Category',
                       value: document.category.displayName,
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Preview placeholder
                     Container(
                       height: 200,
@@ -176,7 +173,7 @@ class DocumentPreviewModal extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             // Actions
             Container(
               padding: const EdgeInsets.all(16),
@@ -192,7 +189,10 @@ class DocumentPreviewModal extends StatelessWidget {
                       onPressed: () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF111111),
-                        side: const BorderSide(color: Color(0xFFE5E5E5), width: 1.5),
+                        side: const BorderSide(
+                          color: Color(0xFFE5E5E5),
+                          width: 1.5,
+                        ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -228,7 +228,7 @@ class DocumentPreviewModal extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2563EB),
+                        backgroundColor: const Color(0xFF0E4778),
                         foregroundColor: Colors.white,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
@@ -277,7 +277,20 @@ class DocumentPreviewModal extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${date.day} ${months[date.month - 1]} ${date.year}';
   }
 }

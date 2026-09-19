@@ -2,7 +2,6 @@
 // Run this to verify subscription packages, capacity tracking, and calendar blocking
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   print('🧪 Testing Advanced Amenities Booking Features\n');
@@ -38,7 +37,7 @@ void main() async {
     print('❌ Error: $e');
   }
   
-  print('\n' + '─' * 60 + '\n');
+  print('\n${'─' * 60}\n');
   
   // Test 2: Check amenity with multiple bookings
   print('👥 Test 2: Checking amenity with multiple user capacity...');
@@ -68,7 +67,7 @@ void main() async {
     print('❌ Error: $e');
   }
   
-  print('\n' + '─' * 60 + '\n');
+  print('\n${'─' * 60}\n');
   
   // Test 3: Check bookings for capacity calculation
   print('📊 Test 3: Checking existing bookings for capacity...');
@@ -118,7 +117,7 @@ void main() async {
     print('❌ Error: $e');
   }
   
-  print('\n' + '─' * 60 + '\n');
+  print('\n${'─' * 60}\n');
   
   // Test 4: Sample amenity data structure
   print('📝 Test 4: Sample amenity data structure for testing...');
@@ -169,6 +168,6 @@ Document: (auto-generated ID)
 }
 ''');
   
-  print('\n' + '─' * 60 + '\n');
+  print('\n${'─' * 60}\n');
   print('✅ Test complete! Check the output above for any issues.\n');
 }

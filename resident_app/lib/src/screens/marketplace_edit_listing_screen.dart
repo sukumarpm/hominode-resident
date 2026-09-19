@@ -2,8 +2,8 @@
 // Edit marketplace listing screen
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import '../models/listing_model.dart';
 import '../services/listing_firestore_service.dart';
@@ -14,10 +14,7 @@ import '../constants/app_sizes.dart';
 class MarketplaceEditListingScreen extends StatefulWidget {
   final ListingModel listing;
 
-  const MarketplaceEditListingScreen({
-    Key? key,
-    required this.listing,
-  }) : super(key: key);
+  const MarketplaceEditListingScreen({super.key, required this.listing});
 
   @override
   State<MarketplaceEditListingScreen> createState() =>
@@ -38,7 +35,7 @@ class _MarketplaceEditListingScreenState
   late String _selectedCondition;
   bool _isUpdating = false;
   List<String> _existingImages = [];
-  List<File> _newImages = [];
+  final List<File> _newImages = [];
 
   final List<String> _categories = [
     'Furniture',
@@ -50,7 +47,7 @@ class _MarketplaceEditListingScreenState
     'Toys',
     'Home Decor',
     'Kitchen',
-    'Other'
+    'Other',
   ];
   final List<String> _conditions = ['Like New', 'Good', 'Fair', 'Poor'];
 
@@ -58,10 +55,12 @@ class _MarketplaceEditListingScreenState
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.listing.title);
-    _priceController =
-        TextEditingController(text: widget.listing.price.toString());
-    _descriptionController =
-        TextEditingController(text: widget.listing.description);
+    _priceController = TextEditingController(
+      text: widget.listing.price.toString(),
+    );
+    _descriptionController = TextEditingController(
+      text: widget.listing.description,
+    );
     _selectedCategory = widget.listing.category;
     _selectedCondition = widget.listing.condition;
     _existingImages = List.from(widget.listing.images);
@@ -86,11 +85,11 @@ class _MarketplaceEditListingScreenState
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'Edit Product',
           style: TextStyle(
             color: Colors.black,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -183,14 +182,15 @@ class _MarketplaceEditListingScreenState
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(AppSizes.radiusButton),
+                        borderRadius: BorderRadius.circular(
+                          AppSizes.radiusButton,
+                        ),
                       ),
                     ),
                     child: _isUpdating
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.w,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
                               valueColor: AlwaysStoppedAnimation<Color>(
@@ -213,15 +213,15 @@ class _MarketplaceEditListingScreenState
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Product Images',
           style: TextStyle(
-            fontSize: 14,
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         // Existing images
         if (_existingImages.isNotEmpty)
           Column(
@@ -229,24 +229,21 @@ class _MarketplaceEditListingScreenState
             children: [
               Text(
                 'Current Images (${_existingImages.length})',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               SizedBox(
-                height: 100,
+                height: 100.h,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: _existingImages.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: EdgeInsets.only(right: 8.w),
                       child: Stack(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                             child: Image.network(
                               _existingImages[index],
                               width: 100,
@@ -254,8 +251,8 @@ class _MarketplaceEditListingScreenState
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Container(
-                                  width: 100,
-                                  height: 100,
+                                  width: 100.w,
+                                  height: 100.h,
                                   color: Colors.grey.shade200,
                                   child: Icon(
                                     Icons.broken_image,
@@ -277,13 +274,13 @@ class _MarketplaceEditListingScreenState
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.red,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
-                                padding: const EdgeInsets.all(4),
-                                child: const Icon(
+                                padding: EdgeInsets.all(4.w),
+                                child: Icon(
                                   Icons.close,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: 16.w,
                                 ),
                               ),
                             ),
@@ -294,7 +291,7 @@ class _MarketplaceEditListingScreenState
                   },
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
             ],
           ),
         // New images
@@ -304,24 +301,21 @@ class _MarketplaceEditListingScreenState
             children: [
               Text(
                 'New Images (${_newImages.length})',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               SizedBox(
-                height: 100,
+                height: 100.h,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: _newImages.length,
                   itemBuilder: (context, index) {
                     return Padding(
-                      padding: const EdgeInsets.only(right: 8),
+                      padding: EdgeInsets.only(right: 8.w),
                       child: Stack(
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
+                            borderRadius: BorderRadius.circular(8.r),
                             child: Image.file(
                               _newImages[index],
                               width: 100,
@@ -341,13 +335,13 @@ class _MarketplaceEditListingScreenState
                               child: Container(
                                 decoration: BoxDecoration(
                                   color: Colors.red,
-                                  borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
-                                padding: const EdgeInsets.all(4),
-                                child: const Icon(
+                                padding: EdgeInsets.all(4.w),
+                                child: Icon(
                                   Icons.close,
                                   color: Colors.white,
-                                  size: 16,
+                                  size: 16.w,
                                 ),
                               ),
                             ),
@@ -358,7 +352,7 @@ class _MarketplaceEditListingScreenState
                   },
                 ),
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
             ],
           ),
         // Add images button
@@ -373,12 +367,12 @@ class _MarketplaceEditListingScreenState
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Expanded(
               child: OutlinedButton.icon(
                 onPressed: _pickImageFromCamera,
@@ -388,7 +382,7 @@ class _MarketplaceEditListingScreenState
                   foregroundColor: AppColors.primary,
                   side: const BorderSide(color: AppColors.primary),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
               ),
@@ -411,13 +405,13 @@ class _MarketplaceEditListingScreenState
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -429,24 +423,24 @@ class _MarketplaceEditListingScreenState
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.error),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 12.h,
             ),
           ),
         ),
@@ -465,40 +459,37 @@ class _MarketplaceEditListingScreenState
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         DropdownButtonFormField<String>(
-          value: value,
+          initialValue: value,
           items: items
-              .map((item) => DropdownMenuItem(
-                    value: item,
-                    child: Text(item),
-                  ))
+              .map((item) => DropdownMenuItem(value: item, child: Text(item)))
               .toList(),
           onChanged: onChanged,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.border),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: AppColors.primary, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 12,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 12.w,
+              vertical: 12.h,
             ),
           ),
         ),
@@ -566,22 +557,25 @@ class _MarketplaceEditListingScreenState
 
     try {
       print('🔵 MARKETPLACE EDIT: Updating listing...');
-      
+
       // Combine existing and new images
       List<String> allImages = [..._existingImages];
 
       // Upload new images if any
       if (_newImages.isNotEmpty) {
-        print('🔐 STEP 1: Uploading ${_newImages.length} new images to Cloudinary...');
-        
+        print(
+          '🔐 STEP 1: Uploading ${_newImages.length} new images to Cloudinary...',
+        );
+
         for (int i = 0; i < _newImages.length; i++) {
           try {
             final imageUrl = await CloudinaryService.uploadImage(
               imagePath: _newImages[i].path,
               folder: 'marketplace',
-              publicId: 'marketplace_${DateTime.now().millisecondsSinceEpoch}_$i',
+              publicId:
+                  'marketplace_${DateTime.now().millisecondsSinceEpoch}_$i',
             );
-            
+
             if (imageUrl.isNotEmpty) {
               allImages.add(imageUrl);
               print('✅ New image ${i + 1} uploaded: $imageUrl');
@@ -600,13 +594,13 @@ class _MarketplaceEditListingScreenState
             return;
           }
         }
-        
+
         print('✅ STEP 1 PASSED: All new images uploaded');
       }
 
       // Step 2: Update listing with all images
       print('🔐 STEP 2: Updating listing in Firestore...');
-      
+
       final result = await _listingService.updateListing(
         listingId: widget.listing.id!,
         title: _titleController.text,
@@ -619,11 +613,11 @@ class _MarketplaceEditListingScreenState
 
       if (mounted) {
         setState(() => _isUpdating = false);
-        
+
         if (result.success) {
           print('✅ STEP 2 PASSED: Listing updated successfully');
           print('✅ MARKETPLACE EDIT: Update complete');
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Product updated successfully'),
@@ -633,7 +627,7 @@ class _MarketplaceEditListingScreenState
           Navigator.pop(context);
         } else {
           print('❌ STEP 2 FAILED: ${result.message}');
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result.message ?? 'Failed to update product'),
@@ -645,15 +639,12 @@ class _MarketplaceEditListingScreenState
     } catch (e, stackTrace) {
       print('❌ MARKETPLACE EDIT: Error updating listing: $e');
       print('   Stack trace: $stackTrace');
-      
+
       if (mounted) {
         setState(() => _isUpdating = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }

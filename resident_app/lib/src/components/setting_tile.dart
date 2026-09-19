@@ -8,10 +8,7 @@ import 'settings_toggle.dart';
 class SettingTile extends StatelessWidget {
   final SettingItem item;
 
-  const SettingTile({
-    Key? key,
-    required this.item,
-  }) : super(key: key);
+  const SettingTile({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +45,7 @@ class SettingTile extends StatelessWidget {
                   child: Icon(
                     item.icon,
                     size: 20,
-                    color: const Color(0xFF2563EB),
+                    color: const Color(0xFF0E4778),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -105,8 +102,9 @@ class SettingTile extends StatelessWidget {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: (item.statusColor ?? const Color(0xFF9AA0A6))
-                  .withOpacity(0.1),
+              color: (item.statusColor ?? const Color(0xFF9AA0A6)).withOpacity(
+                0.1,
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Text(

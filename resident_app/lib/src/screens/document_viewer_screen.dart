@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/document.dart';
 
 /// Full-screen Document Viewer
@@ -8,10 +7,7 @@ import '../models/document.dart';
 class DocumentViewerScreen extends StatelessWidget {
   final Document document;
 
-  const DocumentViewerScreen({
-    Key? key,
-    required this.document,
-  }) : super(key: key);
+  const DocumentViewerScreen({super.key, required this.document});
 
   @override
   Widget build(BuildContext context) {
@@ -107,9 +103,7 @@ class DocumentViewerScreen extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
       decoration: const BoxDecoration(
         color: Color(0xFF1F1F1F),
-        border: Border(
-          bottom: BorderSide(color: Color(0xFF3A3A3A), width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFF3A3A3A), width: 1)),
       ),
       child: Row(
         children: [
@@ -153,9 +147,7 @@ class DocumentViewerScreen extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         color: Color(0xFF1F1F1F),
-        border: Border(
-          top: BorderSide(color: Color(0xFF3A3A3A), width: 1),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFF3A3A3A), width: 1)),
       ),
       child: Row(
         children: [
@@ -172,7 +164,9 @@ class DocumentViewerScreen extends StatelessWidget {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         ),
                         SizedBox(width: 12),
@@ -190,7 +184,11 @@ class DocumentViewerScreen extends StatelessWidget {
                     const SnackBar(
                       content: Row(
                         children: [
-                          Icon(Icons.check_circle, color: Colors.white, size: 20),
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                           SizedBox(width: 12),
                           Text('Downloaded successfully'),
                         ],
@@ -204,10 +202,7 @@ class DocumentViewerScreen extends StatelessWidget {
               icon: const Icon(Icons.download, size: 20),
               label: const Text(
                 'Download',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Colors.white,
@@ -234,13 +229,10 @@ class DocumentViewerScreen extends StatelessWidget {
               icon: const Icon(Icons.open_in_new, size: 20),
               label: const Text(
                 'Open External',
-                style: TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF0E4778),
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(

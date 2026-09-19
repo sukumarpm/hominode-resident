@@ -9,10 +9,7 @@ import '../services/listing_firestore_service.dart';
 class CreateListingModal extends StatefulWidget {
   final ListingModel? prefill;
 
-  const CreateListingModal({
-    Key? key,
-    this.prefill,
-  }) : super(key: key);
+  const CreateListingModal({super.key, this.prefill});
 
   static Future<bool?> show(BuildContext context, {ListingModel? prefill}) {
     return showGeneralDialog<bool>(
@@ -22,16 +19,11 @@ class CreateListingModal extends StatefulWidget {
       barrierColor: Colors.black.withOpacity(0.35),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
-        return Center(
-          child: CreateListingModal(prefill: prefill),
-        );
+        return Center(child: CreateListingModal(prefill: prefill));
       },
       transitionBuilder: (context, animation, secondaryAnimation, child) {
         return FadeTransition(
-          opacity: CurvedAnimation(
-            parent: animation,
-            curve: Curves.easeOut,
-          ),
+          opacity: CurvedAnimation(parent: animation, curve: Curves.easeOut),
           child: ScaleTransition(
             scale: CurvedAnimation(
               parent: animation,
@@ -103,8 +95,8 @@ class _CreateListingModalState extends State<CreateListingModal> {
         title: _titleController.text.trim(),
         price: int.parse(_priceController.text),
         category: _categoryController.text.trim(),
-        condition: _conditionController.text.trim().isEmpty 
-            ? 'Good' 
+        condition: _conditionController.text.trim().isEmpty
+            ? 'Good'
             : _conditionController.text.trim(),
         description: _descriptionController.text.trim(),
         images: _selectedImages,
@@ -134,7 +126,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
       }
     } catch (e) {
       setState(() => _isSubmitting = false);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -190,15 +182,12 @@ class _CreateListingModalState extends State<CreateListingModal> {
                     ),
                     child: const Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
                   title: const Text(
                     'Camera',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Take a new photo'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
@@ -219,10 +208,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
                   ),
                   title: const Text(
                     'Gallery',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Choose from gallery'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
@@ -322,7 +308,9 @@ class _CreateListingModalState extends State<CreateListingModal> {
                           placeholder: '2500',
                           controller: _priceController,
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Price is required';
@@ -379,9 +367,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: Color(0xFFF0F0F0)),
-        ),
+        border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0))),
       ),
       child: Row(
         children: [
@@ -514,11 +500,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
                 color: Color(0xFFEF4444),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 16,
-              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
             ),
           ),
         ),
@@ -534,7 +516,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
       child: ElevatedButton(
         onPressed: isEnabled ? _handleSubmit : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: const Color(0xFF0E4778),
           foregroundColor: Colors.white,
           disabledBackgroundColor: const Color(0xFFE6E6E6),
           disabledForegroundColor: const Color(0xFF9B9B9B),
@@ -554,10 +536,7 @@ class _CreateListingModalState extends State<CreateListingModal> {
               )
             : const Text(
                 'Post Listing',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
       ),
     );

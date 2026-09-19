@@ -40,19 +40,19 @@ import 'package:flutter/services.dart';
 class PremiumSplashScreen extends StatefulWidget {
   /// Callback when animation completes
   final VoidCallback? onComplete;
-  
+
   /// Auto-navigate after animation (default: true)
   final bool autoNavigate;
-  
+
   /// Show progress indicator during hold phase (default: true)
   final bool showProgressIndicator;
 
   const PremiumSplashScreen({
-    Key? key,
+    super.key,
     this.onComplete,
     this.autoNavigate = true,
     this.showProgressIndicator = true,
-  }) : super(key: key);
+  });
 
   @override
   State<PremiumSplashScreen> createState() => _PremiumSplashScreenState();
@@ -63,36 +63,36 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
   // Animation controllers
   late AnimationController _masterController;
   late AnimationController _shimmerController;
-  
+
   // Background animations
   late Animation<double> _backgroundOpacity;
-  
+
   // Logo animations
   late Animation<double> _logoY;
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
   late Animation<double> _shadowBlur;
-  
+
   // Depth layer animations
   late Animation<double> _depthLayerX;
   late Animation<double> _depthLayerY;
   late Animation<double> _depthLayerRotation;
   late Animation<double> _depthLayerOpacity;
-  
+
   // Shimmer animation
   late Animation<double> _shimmerPosition;
-  
+
   // Tagline animations
   late Animation<double> _taglineOpacity;
   late Animation<double> _taglineY;
-  
+
   // Progress indicator
   late Animation<double> _progressOpacity;
 
   @override
   void initState() {
     super.initState();
-    
+
     // Set status bar style
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -101,7 +101,7 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
         statusBarBrightness: Brightness.dark,
       ),
     );
-    
+
     _initializeAnimations();
     _startAnimations();
   }
@@ -112,150 +112,136 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
       vsync: this,
       duration: const Duration(milliseconds: 2200),
     );
-    
+
     // Shimmer controller (700ms, repeats once)
     _shimmerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 700),
     );
-    
+
     // 1. Background fade-in (0-300ms)
-    _backgroundOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _backgroundOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.0, 0.136, curve: Curves.easeOutCubic),
       ),
     );
-    
+
     // 2. Logo entry (300-900ms)
-    _logoY = Tween<double>(
-      begin: 80.0,
-      end: 0.0,
-    ).animate(
+    _logoY = Tween<double>(begin: 80.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.136, 0.409, curve: Curves.elasticOut),
       ),
     );
-    
-    _logoScale = TweenSequence<double>([
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 0.85, end: 1.02),
-        weight: 70,
-      ),
-      TweenSequenceItem(
-        tween: Tween<double>(begin: 1.02, end: 1.0),
-        weight: 30,
-      ),
-    ]).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: const Interval(0.136, 0.409, curve: Curves.easeOut),
-      ),
-    );
-    
-    _logoOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+
+    _logoScale =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 0.85, end: 1.02),
+            weight: 70,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 1.02, end: 1.0),
+            weight: 30,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: const Interval(0.136, 0.409, curve: Curves.easeOut),
+          ),
+        );
+
+    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.136, 0.318, curve: Curves.easeOut),
       ),
     );
-    
+
     // Shadow growth (300-900ms)
-    _shadowBlur = Tween<double>(
-      begin: 4.0,
-      end: 18.0,
-    ).animate(
+    _shadowBlur = Tween<double>(begin: 4.0, end: 18.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.136, 0.409, curve: Curves.easeOut),
       ),
     );
-    
+
     // 3. Depth layer parallax (400-1200ms)
-    _depthLayerX = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: 3), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: 3, end: -2), weight: 50),
-    ]).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
-      ),
-    );
-    
-    _depthLayerY = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: 3), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: 3, end: -2), weight: 50),
-    ]).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
-      ),
-    );
-    
-    _depthLayerRotation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0, end: -1), weight: 50),
-      TweenSequenceItem(tween: Tween<double>(begin: -1, end: 1), weight: 50),
-    ]).animate(
-      CurvedAnimation(
-        parent: _masterController,
-        curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
-      ),
-    );
-    
-    _depthLayerOpacity = Tween<double>(
-      begin: 0.0,
-      end: 0.3,
-    ).animate(
+    _depthLayerX =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween<double>(begin: 0, end: 3), weight: 50),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 3, end: -2),
+            weight: 50,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
+          ),
+        );
+
+    _depthLayerY =
+        TweenSequence<double>([
+          TweenSequenceItem(tween: Tween<double>(begin: 0, end: 3), weight: 50),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 3, end: -2),
+            weight: 50,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
+          ),
+        );
+
+    _depthLayerRotation =
+        TweenSequence<double>([
+          TweenSequenceItem(
+            tween: Tween<double>(begin: 0, end: -1),
+            weight: 50,
+          ),
+          TweenSequenceItem(
+            tween: Tween<double>(begin: -1, end: 1),
+            weight: 50,
+          ),
+        ]).animate(
+          CurvedAnimation(
+            parent: _masterController,
+            curve: const Interval(0.182, 0.545, curve: Curves.easeInOut),
+          ),
+        );
+
+    _depthLayerOpacity = Tween<double>(begin: 0.0, end: 0.3).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.182, 0.409, curve: Curves.easeOut),
       ),
     );
-    
+
     // 4. Shimmer sweep (controlled by separate controller)
-    _shimmerPosition = Tween<double>(
-      begin: -1.0,
-      end: 2.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _shimmerController,
-        curve: Curves.easeInOut,
-      ),
+    _shimmerPosition = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _shimmerController, curve: Curves.easeInOut),
     );
-    
+
     // 5. Tagline fade & slide (1100-1500ms)
-    _taglineOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.5, 0.682, curve: Curves.easeOut),
       ),
     );
-    
-    _taglineY = Tween<double>(
-      begin: 10.0,
-      end: 0.0,
-    ).animate(
+
+    _taglineY = Tween<double>(begin: 10.0, end: 0.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.5, 0.682, curve: Curves.easeOut),
       ),
     );
-    
+
     // 6. Progress indicator (1500-2200ms)
-    _progressOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _progressOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _masterController,
         curve: const Interval(0.682, 0.773, curve: Curves.easeOut),
@@ -266,14 +252,14 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
   void _startAnimations() {
     // Start master animation
     _masterController.forward();
-    
+
     // Start shimmer at 900ms
     Future.delayed(const Duration(milliseconds: 900), () {
       if (mounted) {
         _shimmerController.forward();
       }
     });
-    
+
     // Auto-navigate at 2200ms
     if (widget.autoNavigate) {
       Future.delayed(const Duration(milliseconds: 2200), () {
@@ -295,7 +281,7 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final logoSize = math.min(260.0, screenWidth * 0.66);
-    
+
     return Scaffold(
       body: AnimatedBuilder(
         animation: Listenable.merge([_masterController, _shimmerController]),
@@ -322,12 +308,12 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
                     children: [
                       // Logo with depth layer and shimmer
                       _buildAnimatedLogo(logoSize),
-                      
+
                       const SizedBox(height: 32),
-                      
+
                       // Tagline
                       _buildTagline(),
-                      
+
                       // Progress indicator
                       if (widget.showProgressIndicator)
                         _buildProgressIndicator(),
@@ -354,20 +340,14 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
             Opacity(
               opacity: _depthLayerOpacity.value,
               child: Transform.translate(
-                offset: Offset(
-                  _depthLayerX.value + 4,
-                  _depthLayerY.value + 4,
-                ),
+                offset: Offset(_depthLayerX.value + 4, _depthLayerY.value + 4),
                 child: Transform.rotate(
                   angle: _depthLayerRotation.value * math.pi / 180,
-                  child: _buildLogoImage(
-                    size: size * 0.9,
-                    opacity: 0.3,
-                  ),
+                  child: _buildLogoImage(size: size * 0.9, opacity: 0.3),
                 ),
               ),
             ),
-            
+
             // Main logo with animations
             Opacity(
               opacity: _logoOpacity.value,
@@ -392,7 +372,7 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
                         children: [
                           // Logo image
                           _buildLogoImage(size: size),
-                          
+
                           // Shimmer overlay
                           _buildShimmerOverlay(size),
                         ],
@@ -426,7 +406,7 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
           ),
           child: Center(
             child: Text(
-              'Lyvo',
+              'Hominode',
               style: TextStyle(
                 fontSize: size * 0.25,
                 fontWeight: FontWeight.bold,
@@ -510,28 +490,28 @@ class _PremiumSplashScreenState extends State<PremiumSplashScreen>
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.light,
     ),
   );
-  
+
   runApp(const PremiumSplashDemoApp());
 }
 
 class PremiumSplashDemoApp extends StatelessWidget {
-  const PremiumSplashDemoApp({Key? key}) : super(key: key);
+  const PremiumSplashDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lyvo - Premium Splash',
+      title: 'Hominode - Premium Splash',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        primaryColor: const Color(0xFF2563EB),
+        primaryColor: const Color(0xFF0E4778),
       ),
       home: PremiumSplashScreen(
         autoNavigate: true,
@@ -544,24 +524,26 @@ class PremiumSplashDemoApp extends StatelessWidget {
                 return const DummyLoginScreen();
               },
               transitionDuration: const Duration(milliseconds: 350),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                // Crossfade + slide up transition
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(0, 0.1),
-                      end: Offset.zero,
-                    ).animate(
-                      CurvedAnimation(
-                        parent: animation,
-                        curve: Curves.easeInOut,
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
+                    // Crossfade + slide up transition
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position:
+                            Tween<Offset>(
+                              begin: const Offset(0, 0.1),
+                              end: Offset.zero,
+                            ).animate(
+                              CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.easeInOut,
+                              ),
+                            ),
+                        child: child,
                       ),
-                    ),
-                    child: child,
-                  ),
-                );
-              },
+                    );
+                  },
             ),
           );
         },
@@ -572,7 +554,7 @@ class PremiumSplashDemoApp extends StatelessWidget {
 
 // Dummy login screen for demo
 class DummyLoginScreen extends StatelessWidget {
-  const DummyLoginScreen({Key? key}) : super(key: key);
+  const DummyLoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -582,11 +564,7 @@ class DummyLoginScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.login,
-              size: 64,
-              color: Color(0xFF2563EB),
-            ),
+            const Icon(Icons.login, size: 64, color: Color(0xFF0E4778)),
             const SizedBox(height: 16),
             const Text(
               'Login Screen',
@@ -599,10 +577,7 @@ class DummyLoginScreen extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               'Splash animation complete!',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
           ],
         ),

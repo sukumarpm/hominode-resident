@@ -2,12 +2,10 @@
 // Registration screen with Firebase Auth + Firestore integration
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/firebase_auth_firestore_service.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({Key? key}) : super(key: key);
+  const RegisterScreen({super.key});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
@@ -61,8 +59,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        phone: _phoneController.text.trim().isEmpty 
-            ? null 
+        phone: _phoneController.text.trim().isEmpty
+            ? null
             : _phoneController.text.trim(),
       );
 
@@ -84,10 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         }
       } else {
         // Show error message
-        _showSnackBar(
-          result.message ?? 'Registration failed',
-          isError: true,
-        );
+        _showSnackBar(result.message ?? 'Registration failed', isError: true);
       }
     } catch (e) {
       setState(() => _isLoading = false);
@@ -108,9 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         content: Text(message),
         backgroundColor: isError ? Colors.red : Colors.green,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         margin: const EdgeInsets.all(16),
       ),
     );
@@ -152,10 +145,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 8),
                 const Text(
                   'Sign up to get started',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF666666),
-                  ),
+                  style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
                 ),
                 const SizedBox(height: 40),
 
@@ -226,7 +216,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscurePassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                      _obscurePassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: const Color(0xFF666666),
                     ),
                     onPressed: () {
@@ -254,11 +246,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   obscureText: _obscureConfirmPassword,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: const Color(0xFF666666),
                     ),
                     onPressed: () {
-                      setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+                      setState(
+                        () =>
+                            _obscureConfirmPassword = !_obscureConfirmPassword,
+                      );
                     },
                   ),
                   validator: (value) {
@@ -280,8 +277,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF2563EB),
-                      disabledBackgroundColor: const Color(0xFF2563EB).withOpacity(0.5),
+                      backgroundColor: const Color(0xFF0E4778),
+                      disabledBackgroundColor: const Color(
+                        0xFF0E4778,
+                      ).withOpacity(0.5),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -293,7 +292,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             height: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Text(
@@ -323,7 +324,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextSpan(
                             text: 'Login',
                             style: TextStyle(
-                              color: Color(0xFF2563EB),
+                              color: Color(0xFF0E4778),
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -371,16 +372,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           keyboardType: keyboardType,
           obscureText: obscureText,
           validator: validator,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF111111),
-          ),
+          style: const TextStyle(fontSize: 15, color: Color(0xFF111111)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              fontSize: 14,
-              color: Color(0xFFA3A3A3),
-            ),
+            hintStyle: const TextStyle(fontSize: 14, color: Color(0xFFA3A3A3)),
             prefixIcon: Icon(icon, color: const Color(0xFF666666)),
             suffixIcon: suffixIcon,
             filled: true,
@@ -395,7 +390,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 2),
+              borderSide: const BorderSide(color: Color(0xFF0E4778), width: 2),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),

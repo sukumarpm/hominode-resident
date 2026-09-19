@@ -12,7 +12,7 @@ void main() async {
 }
 
 class TestFlatMembersApp extends StatelessWidget {
-  const TestFlatMembersApp({Key? key}) : super(key: key);
+  const TestFlatMembersApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class TestFlatMembersApp extends StatelessWidget {
 }
 
 class TestFlatMembersScreen extends StatefulWidget {
-  const TestFlatMembersScreen({Key? key}) : super(key: key);
+  const TestFlatMembersScreen({super.key});
 
   @override
   State<TestFlatMembersScreen> createState() => _TestFlatMembersScreenState();

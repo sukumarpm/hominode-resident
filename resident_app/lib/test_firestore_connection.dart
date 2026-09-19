@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TestFirestoreConnection extends StatefulWidget {
-  const TestFirestoreConnection({Key? key}) : super(key: key);
+  const TestFirestoreConnection({super.key});
 
   @override
   State<TestFirestoreConnection> createState() => _TestFirestoreConnectionState();

@@ -8,7 +8,7 @@ void main() {
 }
 
 class EmergencySosDemo extends StatelessWidget {
-  const EmergencySosDemo({Key? key}) : super(key: key);
+  const EmergencySosDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class EmergencySosDemo extends StatelessWidget {
 }
 
 class EmergencySosDemoHome extends StatelessWidget {
-  const EmergencySosDemoHome({Key? key}) : super(key: key);
+  const EmergencySosDemoHome({super.key});
 
   @override
   Widget build(BuildContext context) {

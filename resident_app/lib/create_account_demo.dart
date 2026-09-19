@@ -20,7 +20,7 @@ void main() {
 }
 
 class CreateAccountDemoApp extends StatelessWidget {
-  const CreateAccountDemoApp({Key? key}) : super(key: key);
+  const CreateAccountDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {

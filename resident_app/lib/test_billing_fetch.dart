@@ -6,7 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class TestBillingFetch extends StatefulWidget {
-  const TestBillingFetch({Key? key}) : super(key: key);
+  const TestBillingFetch({super.key});
 
   @override
   State<TestBillingFetch> createState() => _TestBillingFetchState();

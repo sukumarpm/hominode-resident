@@ -11,7 +11,7 @@ import 'notifications_settings_screen.dart';
 import 'language_settings_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({Key? key}) : super(key: key);
+  const SettingsScreen({super.key});
 
   @override
   State<SettingsScreen> createState() => _SettingsScreenState();
@@ -45,7 +45,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         gradient: LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [Color(0xFF2F6AF6), Color(0xFF1D4CE6)],
+          colors: [Color(0xFF3AA6C8), Color(0xFF0E4778)],
         ),
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(24),
@@ -280,7 +280,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: OutlinedButton(
         onPressed: _showLogoutConfirmation,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFF2F6AF6), width: 1.5),
+          side: const BorderSide(color: Color(0xFF3AA6C8), width: 1.5),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -291,7 +291,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF2F6AF6),
+            color: Color(0xFF3AA6C8),
           ),
         ),
       ),
@@ -427,7 +427,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF0E4778),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -463,7 +463,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
             },
             style: TextButton.styleFrom(
-              foregroundColor: const Color(0xFF2F6AF6),
+              foregroundColor: const Color(0xFF3AA6C8),
             ),
             child: const Text('Logout'),
           ),

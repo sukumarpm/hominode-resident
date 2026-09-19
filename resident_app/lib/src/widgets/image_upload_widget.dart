@@ -13,7 +13,7 @@ class ImageUploadWidget extends StatefulWidget {
   final Map<String, dynamic>? additionalData;
 
   const ImageUploadWidget({
-    Key? key,
+    super.key,
     required this.collectionPath,
     required this.documentId,
     required this.fieldName,
@@ -22,7 +22,7 @@ class ImageUploadWidget extends StatefulWidget {
     this.onUploadError,
     this.includeMetadata = false,
     this.additionalData,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageUploadWidget> createState() => _ImageUploadWidgetState();

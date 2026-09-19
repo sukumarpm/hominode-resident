@@ -20,7 +20,7 @@ void main() {
 }
 
 class LoginDemoApp extends StatelessWidget {
-  const LoginDemoApp({Key? key}) : super(key: key);
+  const LoginDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {

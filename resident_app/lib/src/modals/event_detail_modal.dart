@@ -4,7 +4,7 @@
 import 'package:flutter/material.dart';
 import '../models/event.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 
 void showEventDetailModal(
   BuildContext context,
@@ -22,10 +22,10 @@ class EventDetailModal extends StatelessWidget {
   final Function(Event) onRsvp;
 
   const EventDetailModal({
-    Key? key,
+    super.key,
     required this.event,
     required this.onRsvp,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,11 @@ class EventDetailModal extends StatelessWidget {
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
                       color: Colors.grey[300],
-                      child: const Icon(Icons.image, size: 60, color: Colors.grey),
+                      child: const Icon(
+                        Icons.image,
+                        size: 60,
+                        color: Colors.grey,
+                      ),
                     );
                   },
                 ),
@@ -72,11 +76,17 @@ class EventDetailModal extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    _buildInfoRow(Icons.calendar_today_outlined, '${event.formattedDate} • ${event.timeRange}'),
+                    _buildInfoRow(
+                      Icons.calendar_today_outlined,
+                      '${event.formattedDate} • ${event.timeRange}',
+                    ),
                     const SizedBox(height: 12),
                     _buildInfoRow(Icons.location_on_outlined, event.location),
                     const SizedBox(height: 12),
-                    _buildInfoRow(Icons.people_outline, '${event.attendees}/${event.capacity} attending'),
+                    _buildInfoRow(
+                      Icons.people_outline,
+                      '${event.attendees}/${event.capacity} attending',
+                    ),
                     const SizedBox(height: 20),
                     const Text(
                       'Description',
@@ -166,10 +176,7 @@ class EventDetailModal extends StatelessWidget {
         Expanded(
           child: Text(
             text,
-            style: const TextStyle(
-              fontSize: 15,
-              color: Color(0xFF6B7280),
-            ),
+            style: const TextStyle(fontSize: 15, color: Color(0xFF6B7280)),
           ),
         ),
       ],

@@ -13,7 +13,7 @@ void main() async {
 }
 
 class DiagnoseChatRequestsApp extends StatelessWidget {
-  const DiagnoseChatRequestsApp({Key? key}) : super(key: key);
+  const DiagnoseChatRequestsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class DiagnoseChatRequestsApp extends StatelessWidget {
 }
 
 class DiagnoseChatRequestsScreen extends StatefulWidget {
-  const DiagnoseChatRequestsScreen({Key? key}) : super(key: key);
+  const DiagnoseChatRequestsScreen({super.key});
 
   @override
   State<DiagnoseChatRequestsScreen> createState() => _DiagnoseChatRequestsScreenState();

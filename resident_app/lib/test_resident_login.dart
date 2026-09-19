@@ -1,9 +1,6 @@
 // Test script to verify ResidentLoginService works correctly
 // Run with: dart lib/test_resident_login.dart
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'src/services/resident_login_service.dart';
 
 void main() async {
   print('🧪 Testing ResidentLoginService...');

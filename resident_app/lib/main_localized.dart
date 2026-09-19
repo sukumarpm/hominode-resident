@@ -15,7 +15,11 @@ import 'src/providers/localization_provider.dart';
 import 'src/screens/splash_screen_clean.dart';
 import 'src/screens/onboarding_flow.dart';
 import 'src/screens/simple_login_screen.dart';
+import 'src/screens/resident_registration_screen.dart';
+import 'src/screens/awaiting_approval_screen.dart';
+import 'src/screens/access_blocked_screen.dart';
 import 'src/services/firebase_auth_service.dart';
+import 'src/services/resident_auth_routing.dart';
 import 'src/services/tenant_resolution_service.dart';
 import 'src/services/localization_service.dart';
 
@@ -56,7 +60,7 @@ class MyApp extends StatelessWidget {
       child: Consumer<LocalizationProvider>(
         builder: (context, localizationProvider, _) {
           return MaterialApp(
-            title: 'Lyvo - Your Community, Connected',
+            title: 'Hominode - Your Community, Connected',
             debugShowCheckedModeBanner: false,
 
             // Localization configuration
@@ -92,7 +96,7 @@ class MyApp extends StatelessWidget {
                   return MaterialPageRoute(
                     builder: (context) => CleanSplashScreen(
                       logoAssetPath: 'assets/logo1.png',
-                      appName: 'Lyvo',
+                      appName: 'Hominode',
                       tagline: 'Your Community, Connected',
                       duration: const Duration(milliseconds: 3000),
                       onFinish: () async {
@@ -101,13 +105,10 @@ class MyApp extends StatelessWidget {
                               context.read<TenantResolutionService>(),
                             );
                         if (context.mounted) {
-                          if (result.success) {
-                            Navigator.of(context).pushReplacementNamed('/home');
-                          } else {
-                            Navigator.of(
-                              context,
-                            ).pushReplacementNamed('/login');
-                          }
+                          Navigator.of(context).pushReplacementNamed(
+                            ResidentAuthRouting.routeFor(result),
+                            arguments: result.message,
+                          );
                         }
                       },
                     ),
@@ -124,8 +125,26 @@ class MyApp extends StatelessWidget {
                   return MaterialPageRoute(
                     builder: (context) => const MainNavigation(),
                   );
+                case '/resident-registration':
+                  return MaterialPageRoute(
+                    builder: (context) => const ResidentRegistrationScreen(),
+                  );
+                case '/awaiting-approval':
+                  return MaterialPageRoute(
+                    builder: (context) => const AwaitingApprovalScreen(),
+                  );
+                case '/resident-access-blocked':
+                  return MaterialPageRoute(
+                    builder: (context) => AccessBlockedScreen(
+                      message:
+                          settings.arguments as String? ??
+                          'Resident access is unavailable. Contact your community administrator.',
+                    ),
+                  );
                 default:
-                  return null;
+                  return MaterialPageRoute(
+                    builder: (context) => const SimpleLoginScreen(),
+                  );
               }
             },
           );
@@ -137,7 +156,7 @@ class MyApp extends StatelessWidget {
 
 // Auth Check Screen - Determines initial route based on login state
 class AuthCheckScreen extends StatefulWidget {
-  const AuthCheckScreen({Key? key}) : super(key: key);
+  const AuthCheckScreen({super.key});
 
   @override
   State<AuthCheckScreen> createState() => _AuthCheckScreenState();
@@ -151,19 +170,16 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
   }
 
   Future<void> _checkAuthStatus() async {
-    await Future.delayed(const Duration(milliseconds: 500));
-
     if (mounted) {
       final result = await FirebaseAuthService().restoreResidentSession(
         context.read<TenantResolutionService>(),
       );
 
       if (mounted) {
-        if (result.success) {
-          Navigator.of(context).pushReplacementNamed('/home');
-        } else {
-          Navigator.of(context).pushReplacementNamed('/login');
-        }
+        Navigator.of(context).pushReplacementNamed(
+          ResidentAuthRouting.routeFor(result),
+          arguments: result.message,
+        );
       }
     }
   }
@@ -178,7 +194,7 @@ class _AuthCheckScreenState extends State<AuthCheckScreen> {
             Image.asset('assets/logo1.png', width: 100, height: 100),
             const SizedBox(height: 24),
             const CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+              valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0E4778)),
             ),
           ],
         ),

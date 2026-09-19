@@ -5,10 +5,7 @@ import '../services/language_service.dart';
 class LanguageSelectorEasy extends StatefulWidget {
   final VoidCallback? onLanguageChanged;
 
-  const LanguageSelectorEasy({
-    Key? key,
-    this.onLanguageChanged,
-  }) : super(key: key);
+  const LanguageSelectorEasy({super.key, this.onLanguageChanged});
 
   @override
   State<LanguageSelectorEasy> createState() => _LanguageSelectorEasyState();
@@ -115,7 +112,7 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF2563EB)
+                      ? const Color(0xFF0E4778)
                       : const Color(0xFFE6E6E6),
                   width: isSelected ? 2 : 1,
                 ),
@@ -123,7 +120,9 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
-                  onTap: _isLoading ? null : () => _changeLanguage(languageCode),
+                  onTap: _isLoading
+                      ? null
+                      : () => _changeLanguage(languageCode),
                   borderRadius: BorderRadius.circular(12),
                   child: Padding(
                     padding: const EdgeInsets.all(16),
@@ -135,7 +134,7 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
                           height: 48,
                           decoration: BoxDecoration(
                             color: isSelected
-                                ? const Color(0xFF2563EB)
+                                ? const Color(0xFF0E4778)
                                 : const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -158,7 +157,7 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
-                                      ? const Color(0xFF2563EB)
+                                      ? const Color(0xFF0E4778)
                                       : const Color(0xFF111111),
                                 ),
                               ),
@@ -168,7 +167,7 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: isSelected
-                                      ? const Color(0xFF2563EB)
+                                      ? const Color(0xFF0E4778)
                                       : const Color(0xFF9B9B9B),
                                 ),
                               ),
@@ -179,7 +178,7 @@ class _LanguageSelectorEasyState extends State<LanguageSelectorEasy> {
                         if (isSelected)
                           const Icon(
                             Icons.check_circle,
-                            color: Color(0xFF2563EB),
+                            color: Color(0xFF0E4778),
                             size: 24,
                           ),
                       ],

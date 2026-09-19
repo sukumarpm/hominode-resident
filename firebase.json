@@ -3,12 +3,54 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "hosting": {
-    "public": "resident_app/build/web",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      { "source": "/c/**", "destination": "/index.html" },
-      { "source": "**", "destination": "/index.html" }
-    ]
-  }
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "hosting": [
+    {
+      "target": "hominode_prod",
+      "public": "hosting/hominode-prod",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "regex": "^/(?:admin|about|api|app|assets|auth|c|cdn|contact|docs|features|firebase|help|home|legal|login|mail|pricing|privacy|resident|static|status|support|super-admin|terms|www)(?:/.*)?$",
+          "destination": "/index.html"
+        },
+        {
+          "regex": "^/[a-z0-9]+(?:-[a-z0-9]+)*(?:/.*)?$",
+          "destination": "/__resident_app/index.html"
+        },
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "hominode_app",
+      "public": "hominode_web/build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "/c/**",
+          "destination": "/index.html"
+        },
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
 }

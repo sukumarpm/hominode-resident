@@ -2,10 +2,11 @@
 // Community post card component
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/post.dart';
 import 'post_actions_row.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 const kBlackText = Color(0xFF111111);
 const kGrayText = Color(0xFF8C8C8C);
 const kDivider = Color(0xFFE6E6E6);
@@ -18,22 +19,22 @@ class PostCard extends StatelessWidget {
   final VoidCallback onMenuPressed;
 
   const PostCard({
-    Key? key,
+    super.key,
     required this.post,
     required this.onLikePressed,
     required this.onCommentPressed,
     required this.onSharePressed,
     required this.onMenuPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.06),
@@ -52,8 +53,8 @@ class PostCard extends StatelessWidget {
               // Profile image
               ClipOval(
                 child: Container(
-                  width: 48,
-                  height: 48,
+                  width: 48.w,
+                  height: 48.h,
                   color: Colors.grey[300],
                   child: Image.network(
                     post.profileImage,
@@ -68,7 +69,7 @@ class PostCard extends StatelessWidget {
                 ),
               ),
 
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
 
               // Name, flat, time
               Expanded(
@@ -77,17 +78,17 @@ class PostCard extends StatelessWidget {
                   children: [
                     Text(
                       post.authorName,
-                      style: const TextStyle(
-                        fontSize: 17,
+                      style: TextStyle(
+                        fontSize: 17.sp,
                         fontWeight: FontWeight.w600,
                         color: kBlackText,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       '${post.flat} • ${post.timeAgo}',
-                      style: const TextStyle(
-                        fontSize: 14,
+                      style: TextStyle(
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
                         color: kGrayText,
                       ),
@@ -99,24 +100,20 @@ class PostCard extends StatelessWidget {
               // Three-dot menu
               IconButton(
                 onPressed: onMenuPressed,
-                icon: const Icon(
-                  Icons.more_horiz,
-                  color: kGrayText,
-                  size: 24,
-                ),
+                icon: Icon(Icons.more_horiz, color: kGrayText, size: 24.w),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
             ],
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Post content
           Text(
             post.content,
-            style: const TextStyle(
-              fontSize: 15,
+            style: TextStyle(
+              fontSize: 15.sp,
               fontWeight: FontWeight.w400,
               color: kBlackText,
               height: 1.5,
@@ -126,19 +123,16 @@ class PostCard extends StatelessWidget {
           // Images if present
           if ((post.imageUrls != null && post.imageUrls!.isNotEmpty) ||
               (post.imageUrl != null && post.imageUrl!.isNotEmpty)) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             _buildImageGallery(post),
           ],
 
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
 
           // Divider
-          Container(
-            height: 1,
-            color: kDivider,
-          ),
+          Container(height: 1.h, color: kDivider),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Actions row
           PostActionsRow(
@@ -155,14 +149,15 @@ class PostCard extends StatelessWidget {
   }
 
   Widget _buildImageGallery(Post post) {
-    final images = post.imageUrls ?? (post.imageUrl != null ? [post.imageUrl!] : []);
-    
+    final images =
+        post.imageUrls ?? (post.imageUrl != null ? [post.imageUrl!] : []);
+
     if (images.isEmpty) return const SizedBox.shrink();
 
     // Single image - full width
     if (images.length == 1) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         child: Image.network(
           images[0],
           width: double.infinity,
@@ -171,16 +166,16 @@ class PostCard extends StatelessWidget {
           errorBuilder: (context, error, stackTrace) {
             return Container(
               width: double.infinity,
-              height: 240,
+              height: 240.h,
               decoration: BoxDecoration(
                 color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
-              child: const Center(
+              child: Center(
                 child: Icon(
                   Icons.image_not_supported,
                   color: Colors.grey,
-                  size: 48,
+                  size: 48.w,
                 ),
               ),
             );
@@ -191,7 +186,7 @@ class PostCard extends StatelessWidget {
 
     // Multiple images - grid layout
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(12.r),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
@@ -209,11 +204,11 @@ class PostCard extends StatelessWidget {
             errorBuilder: (context, error, stackTrace) {
               return Container(
                 color: Colors.grey[200],
-                child: const Center(
+                child: Center(
                   child: Icon(
                     Icons.image_not_supported,
                     color: Colors.grey,
-                    size: 32,
+                    size: 32.w,
                   ),
                 ),
               );

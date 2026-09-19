@@ -1,5 +1,6 @@
 /// App-wide standardized sizing constants - COMPACT VERSION
 /// Reduced sizes for more compact, professional UI across all screens
+library;
 
 class AppSizes {
   // Page/Screen Padding - REDUCED

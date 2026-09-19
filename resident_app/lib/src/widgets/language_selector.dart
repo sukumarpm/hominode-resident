@@ -8,10 +8,10 @@ class LanguageSelector extends StatelessWidget {
   final bool isCompact;
 
   const LanguageSelector({
-    Key? key,
+    super.key,
     this.showTitle = true,
     this.isCompact = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class LanguageSelector extends StatelessWidget {
         if (isCompact) {
           return _buildCompactSelector(context, languageProvider);
         }
-        
+
         return _buildFullSelector(context, languageProvider);
       },
     );
@@ -36,7 +36,7 @@ class LanguageSelector extends StatelessWidget {
         children: LanguageProvider.supportedLanguages.map((langCode) {
           final isSelected = languageProvider.currentLanguageCode == langCode;
           final langName = LanguageProvider.languageNames[langCode] ?? langCode;
-          
+
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4.0),
             child: FilterChip(
@@ -48,7 +48,7 @@ class LanguageSelector extends StatelessWidget {
                 }
               },
               backgroundColor: Colors.grey[200],
-              selectedColor: const Color(0xFF2563EB),
+              selectedColor: const Color(0xFF0E4778),
               labelStyle: TextStyle(
                 color: isSelected ? Colors.white : Colors.black,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
@@ -79,9 +79,7 @@ class LanguageSelector extends StatelessWidget {
           const SizedBox(height: 12),
         ],
         if (languageProvider.isLoading)
-          const Center(
-            child: CircularProgressIndicator(),
-          )
+          const Center(child: CircularProgressIndicator())
         else
           GridView.builder(
             shrinkWrap: true,
@@ -95,9 +93,11 @@ class LanguageSelector extends StatelessWidget {
             itemCount: LanguageProvider.supportedLanguages.length,
             itemBuilder: (context, index) {
               final langCode = LanguageProvider.supportedLanguages[index];
-              final isSelected = languageProvider.currentLanguageCode == langCode;
-              final langName = LanguageProvider.languageNames[langCode] ?? langCode;
-              
+              final isSelected =
+                  languageProvider.currentLanguageCode == langCode;
+              final langName =
+                  LanguageProvider.languageNames[langCode] ?? langCode;
+
               return _buildLanguageCard(
                 context,
                 langCode,
@@ -114,10 +114,7 @@ class LanguageSelector extends StatelessWidget {
             padding: const EdgeInsets.only(top: 12),
             child: Text(
               languageProvider.error!,
-              style: const TextStyle(
-                color: Colors.red,
-                fontSize: 12,
-              ),
+              style: const TextStyle(color: Colors.red, fontSize: 12),
             ),
           ),
       ],
@@ -135,16 +132,18 @@ class LanguageSelector extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.white,
+          color: isSelected ? const Color(0xFF0E4778) : Colors.white,
           border: Border.all(
-            color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE6E6E6),
+            color: isSelected
+                ? const Color(0xFF0E4778)
+                : const Color(0xFFE6E6E6),
             width: 2,
           ),
           borderRadius: BorderRadius.circular(12),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: const Color(0xFF2563EB).withOpacity(0.3),
+                    color: const Color(0xFF0E4778).withOpacity(0.3),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -174,11 +173,7 @@ class LanguageSelector extends StatelessWidget {
             ),
             if (isSelected) ...[
               const SizedBox(height: 4),
-              const Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 20,
-              ),
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
             ],
           ],
         ),

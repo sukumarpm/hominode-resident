@@ -1,14 +1,13 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../widgets/animated_onboarding_card.dart';
 import '../constants/onboarding_styles.dart';
 
 /// Production-ready onboarding flow with 4 screens
 /// Implements smooth page transitions, animations, and state persistence
 class OnboardingFlow extends StatefulWidget {
-  const OnboardingFlow({Key? key}) : super(key: key);
+  const OnboardingFlow({super.key});
 
   @override
   State<OnboardingFlow> createState() => _OnboardingFlowState();
@@ -24,7 +23,7 @@ class _OnboardingFlowState extends State<OnboardingFlow>
   final List<OnboardingPage> _pages = [
     OnboardingPage(
       icon: Icons.apartment_rounded,
-      title: 'Welcome to Lyvo',
+      title: 'Welcome to Hominode',
       subtitle:
           'Manage your apartment community with ease. Everything you need in one place.',
       iconData: Icons.apartment_rounded,
@@ -232,7 +231,8 @@ class _OnboardingFlowState extends State<OnboardingFlow>
                         animation: _buttonAnimationController,
                         builder: (context, child) {
                           return Transform.scale(
-                            scale: 1.0 - (_buttonAnimationController.value * 0.05),
+                            scale:
+                                1.0 - (_buttonAnimationController.value * 0.05),
                             child: child,
                           );
                         },
@@ -244,7 +244,9 @@ class _OnboardingFlowState extends State<OnboardingFlow>
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: OnboardingStyles.primaryBlue.withValues(alpha: 0.3),
+                                color: OnboardingStyles.primaryBlue.withValues(
+                                  alpha: 0.3,
+                                ),
                                 blurRadius: 12,
                                 offset: const Offset(0, 4),
                               ),
@@ -273,7 +275,9 @@ class _OnboardingFlowState extends State<OnboardingFlow>
 
   Widget _buildPageContent(OnboardingPage page) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16), // Standard app padding
+      padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+      ), // Standard app padding
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -369,8 +373,10 @@ class WavePainter extends CustomPainter {
         i,
         size.height * 0.3 +
             waveHeight *
-                Math.sin((i / waveLength * 2 * Math.pi) +
-                    (animationValue * 2 * Math.pi)),
+                Math.sin(
+                  (i / waveLength * 2 * Math.pi) +
+                      (animationValue * 2 * Math.pi),
+                ),
       );
     }
 

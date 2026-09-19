@@ -10,7 +10,7 @@ void main() {
 }
 
 class LanguageSettingsDemo extends StatefulWidget {
-  const LanguageSettingsDemo({Key? key}) : super(key: key);
+  const LanguageSettingsDemo({super.key});
 
   @override
   State<LanguageSettingsDemo> createState() => _LanguageSettingsDemoState();
@@ -63,7 +63,7 @@ class _LanguageSettingsDemoState extends State<LanguageSettingsDemo> {
 }
 
 class DemoHomePage extends StatelessWidget {
-  const DemoHomePage({Key? key}) : super(key: key);
+  const DemoHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {

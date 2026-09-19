@@ -7,7 +7,7 @@ import 'src/screens/login_screen.dart';
 /// Run: flutter run -t lib/simple_splash_demo.dart
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Set system UI to light mode
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -16,17 +16,17 @@ void main() {
       statusBarBrightness: Brightness.dark,
     ),
   );
-  
+
   runApp(const SimpleSplashDemoApp());
 }
 
 class SimpleSplashDemoApp extends StatelessWidget {
-  const SimpleSplashDemoApp({Key? key}) : super(key: key);
+  const SimpleSplashDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lyvo - Splash Demo',
+      title: 'Hominode - Splash Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
@@ -36,9 +36,7 @@ class SimpleSplashDemoApp extends StatelessWidget {
         onComplete: () {
           // Navigate to login after splash
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const LoginScreen(),
-            ),
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
           );
         },
       ),

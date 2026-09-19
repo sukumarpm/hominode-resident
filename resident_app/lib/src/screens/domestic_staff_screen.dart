@@ -1,9 +1,11 @@
 // lib/src/screens/domestic_staff_screen.dart
 // Domestic Staff Management Screen
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../services/user_data_service.dart';
 import '../widgets/skeleton_loader.dart';
 
@@ -11,7 +13,7 @@ import '../widgets/skeleton_loader.dart';
 // DOMESTIC STAFF SCREEN
 // ============================================================================
 class DomesticStaffScreen extends StatefulWidget {
-  const DomesticStaffScreen({Key? key}) : super(key: key);
+  const DomesticStaffScreen({super.key});
 
   @override
   State<DomesticStaffScreen> createState() => _DomesticStaffScreenState();
@@ -31,17 +33,17 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
 
   Future<void> _initializeStream() async {
     print('🔵 DOMESTIC STAFF SCREEN: Initializing...');
-    
+
     try {
       final userData = await _userDataService.getCurrentUserData();
-      
+
       if (userData == null) {
         print('❌ No user data found');
         return;
       }
 
       final flatId = userData['flatId'] ?? userData['flatLabel'];
-      
+
       if (flatId == null || flatId.isEmpty) {
         print('❌ No flat ID found');
         return;
@@ -60,7 +62,7 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
 
   Stream<List<Map<String, dynamic>>> _getDomesticStaffStream(String flatId) {
     print('📡 DOMESTIC STAFF FLOW: Streaming staff for flat: $flatId');
-    
+
     return _firestore
         .collection('domesticStaff')
         .where('flatId', isEqualTo: flatId)
@@ -68,60 +70,60 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
         .orderBy('addedDate', descending: true)
         .snapshots()
         .map((snapshot) {
-      print('📊 Found ${snapshot.docs.length} domestic staff members');
-      
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        print('✅ Staff: ${data['name']} - ${data['role']}');
-        
-        return {
-          'id': doc.id,
-          'name': data['name'] ?? 'Unknown',
-          'role': data['role'] ?? 'Staff',
-          'phone': data['phone'] ?? '',
-          'email': data['email'] ?? '',
-          'address': data['address'] ?? '',
-          'joinDate': (data['addedDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          'salary': data['salary'] ?? 0,
-          'status': data['status'] ?? 'active',
-          'notes': data['notes'] ?? '',
-          'aadharNumber': data['aadharNumber'] ?? '',
-          'bankAccount': data['bankAccount'] ?? '',
-        };
-      }).toList();
-    }).handleError((error) {
-      print('❌ Stream error: $error');
-      return [];
-    });
+          print('📊 Found ${snapshot.docs.length} domestic staff members');
+
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            print('✅ Staff: ${data['name']} - ${data['role']}');
+
+            return {
+              'id': doc.id,
+              'name': data['name'] ?? 'Unknown',
+              'role': data['role'] ?? 'Staff',
+              'phone': data['phone'] ?? '',
+              'email': data['email'] ?? '',
+              'address': data['address'] ?? '',
+              'joinDate':
+                  (data['addedDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              'salary': data['salary'] ?? 0,
+              'status': data['status'] ?? 'active',
+              'notes': data['notes'] ?? '',
+              'aadharNumber': data['aadharNumber'] ?? '',
+              'bankAccount': data['bankAccount'] ?? '',
+            };
+          }).toList();
+        })
+        .handleError((error) {
+          print('❌ Stream error: $error');
+          return [];
+        });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Domestic Staff'),
-        backgroundColor: const Color(0xFF2563EB),
+        title: Text('domestic_staff'.tr()),
+        backgroundColor: const Color(0xFF0E4778),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _flatId == null
-          ? const Center(
-              child: Text('Unable to load staff information'),
-            )
+          ? Center(child: Text('unable_to_load_staff_information'.tr()))
           : StreamBuilder<List<Map<String, dynamic>>>(
               stream: _staffStream,
               builder: (context, snapshot) {
                 // Loading state
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return ListView.builder(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.w),
                     itemCount: 3,
                     itemBuilder: (context, index) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
+                      padding: EdgeInsets.only(bottom: 12.h),
                       child: SkeletonLoader(
                         width: double.infinity,
                         height: 120,
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(12.0.r),
                       ),
                     ),
                   );
@@ -133,9 +135,15 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                        const SizedBox(height: 16),
-                        Text('Error: ${snapshot.error}'),
+                        Icon(
+                          Icons.error_outline,
+                          size: 48.w,
+                          color: Colors.red,
+                        ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          'error_loading_staff'.tr(args: ['${snapshot.error}']),
+                        ),
                       ],
                     ),
                   );
@@ -151,14 +159,14 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
                       children: [
                         Icon(
                           Icons.people_outline,
-                          size: 64,
+                          size: 64.w,
                           color: Colors.grey[300],
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 16.h),
                         Text(
-                          'No domestic staff added',
+                          'no_domestic_staff_added'.tr(),
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 16.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -169,7 +177,7 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
 
                 // Staff list
                 return ListView.builder(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   itemCount: staffList.length,
                   itemBuilder: (context, index) {
                     final staff = staffList[index];
@@ -183,13 +191,13 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
 
   Widget _buildStaffCard(BuildContext context, Map<String, dynamic> staff) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.only(bottom: 12.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: InkWell(
         onTap: () => _showStaffDetails(context, staff),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -197,34 +205,34 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
               Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 48.w,
+                    height: 48.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFF3E8),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.cleaning_services_outlined,
                       color: Color(0xFFF97316),
-                      size: 24,
+                      size: 24.w,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           staff['name'] ?? 'Unknown',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           staff['role'] ?? 'Staff',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 13.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -234,18 +242,18 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
                   const Icon(Icons.chevron_right, color: Colors.grey),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               // Contact info
               if ((staff['phone'] as String?)?.isNotEmpty ?? false)
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: 8.h),
                   child: Row(
                     children: [
-                      const Icon(Icons.phone, size: 16, color: Colors.grey),
-                      const SizedBox(width: 8),
+                      Icon(Icons.phone, size: 16.w, color: Colors.grey),
+                      SizedBox(width: 8.w),
                       Text(
                         staff['phone'] ?? '',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13.sp),
                       ),
                     ],
                   ),
@@ -253,12 +261,12 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
               if ((staff['email'] as String?)?.isNotEmpty ?? false)
                 Row(
                   children: [
-                    const Icon(Icons.email, size: 16, color: Colors.grey),
-                    const SizedBox(width: 8),
+                    Icon(Icons.email, size: 16.w, color: Colors.grey),
+                    SizedBox(width: 8.w),
                     Expanded(
                       child: Text(
                         staff['email'] ?? '',
-                        style: const TextStyle(fontSize: 13),
+                        style: TextStyle(fontSize: 13.sp),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -274,12 +282,12 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
   void _showStaffDetails(BuildContext context, Map<String, dynamic> staff) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -287,34 +295,34 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
               Row(
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 56.w,
+                    height: 56.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFF3E8),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.cleaning_services_outlined,
                       color: Color(0xFFF97316),
-                      size: 28,
+                      size: 28.w,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           staff['name'] ?? 'Unknown',
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           staff['role'] ?? 'Staff',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -323,13 +331,19 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               // Details
               _buildDetailRow('Phone', staff['phone'] ?? 'Not provided'),
               _buildDetailRow('Email', staff['email'] ?? 'Not provided'),
               _buildDetailRow('Address', staff['address'] ?? 'Not provided'),
-              _buildDetailRow('Aadhar Number', staff['aadharNumber'] ?? 'Not provided'),
-              _buildDetailRow('Bank Account', staff['bankAccount'] ?? 'Not provided'),
+              _buildDetailRow(
+                'Aadhar Number',
+                staff['aadharNumber'] ?? 'Not provided',
+              ),
+              _buildDetailRow(
+                'Bank Account',
+                staff['bankAccount'] ?? 'Not provided',
+              ),
               if (((staff['salary'] as num?) ?? 0) > 0)
                 _buildDetailRow('Monthly Salary', '₹${staff['salary']}'),
               if (staff['joinDate'] != null)
@@ -339,16 +353,16 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
                 ),
               if ((staff['notes'] as String?)?.isNotEmpty ?? false)
                 _buildDetailRow('Notes', staff['notes'] ?? ''),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: const Color(0xFF0E4778),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
                   child: const Text(
@@ -366,25 +380,22 @@ class _DomesticStaffScreenState extends State<DomesticStaffScreen> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
           ),
         ],
       ),

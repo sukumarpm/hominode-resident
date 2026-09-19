@@ -1,36 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../components/auth_text_field.dart';
+
 import '../components/auth_primary_button.dart';
+import '../components/auth_text_field.dart';
 import '../services/firebase_auth_service.dart';
 import '../services/flat_access_control_service.dart';
-import '../services/resident_login_service.dart';
 import 'verify_otp_screen_single_field.dart';
 
 /// Login Screen with Phone OTP and Email/Password options
 /// Supports both authentication methods
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStateMixin {
+class _LoginScreenState extends State<LoginScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  
+
   // Phone OTP controllers
   final TextEditingController _phoneController = TextEditingController();
   final FocusNode _phoneFocusNode = FocusNode();
-  
+
   // Email/Password controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
-  
+
   final FirebaseAuthService _authService = FirebaseAuthService();
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -56,24 +55,24 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   /// Handle Phone OTP - Send OTP to phone number
   Future<void> _handleSendOTP() async {
     final phone = _phoneController.text.trim();
-    
+
     // Validate
     if (!_authService.validatePhoneNumber(phone)) {
       _showError('Please enter a valid 10-digit phone number');
       return;
     }
-    
+
     setState(() => _isLoading = true);
-    
+
     // Format to E.164
     final formattedPhone = _authService.formatPhoneNumber(phone);
-    
+
     await _authService.signInWithPhone(
       phoneNumber: formattedPhone,
       onCodeSent: (verificationId) {
         setState(() => _isLoading = false);
         _showSuccess('OTP sent to $phone');
-        
+
         // Navigate to OTP verification screen
         Navigator.push(
           context,
@@ -105,59 +104,59 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
   Future<void> _handleEmailLogin() async {
     try {
       print('🔵 _handleEmailLogin: Starting email/password login...');
-      
+
       final identifier = _emailController.text.trim();
       final password = _passwordController.text;
-      
+
       // Validate identifier (email or phone)
       if (identifier.isEmpty) {
         _showError('Please enter your email or phone number');
         return;
       }
-      
+
       // Check if it's a phone number or email
       final isPhone = RegExp(r'^[\d+\s()-]+$').hasMatch(identifier);
-      
+
       if (!isPhone && !_authService.validateEmail(identifier)) {
         _showError('Please enter a valid email or phone number');
         return;
       }
-      
+
       if (password.isEmpty) {
         _showError('Please enter your password');
         return;
       }
-      
+
       print('🔐 Step 1: Validating credentials...');
       setState(() => _isLoading = true);
-      
+
       final result = await _authService.signInWithEmail(
         email: identifier,
         password: password,
       );
-      
+
       print('🔐 Step 2: Login result received');
       print('   Success: ${result.success}');
       print('   Message: ${result.message}');
       print('   User ID: ${result.userId}');
-      
+
       setState(() => _isLoading = false);
-      
+
       if (result.success) {
         print('✅ Login successful!');
         print('   User: ${result.userData?['name']}');
         print('   FlatId: ${result.userData?['flatId']}');
-        
+
         _showSuccess('Login successful!');
-        
+
         // Clear access control cache to force fresh check
         print('🗑️  Clearing access control cache...');
         FlatAccessControlService.instance.clearCache();
-        
+
         // Wait for Firestore to be fully updated
         print('⏳ Waiting for data sync (1 second)...');
         await Future.delayed(const Duration(seconds: 1));
-        
+
         print('🔐 Step 3: Navigating to home screen...');
         if (mounted) {
           Navigator.of(context).pushReplacementNamed('/home');
@@ -211,7 +210,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
 
   Widget _buildForgotPasswordDialog() {
     final emailController = TextEditingController();
-    
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: const Text('Reset Password'),
@@ -244,10 +243,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               _showError('Please enter a valid email');
               return;
             }
-            
+
             Navigator.pop(context);
-            
-            final result = await _authService.sendPasswordResetEmail(email: email);
+
+            final result = await _authService.sendPasswordResetEmail(
+              email: email,
+            );
             if (result.success) {
               _showSuccess('Password reset email sent!');
             } else {
@@ -286,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                 child: Column(
                   children: [
                     const SizedBox(height: 120),
-                    
+
                     // Welcome Back Title
                     const Text(
                       'Welcome Back',
@@ -297,12 +298,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         letterSpacing: -0.5,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 12),
-                    
+
                     // Subtitle
                     const Text(
-                      'Login to your Lyvo account',
+                      'Login to your Hominode account',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -310,12 +311,12 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
                         letterSpacing: 0.1,
                       ),
                     ),
-                    
+
                     const SizedBox(height: 48),
-                    
+
                     // White Card Container with Tabs
                     _buildLoginCard(),
-                    
+
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -347,10 +348,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
           Container(
             decoration: BoxDecoration(
               border: Border(
-                bottom: BorderSide(
-                  color: const Color(0xFFE0E0E0),
-                  width: 1,
-                ),
+                bottom: BorderSide(color: const Color(0xFFE0E0E0), width: 1),
               ),
             ),
             child: TabBar(
@@ -373,16 +371,13 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
               ],
             ),
           ),
-          
+
           // Tab Content
           SizedBox(
             height: 380,
             child: TabBarView(
               controller: _tabController,
-              children: [
-                _buildPhoneOTPTab(),
-                _buildEmailPasswordTab(),
-              ],
+              children: [_buildPhoneOTPTab(), _buildEmailPasswordTab()],
             ),
           ),
         ],
@@ -512,10 +507,7 @@ class _LoginScreenState extends State<LoginScreen> with SingleTickerProviderStat
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: const Color(0xFFE0E0E0),
-                width: 1,
-              ),
+              border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
             ),
             child: TextField(
               controller: _passwordController,

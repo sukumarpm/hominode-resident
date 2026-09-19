@@ -13,14 +13,14 @@ class PhotoUploadWidget extends StatefulWidget {
   final List<String>? initialPhotos;
 
   const PhotoUploadWidget({
-    Key? key,
+    super.key,
     this.initialPhotoUrl,
     required this.onPhotoChanged,
     this.label = 'Attach photo',
     this.isOptional = true,
     this.allowMultiple = false,
     this.initialPhotos,
-  }) : super(key: key);
+  });
 
   @override
   State<PhotoUploadWidget> createState() => _PhotoUploadWidgetState();
@@ -31,7 +31,7 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
   File? _photoFile;
   final ImagePicker _picker = ImagePicker();
   List<String> _photos = [];
-  List<File> _photoFiles = [];
+  final List<File> _photoFiles = [];
 
   @override
   void initState() {
@@ -85,15 +85,12 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
                     ),
                     child: const Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
                   title: const Text(
                     'Camera',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Take a new photo'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
@@ -114,10 +111,7 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
                   ),
                   title: const Text(
                     'Gallery',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Choose from gallery'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
@@ -242,32 +236,32 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
                         height: 48,
                       )
                     : _photoUrl!.startsWith('http')
-                        ? Image.network(
-                            _photoUrl!,
-                            fit: BoxFit.cover,
-                            width: 48,
-                            height: 48,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.image,
-                                size: 24,
-                                color: Color(0xFF9CA3AF),
-                              );
-                            },
-                          )
-                        : Image.file(
-                            File(_photoUrl!),
-                            fit: BoxFit.cover,
-                            width: 48,
-                            height: 48,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const Icon(
-                                Icons.image,
-                                size: 24,
-                                color: Color(0xFF9CA3AF),
-                              );
-                            },
-                          ),
+                    ? Image.network(
+                        _photoUrl!,
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image,
+                            size: 24,
+                            color: Color(0xFF9CA3AF),
+                          );
+                        },
+                      )
+                    : Image.file(
+                        File(_photoUrl!),
+                        fit: BoxFit.cover,
+                        width: 48,
+                        height: 48,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image,
+                            size: 24,
+                            color: Color(0xFF9CA3AF),
+                          );
+                        },
+                      ),
               ),
             ),
             const SizedBox(width: 12),
@@ -290,7 +284,7 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
                       'Change photo',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                         decoration: TextDecoration.underline,
                       ),
                     ),
@@ -429,11 +423,7 @@ class _PhotoUploadWidgetState extends State<PhotoUploadWidget> {
                 color: Color(0xFFEF4444),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 16,
-              ),
+              child: const Icon(Icons.close, color: Colors.white, size: 16),
             ),
           ),
         ),

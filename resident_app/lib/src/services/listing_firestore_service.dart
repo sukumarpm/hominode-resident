@@ -1,8 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/listing_model.dart';
-import 'firestore_auth_service.dart';
 import 'content_moderation_service.dart';
+import 'firestore_auth_service.dart';
 
 class ListingFirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -15,32 +16,35 @@ class ListingFirestoreService {
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
       print('📥 Using Firebase Auth UID: ${firebaseUser.uid}');
-      
+
       // Check if user document exists with this UID
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      final doc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
       if (doc.exists) {
         return firebaseUser.uid;
       }
-      
+
       // Try to find by authUid field
       final querySnapshot = await _firestore
           .collection('users')
           .where('authUid', isEqualTo: firebaseUser.uid)
           .limit(1)
           .get();
-      
+
       if (querySnapshot.docs.isNotEmpty) {
         return querySnapshot.docs.first.id;
       }
     }
-    
+
     // Fallback to Firestore Auth Service (for Firestore-only login)
     final userId = await _authService.getCurrentUserId();
     if (userId != null) {
       print('📥 Using Firestore Auth user ID: $userId');
       return userId;
     }
-    
+
     print('❌ No user authenticated');
     return '';
   }
@@ -53,8 +57,7 @@ class ListingFirestoreService {
   // Collection reference
   CollectionReference get _listingsCollection =>
       _firestore.collection('marketplaces');
-  CollectionReference get _usersCollection =>
-      _firestore.collection('users');
+  CollectionReference get _usersCollection => _firestore.collection('users');
 
   // ============================================
   // CREATE LISTING
@@ -84,10 +87,7 @@ class ListingFirestoreService {
 
       final currentUserId = await _currentUserId;
       if (currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('📝 Creating listing: $title');
@@ -96,7 +96,7 @@ class ListingFirestoreService {
       final userDoc = await _usersCollection.doc(currentUserId).get();
       final userData = userDoc.data() as Map<String, dynamic>?;
       final sellerName = userData?['name'] ?? 'Unknown Seller';
-      
+
       // Check if user has building assigned
       final buildingId = userData?['buildingId'];
       if (buildingId == null || buildingId.toString().isEmpty) {
@@ -116,7 +116,8 @@ class ListingFirestoreService {
         'images': images,
         'sellerId': currentUserId,
         'sellerName': sellerName,
-        'buildingId': buildingId, // Store by buildingId for building members only
+        'buildingId':
+            buildingId, // Store by buildingId for building members only
         'status': 'active', // active, sold, deleted
         'phoneRequestCount': 0,
         'phoneRequestIds': [],
@@ -179,7 +180,9 @@ class ListingFirestoreService {
       // Sort by createdAt in memory (newest first)
       listings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-      print('✅ Fetched ${listings.length} listings for building $userBuildingId');
+      print(
+        '✅ Fetched ${listings.length} listings for building $userBuildingId',
+      );
       return listings;
     } catch (e) {
       print('❌ Error fetching listings: $e');
@@ -208,7 +211,9 @@ class ListingFirestoreService {
         return [];
       }
 
-      print('📥 Fetching listings for category: $category, building: $userBuildingId');
+      print(
+        '📥 Fetching listings for category: $category, building: $userBuildingId',
+      );
 
       // Query listings for user's building only
       final querySnapshot = await _listingsCollection
@@ -238,6 +243,7 @@ class ListingFirestoreService {
   Future<List<ListingModel>> getMyListings() async {
     try {
       final currentUserId = await _currentUserId;
+
       if (currentUserId.isEmpty) {
         print('⚠️ User not authenticated');
         return [];
@@ -245,18 +251,43 @@ class ListingFirestoreService {
 
       print('📥 Fetching my listings...');
 
+      // Get the resident's current building.
+      // Marketplace access is building-scoped.
+      final userSnapshot = await _usersCollection.doc(currentUserId).get();
+
+      if (!userSnapshot.exists) {
+        print('❌ User document not found');
+        return [];
+      }
+
+      final userData = userSnapshot.data() as Map<String, dynamic>?;
+
+      final userBuildingId = userData?['buildingId']?.toString().trim();
+
+      if (userBuildingId == null || userBuildingId.isEmpty) {
+        print('❌ User has no building assigned - cannot fetch my listings');
+        return [];
+      }
+
+      print('   Seller ID: $currentUserId');
+      print('   Building ID: $userBuildingId');
+
+      // Important:
+      // Query both seller ownership and tenant/building scope.
       final querySnapshot = await _listingsCollection
           .where('sellerId', isEqualTo: currentUserId)
+          .where('buildingId', isEqualTo: userBuildingId)
           .get();
 
       final listings = querySnapshot.docs.map((doc) {
         return _listingFromFirestore(doc);
       }).toList();
 
-      // Sort by createdAt in memory (newest first)
+      // Sort newest first in memory.
       listings.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       print('✅ Fetched ${listings.length} my listings');
+
       return listings;
     } catch (e) {
       print('❌ Error fetching my listings: $e');
@@ -277,7 +308,8 @@ class ListingFirestoreService {
       }
 
       // Get user's building ID first
-      await for (final userSnapshot in _usersCollection.doc(currentUserId).snapshots()) {
+      await for (final userSnapshot
+          in _usersCollection.doc(currentUserId).snapshots()) {
         if (!userSnapshot.exists) {
           print('❌ User document not found');
           yield [];
@@ -296,10 +328,11 @@ class ListingFirestoreService {
         print('📥 Streaming listings for building: $userBuildingId');
 
         // Stream listings for user's building only
-        await for (final snapshot in _listingsCollection
-            .where('buildingId', isEqualTo: userBuildingId)
-            .where('status', isEqualTo: 'active')
-            .snapshots()) {
+        await for (final snapshot
+            in _listingsCollection
+                .where('buildingId', isEqualTo: userBuildingId)
+                .where('status', isEqualTo: 'active')
+                .snapshots()) {
           final listings = snapshot.docs.map((doc) {
             return _listingFromFirestore(doc);
           }).toList();
@@ -333,10 +366,7 @@ class ListingFirestoreService {
 
       print('✅ Listing status updated');
 
-      return ServiceResult(
-        success: true,
-        message: 'Listing status updated',
-      );
+      return ServiceResult(success: true, message: 'Listing status updated');
     } catch (e) {
       print('❌ Error updating listing status: $e');
       return ServiceResult(
@@ -349,7 +379,7 @@ class ListingFirestoreService {
   // ============================================
   // PHONE REQUEST OPERATIONS
   // ============================================
-  
+
   /// Request phone number from seller
   /// Fetches requester details from users collection and validates building membership
   /// Creates request in subcollection: marketplaces/{productId}/requests
@@ -357,10 +387,7 @@ class ListingFirestoreService {
     try {
       final currentUserId = await _currentUserId;
       if (currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('📞 Requesting phone number for listing: $listingId');
@@ -372,10 +399,7 @@ class ListingFirestoreService {
       final buildingId = listingData?['buildingId'];
 
       if (sellerId == null || buildingId == null) {
-        return ServiceResult(
-          success: false,
-          message: 'Listing not found',
-        );
+        return ServiceResult(success: false, message: 'Listing not found');
       }
 
       // Get requester details from users collection
@@ -383,10 +407,7 @@ class ListingFirestoreService {
       final userData = userDoc.data() as Map<String, dynamic>?;
 
       if (userData == null) {
-        return ServiceResult(
-          success: false,
-          message: 'User not found',
-        );
+        return ServiceResult(success: false, message: 'User not found');
       }
 
       // Validate that requester is in the same building as the listing
@@ -394,7 +415,8 @@ class ListingFirestoreService {
       if (requesterBuildingId != buildingId) {
         return ServiceResult(
           success: false,
-          message: 'You must be a member of this building to request phone number',
+          message:
+              'You must be a member of this building to request phone number',
         );
       }
 
@@ -424,13 +446,13 @@ class ListingFirestoreService {
           .doc(listingId)
           .collection('requests')
           .add({
-        'requesterId': currentUserId,
-        'requesterName': requesterName,
-        'requesterFlat': requesterFlat,
-        'requesterPhone': requesterPhone,
-        'status': 'pending',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
+            'requesterId': currentUserId,
+            'requesterName': requesterName,
+            'requesterFlat': requesterFlat,
+            'requesterPhone': requesterPhone,
+            'status': 'pending',
+            'createdAt': FieldValue.serverTimestamp(),
+          });
 
       print('✅ Phone request created in subcollection from building member');
       return ServiceResult(
@@ -448,7 +470,10 @@ class ListingFirestoreService {
 
   /// Accept phone request (seller action)
   /// Updates status in subcollection: marketplaces/{productId}/requests/{requestId}
-  Future<ServiceResult> acceptPhoneRequest(String listingId, String requestId) async {
+  Future<ServiceResult> acceptPhoneRequest(
+    String listingId,
+    String requestId,
+  ) async {
     try {
       print('✅ Accepting phone request: $requestId');
 
@@ -458,15 +483,10 @@ class ListingFirestoreService {
           .doc(listingId)
           .collection('requests')
           .doc(requestId)
-          .update({
-        'status': 'accepted',
-      });
+          .update({'status': 'accepted'});
 
       print('✅ Phone request accepted');
-      return ServiceResult(
-        success: true,
-        message: 'Phone request accepted',
-      );
+      return ServiceResult(success: true, message: 'Phone request accepted');
     } catch (e) {
       print('❌ Error accepting phone request: $e');
       return ServiceResult(
@@ -478,7 +498,10 @@ class ListingFirestoreService {
 
   /// Reject phone request (seller action)
   /// Updates status in subcollection: marketplaces/{productId}/requests/{requestId}
-  Future<ServiceResult> rejectPhoneRequest(String listingId, String requestId) async {
+  Future<ServiceResult> rejectPhoneRequest(
+    String listingId,
+    String requestId,
+  ) async {
     try {
       print('❌ Rejecting phone request: $requestId');
 
@@ -487,15 +510,10 @@ class ListingFirestoreService {
           .doc(listingId)
           .collection('requests')
           .doc(requestId)
-          .update({
-        'status': 'rejected',
-      });
+          .update({'status': 'rejected'});
 
       print('✅ Phone request rejected');
-      return ServiceResult(
-        success: true,
-        message: 'Phone request rejected',
-      );
+      return ServiceResult(success: true, message: 'Phone request rejected');
     } catch (e) {
       print('❌ Error rejecting phone request: $e');
       return ServiceResult(
@@ -507,26 +525,27 @@ class ListingFirestoreService {
 
   /// Stream phone requests for real-time updates from subcollection
   /// Fetches from: marketplaces/{productId}/requests
-  Stream<List<Map<String, dynamic>>> streamPhoneRequestsForListing(String listingId) async* {
+  Stream<List<Map<String, dynamic>>> streamPhoneRequestsForListing(
+    String listingId,
+  ) async* {
     try {
-      print('📞 Streaming phone requests from subcollection for listing: $listingId');
+      print(
+        '📞 Streaming phone requests from subcollection for listing: $listingId',
+      );
 
-      await for (final snapshot in _firestore
-          .collection('marketplaces')
-          .doc(listingId)
-          .collection('requests')
-          .orderBy('createdAt', descending: true)
-          .snapshots()) {
+      await for (final snapshot
+          in _firestore
+              .collection('marketplaces')
+              .doc(listingId)
+              .collection('requests')
+              .orderBy('createdAt', descending: true)
+              .snapshots()) {
         final requestsList = <Map<String, dynamic>>[];
 
         for (final doc in snapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
+          final data = doc.data();
 
-          requestsList.add({
-            ...data,
-            'id': doc.id,
-            'requestId': doc.id,
-          });
+          requestsList.add({...data, 'id': doc.id, 'requestId': doc.id});
         }
 
         print('✅ Fetched ${requestsList.length} requests from subcollection');
@@ -538,7 +557,7 @@ class ListingFirestoreService {
     }
   }
 
-// ============================================
+  // ============================================
   // UPDATE LISTING
   // ============================================
   Future<ServiceResult> updateListing({
@@ -656,10 +675,7 @@ class ListingFirestoreService {
 
       print('✅ Fetched seller phone number for buyer');
       return [
-        {
-          'phone': sellerPhone,
-          'sellerName': sellerName,
-        }
+        {'phone': sellerPhone, 'sellerName': sellerName},
       ];
     } catch (e) {
       print('❌ Error fetching accepted phone numbers for buyer: $e');
@@ -671,6 +687,7 @@ class ListingFirestoreService {
   Future<List<ListingModel>> getHistoryListings() async {
     try {
       final currentUserId = await _currentUserId;
+
       if (currentUserId.isEmpty) {
         print('⚠️ User not authenticated');
         return [];
@@ -678,23 +695,45 @@ class ListingFirestoreService {
 
       print('📥 Fetching history listings...');
 
+      // Get resident's current building.
+      final userSnapshot = await _usersCollection.doc(currentUserId).get();
+
+      if (!userSnapshot.exists) {
+        print('❌ User document not found');
+        return [];
+      }
+
+      final userData = userSnapshot.data() as Map<String, dynamic>?;
+
+      final userBuildingId = userData?['buildingId']?.toString().trim();
+
+      if (userBuildingId == null || userBuildingId.isEmpty) {
+        print('❌ User has no building assigned - cannot fetch history');
+        return [];
+      }
+
+      print('   Seller ID: $currentUserId');
+      print('   Building ID: $userBuildingId');
+
       final querySnapshot = await _listingsCollection
           .where('sellerId', isEqualTo: currentUserId)
+          .where('buildingId', isEqualTo: userBuildingId)
           .get();
 
       final listings = querySnapshot.docs.map((doc) {
         return _listingFromFirestore(doc);
       }).toList();
 
-      // Filter to only sold and deleted
+      // Only completed/removed listings belong in History.
       final historyListings = listings.where((listing) {
         return listing.status == 'sold' || listing.status == 'deleted';
       }).toList();
 
-      // Sort by updatedAt in memory (newest first)
+      // Newest history entry first.
       historyListings.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
 
       print('✅ Fetched ${historyListings.length} history listings');
+
       return historyListings;
     } catch (e) {
       print('❌ Error fetching history listings: $e');
@@ -718,9 +757,5 @@ class ServiceResult {
   final String? message;
   final dynamic data;
 
-  ServiceResult({
-    required this.success,
-    this.message,
-    this.data,
-  });
+  ServiceResult({required this.success, this.message, this.data});
 }

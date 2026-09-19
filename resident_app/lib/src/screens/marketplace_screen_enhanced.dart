@@ -2,7 +2,6 @@
 // Enhanced Marketplace with Browse & Your Products tabs, real data only
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/listing_model.dart';
 import '../services/listing_firestore_service.dart';
 import '../components/app_segmented_control.dart';
@@ -15,10 +14,9 @@ import 'marketplace_your_products_screen.dart';
 import 'marketplace_create_listing_screen.dart';
 import 'marketplace_your_product_detail_screen.dart';
 import 'marketplace_edit_listing_screen.dart';
-import 'marketplace_buyer_phone_view_screen.dart';
 
 class MarketplaceScreenEnhanced extends StatefulWidget {
-  const MarketplaceScreenEnhanced({Key? key}) : super(key: key);
+  const MarketplaceScreenEnhanced({super.key});
 
   @override
   State<MarketplaceScreenEnhanced> createState() => _MarketplaceScreenEnhancedState();

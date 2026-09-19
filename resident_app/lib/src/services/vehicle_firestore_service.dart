@@ -14,16 +14,26 @@ class VehicleFirestoreService {
   /// Get current user ID
   String? get _userId => _auth.currentUser?.uid;
 
+  Future<String?> _communityId() async {
+    final uid = _userId;
+    if (uid == null) return null;
+    final profile = await _firestore.collection('users').doc(uid).get();
+    final communityId = profile.data()?['communityId']?.toString().trim();
+    return communityId == null || communityId.isEmpty ? null : communityId;
+  }
+
   /// Add a new vehicle
   Future<String?> addVehicle(Vehicle vehicle) async {
     try {
-      if (_userId == null) {
+      final communityId = await _communityId();
+      if (_userId == null || communityId == null) {
         print('❌ No user logged in');
         return null;
       }
 
       final docRef = await _firestore.collection(collectionName).add({
         'userId': _userId,
+        'communityId': communityId,
         'name': vehicle.name,
         'type': vehicle.type,
         'plateNumber': vehicle.plateNumber,
@@ -44,13 +54,15 @@ class VehicleFirestoreService {
   /// Get all vehicles for current user
   Future<List<Vehicle>> getVehicles() async {
     try {
-      if (_userId == null) {
+      final communityId = await _communityId();
+      if (_userId == null || communityId == null) {
         print('❌ No user logged in');
         return [];
       }
 
       final snapshot = await _firestore
           .collection(collectionName)
+          .where('communityId', isEqualTo: communityId)
           .where('userId', isEqualTo: _userId)
           .get();
 
@@ -75,28 +87,36 @@ class VehicleFirestoreService {
   }
 
   /// Stream vehicles (real-time updates)
-  Stream<List<Vehicle>> streamVehicles() {
+  Stream<List<Vehicle>> streamVehicles() async* {
+    final communityId = await _communityId();
     if (_userId == null) {
-      return Stream.value([]);
+      yield [];
+      return;
     }
 
-    return _firestore
+    if (communityId == null) {
+      yield [];
+      return;
+    }
+
+    yield* _firestore
         .collection(collectionName)
+        .where('communityId', isEqualTo: communityId)
         .where('userId', isEqualTo: _userId)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return Vehicle(
-          id: doc.id,
-          name: data['name'] ?? '',
-          type: data['type'] ?? '',
-          plateNumber: data['plateNumber'] ?? '',
-          color: data['color'] ?? '',
-          photoUrl: data['photoUrl'],
-        );
-      }).toList();
-    });
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            return Vehicle(
+              id: doc.id,
+              name: data['name'] ?? '',
+              type: data['type'] ?? '',
+              plateNumber: data['plateNumber'] ?? '',
+              color: data['color'] ?? '',
+              photoUrl: data['photoUrl'],
+            );
+          }).toList();
+        });
   }
 
   /// Update vehicle

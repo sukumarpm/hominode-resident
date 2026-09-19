@@ -9,7 +9,7 @@ import 'src/providers/theme_provider.dart';
 
 /// Complete Authentication Flow Demo
 /// Demonstrates: Splash → Login → Create Account → OTP → Home
-/// 
+///
 /// Run this to see the complete auth flow:
 /// flutter run -t lib/auth_flow_demo.dart
 void main() async {
@@ -28,12 +28,12 @@ void main() async {
 }
 
 class AuthFlowDemoApp extends StatelessWidget {
-  const AuthFlowDemoApp({Key? key}) : super(key: key);
+  const AuthFlowDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lyvo - Auth Flow Demo',
+      title: 'Hominode - Auth Flow Demo',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,
@@ -50,9 +50,7 @@ class AuthFlowDemoApp extends StatelessWidget {
         '/create-account': (context) => CreateAccountScreen(),
         '/verify-otp': (context) {
           final args = ModalRoute.of(context)?.settings.arguments as Map?;
-          return VerifyOTPScreen(
-            mobileNumber: args?['mobile'] as String?,
-          );
+          return VerifyOTPScreen(mobileNumber: args?['mobile'] as String?);
         },
         '/home': (context) => const MainNavigation(),
       },

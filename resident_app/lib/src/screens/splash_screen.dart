@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Splash Screen Configuration
 class SplashConfig {
@@ -11,7 +10,7 @@ class SplashConfig {
   static const Duration taglineDuration = Duration(milliseconds: 400);
   static const Duration holdDuration = Duration(milliseconds: 650);
   static const Duration exitDuration = Duration(milliseconds: 300);
-  
+
   static const bool enableParticles = true;
   static const bool respectReducedMotion = true;
 }
@@ -20,11 +19,8 @@ class SplashConfig {
 /// Features smooth logo entrance, depth effects, and tagline animation
 class SplashScreen extends StatefulWidget {
   final bool reduceMotion;
-  
-  const SplashScreen({
-    Key? key,
-    this.reduceMotion = false,
-  }) : super(key: key);
+
+  const SplashScreen({super.key, this.reduceMotion = false});
 
   @override
   State<SplashScreen> createState() => _SplashScreenState();
@@ -37,21 +33,21 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _bounceController;
   late AnimationController _taglineController;
   late AnimationController _exitController;
-  
+
   late Animation<double> _logoScale;
   late Animation<double> _logoOpacity;
   late Animation<double> _logoRotation;
   late Animation<double> _logoTranslateY;
-  
+
   late Animation<double> _shadowOpacity;
   late Animation<double> _shadowBlur;
-  
+
   late Animation<double> _squashX;
   late Animation<double> _squashY;
-  
+
   late Animation<double> _taglineOpacity;
   late Animation<double> _taglineTranslateY;
-  
+
   late Animation<double> _exitScale;
   late Animation<double> _exitOpacity;
 
@@ -68,61 +64,45 @@ class _SplashScreenState extends State<SplashScreen>
       vsync: this,
       duration: SplashConfig.logoEntryDuration,
     );
-    
+
     _logoScale = Tween<double>(begin: 0.6, end: 1.05).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeOutBack,
-      ),
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
     );
-    
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeOut,
-      ),
-    );
-    
-    _logoRotation = Tween<double>(begin: -0.05, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeOut,
-      ),
-    );
-    
+
+    _logoOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeOut));
+
+    _logoRotation = Tween<double>(
+      begin: -0.05,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _logoController, curve: Curves.easeOut));
+
     _logoTranslateY = Tween<double>(begin: 20.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _logoController,
-        curve: Curves.easeOutBack,
-      ),
+      CurvedAnimation(parent: _logoController, curve: Curves.easeOutBack),
     );
-    
+
     // Shadow animation
     _shadowController = AnimationController(
       vsync: this,
       duration: SplashConfig.shadowDuration,
     );
-    
+
     _shadowOpacity = Tween<double>(begin: 0.0, end: 0.35).animate(
-      CurvedAnimation(
-        parent: _shadowController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _shadowController, curve: Curves.easeOut),
     );
-    
+
     _shadowBlur = Tween<double>(begin: 0.0, end: 40.0).animate(
-      CurvedAnimation(
-        parent: _shadowController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _shadowController, curve: Curves.easeOut),
     );
-    
+
     // Bounce animation
     _bounceController = AnimationController(
       vsync: this,
       duration: SplashConfig.bounceDuration,
     );
-    
+
     _squashX = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.0, end: 1.03),
@@ -133,7 +113,7 @@ class _SplashScreenState extends State<SplashScreen>
         weight: 50,
       ),
     ]).animate(_bounceController);
-    
+
     _squashY = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 1.0, end: 0.97),
@@ -144,46 +124,36 @@ class _SplashScreenState extends State<SplashScreen>
         weight: 50,
       ),
     ]).animate(_bounceController);
-    
+
     // Tagline animation
     _taglineController = AnimationController(
       vsync: this,
       duration: SplashConfig.taglineDuration,
     );
-    
+
     _taglineOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _taglineController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _taglineController, curve: Curves.easeOut),
     );
-    
+
     _taglineTranslateY = Tween<double>(begin: 12.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _taglineController,
-        curve: Curves.easeOut,
-      ),
+      CurvedAnimation(parent: _taglineController, curve: Curves.easeOut),
     );
-    
+
     // Exit animation
     _exitController = AnimationController(
       vsync: this,
       duration: SplashConfig.exitDuration,
     );
-    
-    _exitScale = Tween<double>(begin: 1.0, end: 0.98).animate(
-      CurvedAnimation(
-        parent: _exitController,
-        curve: Curves.easeIn,
-      ),
-    );
-    
-    _exitOpacity = Tween<double>(begin: 1.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _exitController,
-        curve: Curves.easeIn,
-      ),
-    );
+
+    _exitScale = Tween<double>(
+      begin: 1.0,
+      end: 0.98,
+    ).animate(CurvedAnimation(parent: _exitController, curve: Curves.easeIn));
+
+    _exitOpacity = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(parent: _exitController, curve: Curves.easeIn));
   }
 
   Future<void> _startAnimationSequence() async {
@@ -194,25 +164,25 @@ class _SplashScreenState extends State<SplashScreen>
       await _navigateToHome();
       return;
     }
-    
+
     // Start logo entry
     _logoController.forward();
-    
+
     // Start shadow after 350ms
     await Future.delayed(const Duration(milliseconds: 350));
     _shadowController.forward();
-    
+
     // Start bounce at 600ms
     await Future.delayed(const Duration(milliseconds: 250));
     _bounceController.forward();
-    
+
     // Start tagline at 850ms
     await Future.delayed(const Duration(milliseconds: 250));
     _taglineController.forward();
-    
+
     // Hold for branding
     await Future.delayed(SplashConfig.holdDuration);
-    
+
     // Exit and navigate
     await _exitController.forward();
     await _navigateToHome();
@@ -244,20 +214,15 @@ class _SplashScreenState extends State<SplashScreen>
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF2F80ED), Color(0xFF2563EB)],
+              colors: [Color(0xFF3AA6C8), Color(0xFF0E4778)],
             ),
           ),
           child: AnimatedBuilder(
-            animation: Listenable.merge([
-              _exitController,
-            ]),
+            animation: Listenable.merge([_exitController]),
             builder: (context, child) {
               return Opacity(
                 opacity: _exitOpacity.value,
-                child: Transform.scale(
-                  scale: _exitScale.value,
-                  child: child,
-                ),
+                child: Transform.scale(scale: _exitScale.value, child: child),
               );
             },
             child: Stack(
@@ -275,11 +240,11 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
                 ),
-                
+
                 // Particles (optional)
                 if (SplashConfig.enableParticles && !widget.reduceMotion)
                   ..._buildParticles(),
-                
+
                 // Main content
                 Center(
                   child: Column(
@@ -287,9 +252,9 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       // Logo with animations
                       _buildAnimatedLogo(),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // App name
                       AnimatedBuilder(
                         animation: _taglineController,
@@ -303,7 +268,7 @@ class _SplashScreenState extends State<SplashScreen>
                           );
                         },
                         child: const Text(
-                          'Lyvo',
+                          'Hominode',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 36,
@@ -312,9 +277,9 @@ class _SplashScreenState extends State<SplashScreen>
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 8),
-                      
+
                       // Tagline
                       AnimatedBuilder(
                         animation: _taglineController,
@@ -377,7 +342,9 @@ class _SplashScreenState extends State<SplashScreen>
                         decoration: BoxDecoration(
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: _shadowOpacity.value),
+                              color: Colors.black.withValues(
+                                alpha: _shadowOpacity.value,
+                              ),
                               blurRadius: _shadowBlur.value,
                               spreadRadius: 2,
                               offset: const Offset(0, 8),
@@ -387,10 +354,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                     ),
                     // Logo
-                    Hero(
-                      tag: 'appLogoHero',
-                      child: _buildLyvoLogo(),
-                    ),
+                    Hero(tag: 'appLogoHero', child: _buildLyvoLogo()),
                   ],
                 ),
               ),
@@ -402,13 +366,11 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Widget _buildLyvoLogo() {
-    // Custom Lyvo logo using CustomPaint
+    // Custom Hominode logo using CustomPaint
     return SizedBox(
       width: 140,
       height: 140,
-      child: CustomPaint(
-        painter: _LyvoLogoPainter(),
-      ),
+      child: CustomPaint(painter: _LyvoLogoPainter()),
     );
   }
 
@@ -416,30 +378,27 @@ class _SplashScreenState extends State<SplashScreen>
     return List.generate(5, (index) {
       return _FloatingParticle(
         delay: Duration(milliseconds: 600 + (index * 200)),
-        offset: Offset(
-          (index - 2) * 60.0,
-          -100 + (index * 40.0),
-        ),
+        offset: Offset((index - 2) * 60.0, -100 + (index * 40.0)),
       );
     });
   }
 }
 
-/// Custom painter for Lyvo logo
+/// Custom painter for Hominode logo
 class _LyvoLogoPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.fill
       ..color = Colors.white;
-    
+
     final shadowPaint = Paint()
       ..style = PaintingStyle.fill
-      ..color = const Color(0xFF1E3A8A);
-    
+      ..color = const Color(0xFF061C4C);
+
     final centerX = size.width / 2;
     final centerY = size.height / 2;
-    
+
     // Draw left slash (larger)
     final leftPath = Path();
     leftPath.moveTo(centerX - 35, centerY - 50);
@@ -447,16 +406,16 @@ class _LyvoLogoPainter extends CustomPainter {
     leftPath.lineTo(centerX - 25, centerY + 50);
     leftPath.lineTo(centerX - 45, centerY + 50);
     leftPath.close();
-    
+
     // Shadow for left slash
     canvas.save();
     canvas.translate(4, 6);
     canvas.drawPath(leftPath, shadowPaint);
     canvas.restore();
-    
+
     // Main left slash
     canvas.drawPath(leftPath, paint);
-    
+
     // Draw right slash (smaller)
     final rightPath = Path();
     rightPath.moveTo(centerX + 10, centerY - 35);
@@ -464,13 +423,13 @@ class _LyvoLogoPainter extends CustomPainter {
     rightPath.lineTo(centerX + 15, centerY + 35);
     rightPath.lineTo(centerX, centerY + 35);
     rightPath.close();
-    
+
     // Shadow for right slash
     canvas.save();
     canvas.translate(4, 6);
     canvas.drawPath(rightPath, shadowPaint);
     canvas.restore();
-    
+
     // Main right slash
     canvas.drawPath(rightPath, paint);
   }
@@ -483,12 +442,8 @@ class _LyvoLogoPainter extends CustomPainter {
 class _FloatingParticle extends StatefulWidget {
   final Duration delay;
   final Offset offset;
-  
-  const _FloatingParticle({
-    Key? key,
-    required this.delay,
-    required this.offset,
-  }) : super(key: key);
+
+  const _FloatingParticle({required this.delay, required this.offset});
 
   @override
   State<_FloatingParticle> createState() => _FloatingParticleState();
@@ -507,11 +462,12 @@ class _FloatingParticleState extends State<_FloatingParticle>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     );
-    
-    _translateY = Tween<double>(begin: 0.0, end: -80.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
-    
+
+    _translateY = Tween<double>(
+      begin: 0.0,
+      end: -80.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
     _opacity = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.0, end: 0.08),
@@ -526,7 +482,7 @@ class _FloatingParticleState extends State<_FloatingParticle>
         weight: 30,
       ),
     ]).animate(_controller);
-    
+
     Future.delayed(widget.delay, () {
       if (mounted) {
         _controller.repeat();
@@ -547,7 +503,10 @@ class _FloatingParticleState extends State<_FloatingParticle>
       builder: (context, child) {
         return Positioned(
           left: MediaQuery.of(context).size.width / 2 + widget.offset.dx,
-          top: MediaQuery.of(context).size.height / 2 + widget.offset.dy + _translateY.value,
+          top:
+              MediaQuery.of(context).size.height / 2 +
+              widget.offset.dy +
+              _translateY.value,
           child: Opacity(
             opacity: _opacity.value,
             child: Container(

@@ -2,13 +2,12 @@
 // Notifications Preferences Screen
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:shared_preferences/shared_preferences.dart'; // Uncomment when ready to use
-import '../components/settings_toggle.dart';
 import '../components/standard_screen.dart';
 
 class NotificationsSettingsScreen extends StatefulWidget {
-  const NotificationsSettingsScreen({Key? key}) : super(key: key);
+  const NotificationsSettingsScreen({super.key});
 
   @override
   State<NotificationsSettingsScreen> createState() =>
@@ -32,12 +31,12 @@ class _NotificationsSettingsScreenState
     return StandardScreen(
       title: 'Notification Settings',
       isScrollable: true,
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildNotificationsCard(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
         ],
       ),
     );
@@ -46,34 +45,38 @@ class _NotificationsSettingsScreenState
   Widget _buildOldHeader() {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24.r),
+          bottomRight: Radius.circular(24.r),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(8, 16, 16, 20),
+          padding: EdgeInsets.fromLTRB(8.w, 16.h, 16.w, 20.h),
           child: Row(
             children: [
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-                padding: const EdgeInsets.all(8),
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 20.w,
+                ),
+                padding: EdgeInsets.all(8.w),
               ),
-              const SizedBox(width: 4),
-              const Text(
+              SizedBox(width: 4.w),
+              Text(
                 'Notifications',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -88,7 +91,7 @@ class _NotificationsSettingsScreenState
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.04),
@@ -101,27 +104,27 @@ class _NotificationsSettingsScreenState
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 40.w,
+                  height: 40.h,
                   decoration: BoxDecoration(
                     color: const Color(0xFFDBEAFE),
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.notifications,
                     color: Color(0xFF3B82F6),
-                    size: 22,
+                    size: 22.w,
                   ),
                 ),
-                const SizedBox(width: 12),
-                const Text(
+                SizedBox(width: 12.w),
+                Text(
                   'Notifications',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111827),
                   ),
@@ -139,7 +142,12 @@ class _NotificationsSettingsScreenState
               _savePreference('push_notifications', value);
             },
           ),
-          const Divider(height: 1, color: Color(0xFFE5E7EB), indent: 16, endIndent: 16),
+          const Divider(
+            height: 1,
+            color: Color(0xFFE5E7EB),
+            indent: 16,
+            endIndent: 16,
+          ),
           _buildToggleRow(
             title: 'Email Notifications',
             subtitle: 'Receive emails about bills',
@@ -161,7 +169,7 @@ class _NotificationsSettingsScreenState
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Row(
         children: [
           Expanded(
@@ -170,19 +178,16 @@ class _NotificationsSettingsScreenState
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    fontSize: 15,
+                  style: TextStyle(
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF111827),
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF9CA3AF),
-                  ),
+                  style: TextStyle(fontSize: 13.sp, color: Color(0xFF9CA3AF)),
                 ),
               ],
             ),
@@ -190,7 +195,7 @@ class _NotificationsSettingsScreenState
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF3B82F6),
+            activeThumbColor: const Color(0xFF3B82F6),
             activeTrackColor: const Color(0xFFDBEAFE),
           ),
         ],

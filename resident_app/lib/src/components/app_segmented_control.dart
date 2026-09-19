@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 /// Premium Segmented Control Component
-/// 
+///
 /// A high-end, reusable segmented control with smooth animations
 /// matching Airbnb/Apple level design standards.
-/// 
+///
 /// Design Specifications:
 /// - Track background: #F0F1F3 (light grey)
 /// - Height: 48px
@@ -14,7 +15,7 @@ import 'package:flutter/material.dart';
 /// - Animation: 220ms easeOut
 /// - Active text: Bold #0F172A
 /// - Inactive text: Medium #9AA0A6, 15px
-/// 
+///
 /// Usage:
 /// ```dart
 /// AppSegmentedControl(
@@ -26,29 +27,30 @@ import 'package:flutter/material.dart';
 class AppSegmentedControl extends StatefulWidget {
   /// List of segment labels (2-5 segments recommended)
   final List<String> segments;
-  
+
   /// Currently selected segment index
   final int selectedIndex;
-  
+
   /// Callback when segment is tapped, returns the new index
   final ValueChanged<int> onChanged;
-  
+
   /// Optional custom height (default: 48px)
   final double? height;
-  
+
   /// Optional horizontal margin (default: 20px)
   final double? horizontalMargin;
 
   const AppSegmentedControl({
-    Key? key,
+    super.key,
     required this.segments,
     required this.selectedIndex,
     required this.onChanged,
     this.height,
     this.horizontalMargin,
-  })  : assert(segments.length >= 2 && segments.length <= 5,
-            'Segments must contain 2-5 items'),
-        super(key: key);
+  }) : assert(
+         segments.length >= 2 && segments.length <= 5,
+         'Segments must contain 2-5 items',
+       );
 
   @override
   State<AppSegmentedControl> createState() => _AppSegmentedControlState();
@@ -99,14 +101,14 @@ class _AppSegmentedControlState extends State<AppSegmentedControl>
       margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
       decoration: BoxDecoration(
         color: const Color(0xFFF0F1F3),
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(30.r),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(4),
+        padding: EdgeInsets.all(4.w),
         child: LayoutBuilder(
           builder: (context, constraints) {
             final segmentWidth = constraints.maxWidth / widget.segments.length;
-            
+
             return Stack(
               children: [
                 // Animated sliding pill
@@ -115,7 +117,8 @@ class _AppSegmentedControlState extends State<AppSegmentedControl>
                   builder: (context, child) {
                     final startPosition = _previousIndex * segmentWidth;
                     final endPosition = widget.selectedIndex * segmentWidth;
-                    final currentPosition = startPosition +
+                    final currentPosition =
+                        startPosition +
                         (endPosition - startPosition) * _animation.value;
 
                     return Positioned(
@@ -126,10 +129,12 @@ class _AppSegmentedControlState extends State<AppSegmentedControl>
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(26),
+                          borderRadius: BorderRadius.circular(26.r),
                           boxShadow: [
                             BoxShadow(
-                              color: const Color(0x10182840), // rgba(16, 24, 40, 0.12)
+                              color: const Color(
+                                0x10182840,
+                              ), // rgba(16, 24, 40, 0.12)
                               blurRadius: 12,
                               offset: const Offset(0, 3),
                               spreadRadius: 0,
@@ -175,7 +180,7 @@ class _AppSegmentedControlState extends State<AppSegmentedControl>
       behavior: HitTestBehavior.opaque,
       child: Container(
         alignment: Alignment.center,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: AnimatedDefaultTextStyle(
           duration: const Duration(milliseconds: 220),
           curve: Curves.easeOut,
@@ -183,7 +188,7 @@ class _AppSegmentedControlState extends State<AppSegmentedControl>
             color: isSelected
                 ? const Color(0xFF0F172A) // Active: Dark slate
                 : const Color(0xFF9AA0A6), // Inactive: Medium grey
-            fontSize: 15,
+            fontSize: 15.sp,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
             letterSpacing: -0.2,
           ),

@@ -1,7 +1,6 @@
 // lib/src/modals/add_staff_modal.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../models/domestic_staff.dart';
 
@@ -13,10 +12,8 @@ void showAddStaffModal(
   showDialog(
     context: context,
     barrierColor: const Color(0x52000000), // rgba(0,0,0,0.32)
-    builder: (context) => AddStaffModal(
-      existingStaff: existingStaff,
-      onSaved: onSaved,
-    ),
+    builder: (context) =>
+        AddStaffModal(existingStaff: existingStaff, onSaved: onSaved),
   );
 }
 
@@ -24,11 +21,7 @@ class AddStaffModal extends StatefulWidget {
   final DomesticStaff? existingStaff;
   final Function(DomesticStaff) onSaved;
 
-  const AddStaffModal({
-    Key? key,
-    this.existingStaff,
-    required this.onSaved,
-  }) : super(key: key);
+  const AddStaffModal({super.key, this.existingStaff, required this.onSaved});
 
   @override
   State<AddStaffModal> createState() => _AddStaffModalState();
@@ -39,14 +32,21 @@ class _AddStaffModalState extends State<AddStaffModal> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _scheduleController = TextEditingController();
-  
+
   String _selectedRole = 'Maid';
   bool _isActive = true;
   bool _isSaving = false;
   File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
-  final List<String> _roles = ['Maid', 'Driver', 'Cook', 'Gardener', 'Security', 'Other'];
+  final List<String> _roles = [
+    'Maid',
+    'Driver',
+    'Cook',
+    'Gardener',
+    'Security',
+    'Other',
+  ];
 
   @override
   void initState() {
@@ -74,7 +74,9 @@ class _AddStaffModalState extends State<AddStaffModal> {
     setState(() => _isSaving = true);
 
     final staff = DomesticStaff(
-      id: widget.existingStaff?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+      id:
+          widget.existingStaff?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
       name: _nameController.text.trim(),
       role: _selectedRole,
       phone: _phoneController.text.trim(),
@@ -120,7 +122,9 @@ class _AddStaffModalState extends State<AddStaffModal> {
                     children: [
                       Expanded(
                         child: Text(
-                          widget.existingStaff != null ? 'Edit Staff Member' : 'Add Staff Member',
+                          widget.existingStaff != null
+                              ? 'Edit Staff Member'
+                              : 'Add Staff Member',
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 20,
@@ -131,14 +135,18 @@ class _AddStaffModalState extends State<AddStaffModal> {
                       ),
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close, color: Color(0xFF9E9E9E), size: 24),
+                        icon: const Icon(
+                          Icons.close,
+                          color: Color(0xFF9E9E9E),
+                          size: 24,
+                        ),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Full Name
                   _buildTextField(
                     label: 'Full Name',
@@ -152,11 +160,11 @@ class _AddStaffModalState extends State<AddStaffModal> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  
+
                   // Role
                   _buildRoleDropdown(),
                   const SizedBox(height: 18),
-                  
+
                   // Phone Number
                   _buildTextField(
                     label: 'Phone Number',
@@ -171,7 +179,7 @@ class _AddStaffModalState extends State<AddStaffModal> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  
+
                   // Schedule
                   _buildTextField(
                     label: 'Schedule',
@@ -185,11 +193,11 @@ class _AddStaffModalState extends State<AddStaffModal> {
                     },
                   ),
                   const SizedBox(height: 18),
-                  
+
                   // Attach photo
                   _buildPhotoUpload(),
                   const SizedBox(height: 24),
-                  
+
                   // Add Staff Button
                   _buildSaveButton(),
                 ],
@@ -224,16 +232,10 @@ class _AddStaffModalState extends State<AddStaffModal> {
           controller: controller,
           keyboardType: keyboardType,
           validator: validator,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF0F1724),
-          ),
+          style: const TextStyle(fontSize: 15, color: Color(0xFF0F1724)),
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: const TextStyle(
-              fontSize: 15,
-              color: Color(0xFFA8A8A8),
-            ),
+            hintStyle: const TextStyle(fontSize: 15, color: Color(0xFFA8A8A8)),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
@@ -246,13 +248,19 @@ class _AddStaffModalState extends State<AddStaffModal> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+              borderSide: const BorderSide(
+                color: Color(0xFF0E4778),
+                width: 1.5,
+              ),
             ),
             errorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFEF4444), width: 1),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
         ),
       ],
@@ -273,17 +281,11 @@ class _AddStaffModalState extends State<AddStaffModal> {
         ),
         const SizedBox(height: 10),
         DropdownButtonFormField<String>(
-          value: _selectedRole,
-          style: const TextStyle(
-            fontSize: 15,
-            color: Color(0xFF0F1724),
-          ),
+          initialValue: _selectedRole,
+          style: const TextStyle(fontSize: 15, color: Color(0xFF0F1724)),
           decoration: InputDecoration(
             hintText: 'Select Category',
-            hintStyle: const TextStyle(
-              fontSize: 15,
-              color: Color(0xFFA8A8A8),
-            ),
+            hintStyle: const TextStyle(fontSize: 15, color: Color(0xFFA8A8A8)),
             filled: true,
             fillColor: Colors.white,
             border: OutlineInputBorder(
@@ -296,16 +298,23 @@ class _AddStaffModalState extends State<AddStaffModal> {
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+              borderSide: const BorderSide(
+                color: Color(0xFF0E4778),
+                width: 1.5,
+              ),
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
           ),
-          icon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFFA8A8A8), size: 24),
+          icon: const Icon(
+            Icons.keyboard_arrow_down,
+            color: Color(0xFFA8A8A8),
+            size: 24,
+          ),
           items: _roles.map((role) {
-            return DropdownMenuItem(
-              value: role,
-              child: Text(role),
-            );
+            return DropdownMenuItem(value: role, child: Text(role));
           }).toList(),
           onChanged: (value) {
             if (value != null) {
@@ -360,15 +369,12 @@ class _AddStaffModalState extends State<AddStaffModal> {
                     ),
                     child: const Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
                   title: const Text(
                     'Camera',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Take a new photo'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
@@ -389,10 +395,7 @@ class _AddStaffModalState extends State<AddStaffModal> {
                   ),
                   title: const Text(
                     'Gallery',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Choose from gallery'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
@@ -509,7 +512,7 @@ class _AddStaffModalState extends State<AddStaffModal> {
                           'Change photo',
                           style: TextStyle(
                             fontSize: 14,
-                            color: Color(0xFF2563EB),
+                            color: Color(0xFF0E4778),
                             decoration: TextDecoration.underline,
                           ),
                         ),
@@ -519,9 +522,16 @@ class _AddStaffModalState extends State<AddStaffModal> {
                 ),
                 IconButton(
                   onPressed: _removeImage,
-                  icon: const Icon(Icons.close, size: 20, color: Color(0xFF9CA3AF)),
+                  icon: const Icon(
+                    Icons.close,
+                    size: 20,
+                    color: Color(0xFF9CA3AF),
+                  ),
                   padding: const EdgeInsets.all(8),
-                  constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                  constraints: const BoxConstraints(
+                    minWidth: 36,
+                    minHeight: 36,
+                  ),
                 ),
               ],
             ),
@@ -570,7 +580,7 @@ class _AddStaffModalState extends State<AddStaffModal> {
       child: ElevatedButton(
         onPressed: _isSaving ? null : _handleSave,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: const Color(0xFF0E4778),
           disabledBackgroundColor: const Color(0xFF93C5FD),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

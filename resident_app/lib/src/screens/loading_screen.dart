@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 /// Loading Screen with Skeleton UI
 /// Shows for 2 seconds after successful login
 class LoadingScreen extends StatefulWidget {
-  const LoadingScreen({Key? key}) : super(key: key);
+  const LoadingScreen({super.key});
 
   @override
   State<LoadingScreen> createState() => _LoadingScreenState();
@@ -20,7 +19,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Future<void> _navigateToHome() async {
     // Wait for 2 seconds
     await Future.delayed(const Duration(seconds: 2));
-    
+
     if (mounted) {
       Navigator.of(context).pushReplacementNamed('/home');
     }
@@ -35,9 +34,9 @@ class _LoadingScreenState extends State<LoadingScreen> {
           children: [
             // Header Skeleton
             _buildHeaderSkeleton(),
-            
+
             const SizedBox(height: 20),
-            
+
             // Content Skeletons
             Expanded(
               child: SingleChildScrollView(
@@ -46,14 +45,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
                   children: [
                     // Banner Skeleton
                     _buildBannerSkeleton(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Quick Access Grid Skeleton
                     _buildQuickAccessSkeleton(),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Cards Skeleton
                     _buildCardSkeleton(),
                     const SizedBox(height: 16),
@@ -62,7 +61,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                 ),
               ),
             ),
-            
+
             // Bottom Nav Skeleton
             _buildBottomNavSkeleton(),
           ],
@@ -76,7 +75,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF2F80ED), Color(0xFF2563EB)],
+          colors: [Color(0xFF3AA6C8), Color(0xFF0E4778)],
         ),
       ),
       child: Row(
@@ -100,11 +99,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget _buildBannerSkeleton() {
-    return _shimmerBox(
-      width: double.infinity,
-      height: 160,
-      radius: 16,
-    );
+    return _shimmerBox(width: double.infinity, height: 160, radius: 16);
   }
 
   Widget _buildQuickAccessSkeleton() {

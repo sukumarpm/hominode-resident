@@ -19,7 +19,7 @@ void main() {
 }
 
 class SplashDemo extends StatelessWidget {
-  const SplashDemo({Key? key}) : super(key: key);
+  const SplashDemo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -36,7 +36,7 @@ class SplashDemo extends StatelessWidget {
 }
 
 class SplashDemoHome extends StatefulWidget {
-  const SplashDemoHome({Key? key}) : super(key: key);
+  const SplashDemoHome({super.key});
 
   @override
   State<SplashDemoHome> createState() => _SplashDemoHomeState();

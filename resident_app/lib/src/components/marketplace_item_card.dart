@@ -4,10 +4,7 @@ import '../models/marketplace_item.dart';
 class MarketplaceItemCard extends StatelessWidget {
   final MarketplaceItem item;
 
-  const MarketplaceItemCard({
-    Key? key,
-    required this.item,
-  }) : super(key: key);
+  const MarketplaceItemCard({super.key, required this.item});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +29,9 @@ class MarketplaceItemCard extends StatelessWidget {
             child: Stack(
               children: [
                 ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                   child: Image.asset(
                     item.imagePath,
                     width: double.infinity,
@@ -43,7 +42,11 @@ class MarketplaceItemCard extends StatelessWidget {
                         width: double.infinity,
                         height: double.infinity,
                         color: Colors.grey[200],
-                        child: const Icon(Icons.image, size: 50, color: Colors.grey),
+                        child: const Icon(
+                          Icons.image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
                       );
                     },
                   ),
@@ -52,7 +55,10 @@ class MarketplaceItemCard extends StatelessWidget {
                   top: 8,
                   right: 8,
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1BAF5D),
                       borderRadius: BorderRadius.circular(12),
@@ -94,7 +100,7 @@ class MarketplaceItemCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
                   const SizedBox(height: 2),

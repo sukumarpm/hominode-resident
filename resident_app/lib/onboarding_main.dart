@@ -21,16 +21,13 @@ void main() {
 }
 
 class OnboardingApp extends MaterialApp {
-  const OnboardingApp({Key? key})
-      : super(
-          key: key,
-          title: 'Onboarding Flow',
-          debugShowCheckedModeBanner: false,
-          home: const OnboardingFlow(),
-          routes: const {
-            '/home': _buildHomePlaceholder,
-          },
-        );
+  const OnboardingApp({super.key})
+    : super(
+        title: 'Onboarding Flow',
+        debugShowCheckedModeBanner: false,
+        home: const OnboardingFlow(),
+        routes: const {'/home': _buildHomePlaceholder},
+      );
 
   static Widget _buildHomePlaceholder(BuildContext context) {
     return const HomePlaceholder();
@@ -39,7 +36,7 @@ class OnboardingApp extends MaterialApp {
 
 /// Placeholder home screen for demo purposes
 class HomePlaceholder extends StatelessWidget {
-  const HomePlaceholder({Key? key}) : super(key: key);
+  const HomePlaceholder({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +49,7 @@ class HomePlaceholder extends StatelessWidget {
             const Icon(
               Icons.check_circle_outline,
               size: 80,
-              color: Color(0xFF2563EB),
+              color: Color(0xFF0E4778),
             ),
             const SizedBox(height: 24),
             const Text(
@@ -66,10 +63,7 @@ class HomePlaceholder extends StatelessWidget {
             const SizedBox(height: 12),
             const Text(
               'Onboarding completed successfully',
-              style: TextStyle(
-                fontSize: 16,
-                color: Color(0xFF666666),
-              ),
+              style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
             ),
             const SizedBox(height: 32),
             ElevatedButton(
@@ -87,7 +81,7 @@ class HomePlaceholder extends StatelessWidget {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF0E4778),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 32,
                   vertical: 16,

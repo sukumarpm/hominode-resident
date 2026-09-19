@@ -3,23 +3,29 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'firestore_auth_service.dart';
+import 'package:flutter/foundation.dart';
 
 /// Access Control Result
+enum FlatAccessState { granted, unauthenticated, denied, error }
+
 class AccessControlResult {
-  final bool hasAccess;
+  final FlatAccessState state;
   final String? flatId;
   final String? buildingId;
   final String? message;
   final Map<String, dynamic>? userData;
 
-  AccessControlResult({
-    required this.hasAccess,
+  const AccessControlResult({
+    required this.state,
     this.flatId,
     this.buildingId,
     this.message,
     this.userData,
   });
+
+  bool get hasAccess => state == FlatAccessState.granted;
+
+  bool get isUnauthenticated => state == FlatAccessState.unauthenticated;
 
   factory AccessControlResult.granted({
     required String flatId,
@@ -27,18 +33,26 @@ class AccessControlResult {
     required Map<String, dynamic> userData,
   }) {
     return AccessControlResult(
-      hasAccess: true,
+      state: FlatAccessState.granted,
       flatId: flatId,
       buildingId: buildingId,
       userData: userData,
     );
   }
 
-  factory AccessControlResult.denied({required String message}) {
-    return AccessControlResult(
-      hasAccess: false,
-      message: message,
+  factory AccessControlResult.unauthenticated() {
+    return const AccessControlResult(
+      state: FlatAccessState.unauthenticated,
+      message: 'Please log in to continue',
     );
+  }
+
+  factory AccessControlResult.denied({required String message}) {
+    return AccessControlResult(state: FlatAccessState.denied, message: message);
+  }
+
+  factory AccessControlResult.error({required String message}) {
+    return AccessControlResult(state: FlatAccessState.error, message: message);
   }
 }
 
@@ -46,147 +60,49 @@ class AccessControlResult {
 /// Validates user flat assignment and controls access to features
 class FlatAccessControlService {
   // Singleton pattern
-  static final FlatAccessControlService instance = FlatAccessControlService._internal();
+  static final FlatAccessControlService instance =
+      FlatAccessControlService._internal();
   factory FlatAccessControlService() => instance;
   FlatAccessControlService._internal();
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirestoreAuthService _authService = FirestoreAuthService();
-
   // Cache
   AccessControlResult? _cachedResult;
   String? _cachedUserId;
 
   /// Check if user has flat access
   /// Returns AccessControlResult with access status and user data
-  Future<AccessControlResult> checkFlatAccess({bool forceRefresh = false}) async {
+  Future<AccessControlResult> checkFlatAccess({
+    bool forceRefresh = false,
+    String? approvedUserId,
+  }) async {
     try {
-      print('🔐 Checking flat access...');
-
-      // Get current user ID
-      String? userId;
-      
-      // Try Firebase Auth first
       final firebaseUser = _auth.currentUser;
-      if (firebaseUser != null) {
-        print('📥 Using Firebase Auth UID: ${firebaseUser.uid}');
-        
-        // Try to find user document by Firebase Auth UID
-        final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-        
-        if (doc.exists) {
-          userId = doc.id;
-          print('✅ Found user document by Firebase Auth UID');
-        } else {
-          // Try to find by authUid field
-          print('🔍 Searching by authUid field...');
-          final querySnapshot = await _firestore
-              .collection('users')
-              .where('authUid', isEqualTo: firebaseUser.uid)
-              .limit(1)
-              .get();
-          
-          if (querySnapshot.docs.isNotEmpty) {
-            userId = querySnapshot.docs.first.id;
-            print('✅ Found user document by authUid field');
-          }
-        }
+      if (firebaseUser == null) {
+        return AccessControlResult.unauthenticated();
       }
-      
-      // Fallback to stored user ID
-      if (userId == null) {
-        userId = await _authService.getCurrentUserId();
-        print('📥 Using stored user ID: $userId');
-      }
-
-      if (userId == null) {
-        print('❌ No user logged in');
-        return AccessControlResult.denied(
-          message: 'Please log in to continue',
+      if (approvedUserId != null && approvedUserId != firebaseUser.uid) {
+        return AccessControlResult.error(
+          message: 'The authenticated resident changed during access checks.',
         );
       }
+      final userId = firebaseUser.uid;
 
       // Return cached result if available and not forcing refresh
       if (!forceRefresh && _cachedUserId == userId && _cachedResult != null) {
-        print('✅ Returning cached access result');
         return _cachedResult!;
       }
 
-      print('📥 Fetching user data from Firestore...');
-      print('   User ID: $userId');
-
-      // Fetch user document
       final userDoc = await _firestore.collection('users').doc(userId).get();
 
       if (!userDoc.exists) {
-        print('❌ User document not found');
-        return AccessControlResult.denied(
-          message: 'User account not found. Please contact support.',
+        return AccessControlResult.error(
+          message: 'The approved resident profile is no longer available.',
         );
       }
 
-      final userData = userDoc.data()!;
-      print('✅ User data fetched');
-      print('   Name: ${userData['name']}');
-      print('   Email: ${userData['email']}');
-
-      // Check flatId field - handle both String and dynamic types
-      dynamic flatIdValue = userData['flatId'];
-      String? flatId;
-      
-      if (flatIdValue != null) {
-        flatId = flatIdValue.toString().trim();
-        if (flatId.isEmpty) {
-          flatId = null;
-        }
-      }
-      
-      // Check buildingId field - handle both String and dynamic types
-      dynamic buildingIdValue = userData['buildingId'];
-      String? buildingId;
-      
-      if (buildingIdValue != null) {
-        buildingId = buildingIdValue.toString().trim();
-        if (buildingId.isEmpty) {
-          buildingId = null;
-        }
-      }
-
-      print('   Flat ID: $flatId');
-      print('   Building ID: $buildingId');
-      print('   Flat ID type: ${flatId.runtimeType}');
-      print('   Flat ID length: ${flatId?.length}');
-
-      // Validate flat assignment
-      if (flatId == null || flatId.isEmpty) {
-        print('❌ No flat assigned to user');
-        
-        final result = AccessControlResult.denied(
-          message: 'Your account is not yet assigned to a flat. Please contact admin.',
-        );
-        
-        // Cache the result
-        _cachedResult = result;
-        _cachedUserId = userId;
-        
-        return result;
-      }
-
-      // Check if building ID is also present (optional but recommended)
-      if (buildingId == null || buildingId.isEmpty) {
-        print('⚠️  Warning: No building ID assigned');
-      }
-
-      print('✅ Flat access granted');
-      print('   Flat: $flatId');
-      print('   Building: $buildingId');
-
-      final result = AccessControlResult.granted(
-        flatId: flatId,
-        buildingId: buildingId ?? '',
-        userData: userData,
-      );
+      final result = evaluateApprovedProfile(userDoc.data()!);
 
       // Cache the result
       _cachedResult = result;
@@ -194,9 +110,9 @@ class FlatAccessControlService {
 
       return result;
     } catch (e, stackTrace) {
-      print('❌ Error checking flat access: $e');
-      print('   Stack trace: $stackTrace');
-      return AccessControlResult.denied(
+      debugPrint('Flat access check failed: $e');
+      debugPrintStack(stackTrace: stackTrace);
+      return AccessControlResult.error(
         message: 'Error checking access. Please try again.',
       );
     }
@@ -204,158 +120,100 @@ class FlatAccessControlService {
 
   /// Stream flat access status (real-time updates)
   Stream<AccessControlResult> streamFlatAccess() async* {
+    final firebaseUser = _auth.currentUser;
+    if (firebaseUser == null) {
+      yield AccessControlResult.unauthenticated();
+      return;
+    }
+    final userId = firebaseUser.uid;
     try {
-      // Get current user ID
-      String? userId;
-      
-      print('🔵 streamFlatAccess: Starting access check...');
-      
-      final firebaseUser = _auth.currentUser;
-      print('📥 Firebase Auth user: ${firebaseUser?.uid}');
-      
-      if (firebaseUser != null) {
+      yield* _firestore.collection('users').doc(userId).snapshots().map((
+        snapshot,
+      ) {
         try {
-          final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-          
-          if (doc.exists) {
-            userId = doc.id;
-            print('✅ Found user by Firebase Auth UID: $userId');
-          } else {
-            print('🔍 User not found by Firebase Auth UID, searching by authUid field...');
-            try {
-              final querySnapshot = await _firestore
-                  .collection('users')
-                  .where('authUid', isEqualTo: firebaseUser.uid)
-                  .limit(1)
-                  .get();
-              
-              if (querySnapshot.docs.isNotEmpty) {
-                userId = querySnapshot.docs.first.id;
-                print('✅ Found user by authUid field: $userId');
-              } else {
-                print('❌ User not found by authUid field');
-              }
-            } catch (e) {
-              print('⚠️  Error searching by authUid: $e');
-            }
+          if (!snapshot.exists) {
+            return AccessControlResult.error(
+              message: 'The approved resident profile is no longer available.',
+            );
           }
+
+          final userData = snapshot.data();
+          if (userData == null) {
+            return AccessControlResult.error(
+              message: 'The approved resident profile could not be read.',
+            );
+          }
+
+          final result = evaluateApprovedProfile(userData);
+
+          // Update cache
+          _cachedResult = result;
+          _cachedUserId = userId;
+
+          return result;
         } catch (e) {
-          print('⚠️  Error fetching user doc: $e');
+          return AccessControlResult.error(
+            message: 'Error processing user data. Please try again.',
+          );
         }
-      }
-      
-      if (userId == null) {
-        userId = await _authService.getCurrentUserId();
-        print('📥 Using stored user ID: $userId');
-      }
-
-      if (userId == null) {
-        print('❌ No user ID found');
-        yield AccessControlResult.denied(
-          message: 'Please log in to continue',
-        );
-        return;
-      }
-
-      // Stream user document changes
-      yield* _firestore
-          .collection('users')
-          .doc(userId)
-          .snapshots()
-          .map((snapshot) {
-            try {
-              print('🔵 FlatAccessWrapper: Checking access for user: $userId');
-              
-              if (!snapshot.exists) {
-                print('❌ User document not found');
-                return AccessControlResult.denied(
-                  message: 'User account not found. Please contact support.',
-                );
-              }
-
-              final userData = snapshot.data();
-              if (userData == null) {
-                print('❌ User data is null');
-                return AccessControlResult.denied(
-                  message: 'User data not found. Please contact support.',
-                );
-              }
-              
-              print('📁 Raw user data: $userData');
-              
-              // Get flatId - handle both String and dynamic types
-              dynamic flatIdValue = userData['flatId'];
-              String? flatId;
-              
-              if (flatIdValue != null) {
-                flatId = flatIdValue.toString().trim();
-                if (flatId.isEmpty) {
-                  flatId = null;
-                }
-              }
-              
-              // Get buildingId - handle both String and dynamic types
-              dynamic buildingIdValue = userData['buildingId'];
-              String? buildingId;
-              
-              if (buildingIdValue != null) {
-                buildingId = buildingIdValue.toString().trim();
-                if (buildingId.isEmpty) {
-                  buildingId = null;
-                }
-              }
-
-              print('📁 Parsed data: flatId=$flatId, buildingId=$buildingId');
-              print('   flatId type: ${flatId.runtimeType}');
-              print('   flatId length: ${flatId?.length}');
-
-              if (flatId == null || flatId.isEmpty) {
-                print('❌ No flatId found');
-                final result = AccessControlResult.denied(
-                  message: 'Your account is not yet assigned to a flat. Please contact admin.',
-                );
-                
-                // Update cache
-                _cachedResult = result;
-                _cachedUserId = userId;
-                
-                return result;
-              }
-
-              print('✅ Access granted with flatId: $flatId');
-              final result = AccessControlResult.granted(
-                flatId: flatId,
-                buildingId: buildingId ?? '',
-                userData: userData,
-              );
-
-              // Update cache
-              _cachedResult = result;
-              _cachedUserId = userId;
-
-              return result;
-            } catch (e) {
-              print('❌ Error in map: $e');
-              return AccessControlResult.denied(
-                message: 'Error processing user data. Please try again.',
-              );
-            }
-          }).handleError((error) {
-            print('❌ Stream error: $error');
-          });
+      });
     } catch (e) {
-      print('❌ Error streaming flat access: $e');
-      yield AccessControlResult.denied(
+      yield AccessControlResult.error(
         message: 'Error checking access. Please try again.',
       );
     }
+  }
+
+  @visibleForTesting
+  static AccessControlResult evaluateApprovedProfile(
+    Map<String, dynamic> userData,
+  ) {
+    if (userData['role'] != 'resident') {
+      return AccessControlResult.denied(
+        message: 'This app is available to resident accounts only.',
+      );
+    }
+    if (userData['approvalStatus'] != 'approved') {
+      return AccessControlResult.denied(
+        message: 'Your resident registration is not currently approved.',
+      );
+    }
+    if (userData['isActive'] != true || userData['status'] != 'active') {
+      return AccessControlResult.denied(
+        message:
+            'Your resident account is temporarily deactivated. Contact your community administrator.',
+      );
+    }
+    if (userData['occupancyStatus'] != 'current') {
+      return AccessControlResult.denied(
+        message: 'Your resident occupancy is not currently active.',
+      );
+    }
+    final flatId = userData['flatId']?.toString().trim();
+    if (flatId == null || flatId.isEmpty) {
+      return AccessControlResult.denied(
+        message:
+            'Your account is not yet assigned to a flat. Please contact admin.',
+      );
+    }
+    final buildingId = userData['buildingId']?.toString().trim() ?? '';
+    if (buildingId.isEmpty) {
+      return AccessControlResult.denied(
+        message:
+            'Your account is not assigned to a building. Please contact admin.',
+      );
+    }
+    return AccessControlResult.granted(
+      flatId: flatId,
+      buildingId: buildingId,
+      userData: userData,
+    );
   }
 
   /// Clear cached access result
   void clearCache() {
     _cachedResult = null;
     _cachedUserId = null;
-    print('🗑️  Access control cache cleared');
   }
 
   /// Get cached flat ID (if available)

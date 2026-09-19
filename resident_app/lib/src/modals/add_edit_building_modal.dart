@@ -8,11 +8,7 @@ class AddEditBuildingModal extends StatefulWidget {
   final BuildingModel? building;
   final Function(BuildingModel) onSave;
 
-  const AddEditBuildingModal({
-    Key? key,
-    this.building,
-    required this.onSave,
-  }) : super(key: key);
+  const AddEditBuildingModal({super.key, this.building, required this.onSave});
 
   static Future<void> show(
     BuildContext context, {
@@ -22,10 +18,8 @@ class AddEditBuildingModal extends StatefulWidget {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AddEditBuildingModal(
-        building: building,
-        onSave: onSave,
-      ),
+      builder: (context) =>
+          AddEditBuildingModal(building: building, onSave: onSave),
     );
   }
 
@@ -47,8 +41,12 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.building?.name ?? '');
-    _addressController = TextEditingController(text: widget.building?.address ?? '');
-    _descriptionController = TextEditingController(text: widget.building?.description ?? '');
+    _addressController = TextEditingController(
+      text: widget.building?.address ?? '',
+    );
+    _descriptionController = TextEditingController(
+      text: widget.building?.description ?? '',
+    );
     _floorsController = TextEditingController(
       text: widget.building?.totalFloors.toString() ?? '',
     );
@@ -93,7 +91,7 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                         ),
                         child: const Icon(
                           Icons.business,
-                          color: Color(0xFF2563EB),
+                          color: Color(0xFF0E4778),
                           size: 24,
                         ),
                       ),
@@ -116,9 +114,9 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Building Name
                   TextFormField(
                     controller: _nameController,
@@ -137,9 +135,9 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Address
                   TextFormField(
                     controller: _addressController,
@@ -159,9 +157,9 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                       return null;
                     },
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Description
                   TextFormField(
                     controller: _descriptionController,
@@ -175,9 +173,9 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                     ),
                     maxLines: 3,
                   ),
-                  
+
                   const SizedBox(height: 16),
-                  
+
                   // Total Floors and Flats
                   Row(
                     children: [
@@ -230,9 +228,9 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -245,7 +243,7 @@ class _AddEditBuildingModalState extends State<AddEditBuildingModal> {
                       ElevatedButton(
                         onPressed: _handleSave,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2563EB),
+                          backgroundColor: const Color(0xFF0E4778),
                           padding: const EdgeInsets.symmetric(
                             horizontal: 24,
                             vertical: 12,

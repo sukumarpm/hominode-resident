@@ -1,19 +1,21 @@
-import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../models/family_member.dart';
-import '../models/vehicle.dart';
-import '../widgets/family_card.dart';
-import '../widgets/vehicle_card.dart';
-import '../modals/add_edit_member_modal.dart';
-import '../modals/add_edit_vehicle_modal.dart';
-import '../widgets/confirm_delete_dialog.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../components/app_segmented_control.dart';
 import '../components/standard_screen.dart';
+import '../modals/add_edit_member_modal.dart';
+import '../modals/add_edit_vehicle_modal.dart';
+import '../models/family_member.dart';
+import '../models/vehicle.dart';
 import '../services/family_firestore_service.dart';
 import '../services/vehicle_firestore_service.dart';
+import '../widgets/confirm_delete_dialog.dart';
+import '../widgets/family_card.dart';
+import '../widgets/vehicle_card.dart';
 
 class FamilyVehiclesScreen extends StatefulWidget {
-  const FamilyVehiclesScreen({Key? key}) : super(key: key);
+  const FamilyVehiclesScreen({super.key});
 
   @override
   State<FamilyVehiclesScreen> createState() => _FamilyVehiclesScreenState();
@@ -24,7 +26,7 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
   List<FamilyMember> _familyMembers = [];
   List<Vehicle> _vehicles = [];
   bool _isLoading = true;
-  
+
   final _familyService = FamilyFirestoreService();
   final _vehicleService = VehicleFirestoreService();
 
@@ -36,11 +38,11 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
 
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final members = await _familyService.getFamilyMembers();
       final vehicles = await _vehicleService.getVehicles();
-      
+
       if (mounted) {
         setState(() {
           _familyMembers = members;
@@ -59,22 +61,22 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
   @override
   Widget build(BuildContext context) {
     return StandardScreen(
-      title: 'Family & Vehicles',
+      title: 'family_vehicles'.tr(),
       isScrollable: false,
       padding: EdgeInsets.zero,
       body: Column(
         children: [
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           AppSegmentedControl(
-            segments: const ['Family Members', 'Vehicles'],
+            segments: ['family_members'.tr(), 'vehicles'.tr()],
             selectedIndex: _selectedTab,
             onChanged: (index) {
               setState(() => _selectedTab = index);
             },
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           _buildSectionHeader(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 250),
@@ -91,33 +93,34 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
   Widget _buildOldHeader() {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
-        color: Color(0xFF2563EB),
+      decoration: BoxDecoration(
+        color: Color(0xFF0E4778),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24.r),
+          bottomRight: Radius.circular(24.r),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(4, 12, 16, 24),
+          padding: EdgeInsets.fromLTRB(4.w, 12.h, 16.w, 24.h),
           child: Row(
             children: [
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-                padding: const EdgeInsets.all(12),
-                constraints: const BoxConstraints(
-                  minWidth: 44,
-                  minHeight: 44,
+                icon: Icon(
+                  Icons.arrow_back_ios,
+                  color: Colors.white,
+                  size: 20.w,
                 ),
+                padding: EdgeInsets.all(12.w),
+                constraints: BoxConstraints(minWidth: 44.w, minHeight: 44.h),
               ),
-              const Text(
-                'Family & Vehicles',
+              Text(
+                'family_vehicles'.tr(),
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 20.sp,
                   fontWeight: FontWeight.w600,
                   letterSpacing: -0.3,
                 ),
@@ -131,39 +134,41 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
 
   Widget _buildSectionHeader() {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Expanded(
             child: Text(
-              _selectedTab == 0 ? 'Manage your family members' : 'Manage your vehicles',
-              style: const TextStyle(
-                fontSize: 18,
+              _selectedTab == 0
+                  ? 'manage_your_family_members'.tr()
+                  : 'manage_your_vehicles'.tr(),
+              style: TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF111827),
                 letterSpacing: -0.3,
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           ElevatedButton.icon(
             onPressed: _showAddModal,
-            icon: const Icon(Icons.add, size: 18, color: Colors.white),
-            label: const Text(
+            icon: Icon(Icons.add, size: 18.w, color: Colors.white),
+            label: Text(
               'Add',
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.w600,
-                fontSize: 15,
+                fontSize: 15.sp,
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 11.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10.r),
               ),
             ),
           ),
@@ -176,7 +181,7 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
     if (_isLoading) {
       return const Center(
         child: CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0E4778)),
         ),
       );
     }
@@ -187,42 +192,37 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.people_outline,
-                size: 64,
-                color: Colors.grey[400],
-              ),
-              const SizedBox(height: 16),
+              Icon(Icons.people_outline, size: 64.w, color: Colors.grey[400]),
+              SizedBox(height: 16.h),
               Text(
-                'No family members added yet',
+                'no_family_members_added_yet'.tr(),
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
-                'Tap the Add button to add a family member',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
+                'tap_add_button_to_add_family_member'.tr(),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
           ),
         );
       }
-      
+
       return ListView.builder(
         key: const ValueKey('family'),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
         itemCount: _familyMembers.length,
         itemBuilder: (context, index) {
           final member = _familyMembers[index];
           return FamilyCard(
             member: member,
-            onDelete: member.isPrimary ? null : () => _deleteFamilyMember(member.id),
+            onDelete: member.isPrimary
+                ? null
+                : () => _deleteFamilyMember(member.id),
             onTap: () => _editFamilyMember(member),
           );
         },
@@ -235,34 +235,31 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
             children: [
               Icon(
                 Icons.directions_car_outlined,
-                size: 64,
+                size: 64.w,
                 color: Colors.grey[400],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text(
-                'No vehicles added yet',
+                'no_vehicles_added_yet'.tr(),
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: 16.sp,
                   color: Colors.grey[600],
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text(
-                'Tap the Add button to add a vehicle',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[500],
-                ),
+                'tap_add_button_to_add_vehicle'.tr(),
+                style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
               ),
             ],
           ),
         );
       }
-      
+
       return ListView.builder(
         key: const ValueKey('vehicles'),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
         itemCount: _vehicles.length,
         itemBuilder: (context, index) {
           final vehicle = _vehicles[index];
@@ -287,10 +284,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Family member added successfully'),
+                  content: Text('family_member_added_successfully'.tr()),
                   backgroundColor: const Color(0xFF10B981),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
                 ),
               );
             }
@@ -298,10 +297,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Failed to add family member'),
+                  content: Text('failed_to_add_family_member'.tr()),
                   backgroundColor: const Color(0xFFEF4444),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
                 ),
               );
             }
@@ -318,10 +319,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Vehicle added successfully'),
+                  content: Text('vehicle_added_successfully'.tr()),
                   backgroundColor: const Color(0xFF10B981),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
                 ),
               );
             }
@@ -329,10 +332,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: const Text('Failed to add vehicle'),
+                  content: Text('failed_to_add_vehicle'.tr()),
                   backgroundColor: const Color(0xFFEF4444),
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
                 ),
               );
             }
@@ -353,10 +358,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Family member updated successfully'),
+                content: Text('family_member_updated_successfully'.tr()),
                 backgroundColor: const Color(0xFF10B981),
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
             );
           }
@@ -364,10 +371,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Failed to update family member'),
+                content: Text('failed_to_update_family_member'.tr()),
                 backgroundColor: const Color(0xFFEF4444),
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
             );
           }
@@ -387,10 +396,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Vehicle updated successfully'),
+                content: Text('vehicle_updated_successfully'.tr()),
                 backgroundColor: const Color(0xFF10B981),
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
             );
           }
@@ -398,10 +409,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Failed to update vehicle'),
+                content: Text('failed_to_update_vehicle'.tr()),
                 backgroundColor: const Color(0xFFEF4444),
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
               ),
             );
           }
@@ -413,8 +426,8 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
   Future<void> _deleteFamilyMember(String id) async {
     final confirmed = await ConfirmDeleteDialog.show(
       context: context,
-      title: 'Delete Family Member',
-      message: 'Are you sure you want to remove this family member? This action cannot be undone.',
+      title: 'delete_family_member'.tr(),
+      message: 'are_you_sure_you_want_to_remove_this_family_member'.tr(),
     );
 
     if (confirmed && mounted) {
@@ -424,10 +437,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Family member removed'),
+              content: Text('family_member_removed'.tr()),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
           );
         }
@@ -435,10 +450,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Failed to remove family member'),
+              content: Text('failed_to_remove_family_member'.tr()),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
           );
         }
@@ -449,8 +466,8 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
   Future<void> _deleteVehicle(String id) async {
     final confirmed = await ConfirmDeleteDialog.show(
       context: context,
-      title: 'Delete Vehicle',
-      message: 'Are you sure you want to remove this vehicle? This action cannot be undone.',
+      title: 'delete_vehicle'.tr(),
+      message: 'are_you_sure_you_want_to_remove_this_vehicle'.tr(),
     );
 
     if (confirmed && mounted) {
@@ -460,10 +477,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Vehicle removed'),
+              content: Text('vehicle_removed'.tr()),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
           );
         }
@@ -471,10 +490,12 @@ class _FamilyVehiclesScreenState extends State<FamilyVehiclesScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text('Failed to remove vehicle'),
+              content: Text('failed_to_remove_vehicle'.tr()),
               backgroundColor: const Color(0xFFEF4444),
               behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.r),
+              ),
             ),
           );
         }

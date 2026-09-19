@@ -4,9 +4,9 @@ class MarketplaceSearchBar extends StatelessWidget {
   final Function(String) onChanged;
 
   const MarketplaceSearchBar({
-    Key? key,
+    super.key,
     required this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

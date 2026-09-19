@@ -1,9 +1,11 @@
 // lib/src/screens/my_bookings_screen.dart
 // My Bookings Screen
 
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import '../services/user_data_service.dart';
 import '../widgets/skeleton_loader.dart';
 
@@ -11,7 +13,7 @@ import '../widgets/skeleton_loader.dart';
 // MY BOOKINGS SCREEN
 // ============================================================================
 class MyBookingsScreen extends StatefulWidget {
-  const MyBookingsScreen({Key? key}) : super(key: key);
+  const MyBookingsScreen({super.key});
 
   @override
   State<MyBookingsScreen> createState() => _MyBookingsScreenState();
@@ -32,17 +34,17 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
   Future<void> _initializeStream() async {
     print('🔵 MY BOOKINGS SCREEN: Initializing...');
-    
+
     try {
       final userData = await _userDataService.getCurrentUserData();
-      
+
       if (userData == null) {
         print('❌ No user data found');
         return;
       }
 
       final userId = userData['id'];
-      
+
       if (userId == null || userId.isEmpty) {
         print('❌ No user ID found');
         return;
@@ -61,63 +63,69 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
   Stream<List<Map<String, dynamic>>> _getBookingsStream(String userId) {
     print('📡 MY BOOKINGS FLOW: Streaming bookings for user: $userId');
-    
+
     return _firestore
         .collection('amenityBookings')
         .where('userId', isEqualTo: userId)
         .orderBy('date', descending: true)
         .snapshots()
         .map((snapshot) {
-      print('📊 Found ${snapshot.docs.length} bookings');
-      
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        final date = (data['date'] as Timestamp?)?.toDate() ?? DateTime.now();
-        final status = data['status'] ?? 'pending';
-        
-        print('✅ Booking: ${data['amenityName']} - $status');
-        
-        return {
-          'id': doc.id,
-          'amenityName': data['amenityName'] ?? 'Amenity',
-          'amenityId': data['amenityId'] ?? '',
-          'date': date,
-          'timeSlot': data['timeSlot'] ?? '',
-          'numberOfPeople': data['numberOfPeople'] ?? 1,
-          'status': status,
-          'bookingType': data['bookingType'] ?? 'daily',
-          'createdAt': (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          'updatedAt': (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
-          'notes': data['notes'] ?? '',
-          'price': data['price'] ?? 0,
-          'userName': data['userName'] ?? 'You',
-        };
-      }).toList();
-    }).handleError((error) {
-      print('❌ Stream error: $error');
-      return [];
-    });
+          print('📊 Found ${snapshot.docs.length} bookings');
+
+          return snapshot.docs.map((doc) {
+            final data = doc.data();
+            final date =
+                (data['date'] as Timestamp?)?.toDate() ?? DateTime.now();
+            final status = data['status'] ?? 'pending';
+
+            print('✅ Booking: ${data['amenityName']} - $status');
+
+            return {
+              'id': doc.id,
+              'amenityName': data['amenityName'] ?? 'Amenity',
+              'amenityId': data['amenityId'] ?? '',
+              'date': date,
+              'timeSlot': data['timeSlot'] ?? '',
+              'numberOfPeople': data['numberOfPeople'] ?? 1,
+              'status': status,
+              'bookingType': data['bookingType'] ?? 'daily',
+              'createdAt':
+                  (data['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              'updatedAt':
+                  (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              'notes': data['notes'] ?? '',
+              'price': data['price'] ?? 0,
+              'userName': data['userName'] ?? 'You',
+            };
+          }).toList();
+        })
+        .handleError((error) {
+          print('❌ Stream error: $error');
+          return [];
+        });
   }
 
-  List<Map<String, dynamic>> _filterBookings(List<Map<String, dynamic>> bookings) {
+  List<Map<String, dynamic>> _filterBookings(
+    List<Map<String, dynamic>> bookings,
+  ) {
     final now = DateTime.now();
-    
+
     switch (_selectedTab) {
       case 'upcoming':
         return bookings.where((b) {
           final bookingDate = b['date'] as DateTime;
           return bookingDate.isAfter(now) && b['status'] != 'cancelled';
         }).toList();
-      
+
       case 'completed':
         return bookings.where((b) {
           final bookingDate = b['date'] as DateTime;
           return bookingDate.isBefore(now) || b['status'] == 'completed';
         }).toList();
-      
+
       case 'cancelled':
         return bookings.where((b) => b['status'] == 'cancelled').toList();
-      
+
       default:
         return bookings;
     }
@@ -127,27 +135,25 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Bookings'),
-        backgroundColor: const Color(0xFF2563EB),
+        title: Text('my_bookings'.tr()),
+        backgroundColor: const Color(0xFF0E4778),
         foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: _userId == null
-          ? const Center(
-              child: Text('Unable to load bookings'),
-            )
+          ? const Center(child: Text('Unable to load bookings'))
           : Column(
               children: [
                 // Tab selector
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(16.w),
                   child: Row(
                     children: [
-                      _buildTabButton('Upcoming', 'upcoming'),
-                      const SizedBox(width: 8),
-                      _buildTabButton('Completed', 'completed'),
-                      const SizedBox(width: 8),
-                      _buildTabButton('Cancelled', 'cancelled'),
+                      _buildTabButton('upcoming'.tr(), 'upcoming'),
+                      SizedBox(width: 8.w),
+                      _buildTabButton('completed'.tr(), 'completed'),
+                      SizedBox(width: 8.w),
+                      _buildTabButton('cancelled'.tr(), 'cancelled'),
                     ],
                   ),
                 ),
@@ -159,14 +165,14 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                       // Loading state
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(16.w),
                           itemCount: 3,
                           itemBuilder: (context, index) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
+                            padding: EdgeInsets.only(bottom: 12.h),
                             child: SkeletonLoader(
                               width: double.infinity,
                               height: 140,
-                              borderRadius: BorderRadius.circular(12.0),
+                              borderRadius: BorderRadius.circular(12.0.r),
                             ),
                           ),
                         );
@@ -178,8 +184,12 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                              const SizedBox(height: 16),
+                              Icon(
+                                Icons.error_outline,
+                                size: 48.w,
+                                color: Colors.red,
+                              ),
+                              SizedBox(height: 16.h),
                               Text('Error: ${snapshot.error}'),
                             ],
                           ),
@@ -197,14 +207,14 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                             children: [
                               Icon(
                                 Icons.bookmark_outline,
-                                size: 64,
+                                size: 64.w,
                                 color: Colors.grey[300],
                               ),
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16.h),
                               Text(
                                 'No $_selectedTab bookings',
                                 style: TextStyle(
-                                  fontSize: 16,
+                                  fontSize: 16.sp,
                                   color: Colors.grey[600],
                                 ),
                               ),
@@ -215,7 +225,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
                       // Bookings list
                       return ListView.builder(
-                        padding: const EdgeInsets.all(16),
+                        padding: EdgeInsets.all(16.w),
                         itemCount: filteredBookings.length,
                         itemBuilder: (context, index) {
                           final booking = filteredBookings[index];
@@ -232,21 +242,21 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
   Widget _buildTabButton(String label, String value) {
     final isSelected = _selectedTab == value;
-    
+
     return Expanded(
       child: GestureDetector(
         onTap: () => setState(() => _selectedTab = value),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 8.h),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.grey[200],
-            borderRadius: BorderRadius.circular(8),
+            color: isSelected ? const Color(0xFF0E4778) : Colors.grey[200],
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Text(
             label,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               fontWeight: FontWeight.w600,
               color: isSelected ? Colors.white : Colors.grey[700],
             ),
@@ -260,15 +270,15 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     final date = booking['date'] as DateTime;
     final status = booking['status'] as String;
     final statusColor = _getStatusColor(status);
-    
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      margin: EdgeInsets.only(bottom: 12.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
       child: InkWell(
         onTap: () => _showBookingDetails(context, booking),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -276,34 +286,34 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
               Row(
                 children: [
                   Container(
-                    width: 48,
-                    height: 48,
+                    width: 48.w,
+                    height: 48.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8FDEB),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.bookmark_outline,
                       color: Color(0xFF10B981),
-                      size: 24,
+                      size: 24.w,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           booking['amenityName'] ?? 'Amenity',
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Text(
                           '${booking['numberOfPeople']} people',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: 13.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -311,15 +321,18 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
                       status.toUpperCase(),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                         color: statusColor,
                       ),
@@ -327,22 +340,19 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               // Date and time
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                  const SizedBox(width: 8),
-                  Text(
-                    _formatDate(date),
-                    style: const TextStyle(fontSize: 13),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.access_time, size: 16, color: Colors.grey),
-                  const SizedBox(width: 8),
+                  Icon(Icons.calendar_today, size: 16.w, color: Colors.grey),
+                  SizedBox(width: 8.w),
+                  Text(_formatDate(date), style: TextStyle(fontSize: 13.sp)),
+                  SizedBox(width: 16.w),
+                  Icon(Icons.access_time, size: 16.w, color: Colors.grey),
+                  SizedBox(width: 8.w),
                   Text(
                     booking['timeSlot'] ?? 'Not specified',
-                    style: const TextStyle(fontSize: 13),
+                    style: TextStyle(fontSize: 13.sp),
                   ),
                 ],
               ),
@@ -355,15 +365,15 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
   void _showBookingDetails(BuildContext context, Map<String, dynamic> booking) {
     final date = booking['date'] as DateTime;
-    
+
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) => SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(20.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -371,41 +381,46 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
               Row(
                 children: [
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 56.w,
+                    height: 56.h,
                     decoration: BoxDecoration(
                       color: const Color(0xFFE8FDEB),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.bookmark_outline,
                       color: Color(0xFF10B981),
-                      size: 28,
+                      size: 28.w,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           booking['amenityName'] ?? 'Amenity',
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         Container(
-                          margin: const EdgeInsets.only(top: 4),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          margin: EdgeInsets.only(top: 4.h),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 2.h,
+                          ),
                           decoration: BoxDecoration(
-                            color: _getStatusColor(booking['status']).withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(4),
+                            color: _getStatusColor(
+                              booking['status'],
+                            ).withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
                           ),
                           child: Text(
                             (booking['status'] as String).toUpperCase(),
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.w600,
                               color: _getStatusColor(booking['status']),
                             ),
@@ -416,12 +431,21 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 24),
+              SizedBox(height: 24.h),
               // Details
               _buildDetailRow('Date', _formatDate(date)),
-              _buildDetailRow('Time Slot', booking['timeSlot'] ?? 'Not specified'),
-              _buildDetailRow('Number of People', '${booking['numberOfPeople']} people'),
-              _buildDetailRow('Booking Type', booking['bookingType'] ?? 'Daily'),
+              _buildDetailRow(
+                'Time Slot',
+                booking['timeSlot'] ?? 'Not specified',
+              ),
+              _buildDetailRow(
+                'Number of People',
+                '${booking['numberOfPeople']} people',
+              ),
+              _buildDetailRow(
+                'Booking Type',
+                booking['bookingType'] ?? 'Daily',
+              ),
               if (((booking['price'] as num?) ?? 0) > 0)
                 _buildDetailRow('Price', '₹${booking['price']}'),
               if ((booking['notes'] as String?)?.isNotEmpty ?? false)
@@ -430,16 +454,16 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
                 'Booked On',
                 _formatDateTime(booking['createdAt'] as DateTime),
               ),
-              const SizedBox(height: 20),
+              SizedBox(height: 20.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    backgroundColor: const Color(0xFF0E4778),
+                    padding: EdgeInsets.symmetric(vertical: 12.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                   ),
                   child: const Text(
@@ -457,25 +481,22 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 16.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: 12,
+              fontSize: 12.sp,
               color: Colors.grey[600],
               fontWeight: FontWeight.w500,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
           ),
         ],
       ),

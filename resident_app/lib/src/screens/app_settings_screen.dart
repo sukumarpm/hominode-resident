@@ -1,16 +1,19 @@
 // lib/src/screens/app_settings_screen.dart
 // App Settings Screen with Language Switcher
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:hominode_legal/hominode_legal.dart';
+import 'package:provider/provider.dart';
+
 import '../providers/language_provider.dart';
 
 // ============================================================================
 // APP SETTINGS SCREEN
 // ============================================================================
 class AppSettingsScreen extends StatefulWidget {
-  const AppSettingsScreen({Key? key}) : super(key: key);
+  const AppSettingsScreen({super.key});
 
   @override
   State<AppSettingsScreen> createState() => _AppSettingsScreenState();
@@ -27,7 +30,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
         return Scaffold(
           appBar: AppBar(
             title: Text('settings'.tr()),
-            backgroundColor: const Color(0xFF2563EB),
+            backgroundColor: const Color(0xFF0E4778),
             foregroundColor: Colors.white,
             elevation: 0,
           ),
@@ -62,7 +65,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 _buildSectionHeader(context, 'about'),
                 _buildAboutSection(context),
 
-                const SizedBox(height: 32),
+                SizedBox(height: 32.h),
               ],
             ),
           ),
@@ -76,17 +79,17 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildLanguageSection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       child: Consumer<LanguageProvider>(
         builder: (context, languageProvider, _) {
           return GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              childAspectRatio: 2.5,
-              crossAxisSpacing: 12,
-              mainAxisSpacing: 12,
+              childAspectRatio: 1.8, // Adjusted ratio to give enough height
+              crossAxisSpacing: 12.w,
+              mainAxisSpacing: 12.h,
             ),
             itemCount: languageProvider.supportedLanguages.length,
             itemBuilder: (context, index) {
@@ -99,34 +102,38 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                   await languageProvider.setLanguage(language, context);
                 },
                 child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                   decoration: BoxDecoration(
                     color: isSelected
-                        ? const Color(0xFF2563EB)
+                        ? const Color(0xFF0E4778)
                         : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(12.r),
                     border: Border.all(
                       color: isSelected
-                          ? const Color(0xFF2563EB)
+                          ? const Color(0xFF0E4778)
                           : Colors.grey[300]!,
                       width: 2,
                     ),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         _getLanguageFlag(language),
-                        style: const TextStyle(fontSize: 32),
+                        style: TextStyle(fontSize: 24.sp),
                       ),
-                      const SizedBox(height: 8),
+                      SizedBox(height: 4.h),
                       Text(
                         languageProvider.getLanguageName(language),
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                           color: isSelected ? Colors.white : Colors.black,
                         ),
                         textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
@@ -155,7 +162,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildNotificationSettings(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         children: [
           _buildSettingsTile(
@@ -167,7 +174,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
               onChanged: (value) {
                 setState(() => _notificationsEnabled = value);
               },
-              activeColor: const Color(0xFF2563EB),
+              activeThumbColor: const Color(0xFF0E4778),
             ),
           ),
           _buildSettingsTile(
@@ -177,7 +184,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             trailing: Switch(
               value: true,
               onChanged: (value) {},
-              activeColor: const Color(0xFF2563EB),
+              activeThumbColor: const Color(0xFF0E4778),
             ),
           ),
           _buildSettingsTile(
@@ -187,7 +194,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             trailing: Switch(
               value: false,
               onChanged: (value) {},
-              activeColor: const Color(0xFF2563EB),
+              activeThumbColor: const Color(0xFF0E4778),
             ),
           ),
         ],
@@ -200,7 +207,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildSecuritySettings(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         children: [
           _buildSettingsTile(
@@ -212,7 +219,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
               onChanged: (value) {
                 setState(() => _twoFactorEnabled = value);
               },
-              activeColor: const Color(0xFF2563EB),
+              activeThumbColor: const Color(0xFF0E4778),
             ),
           ),
           _buildSettingsTile(
@@ -233,7 +240,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildPrivacySettings(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         children: [
           _buildSettingsTile(
@@ -241,7 +248,14 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             title: 'privacy_policy'.tr(),
             subtitle: 'privacy_policy'.tr(),
             onTap: () {
-              _showPrivacyPolicyDialog(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => HominodeLegalDocumentViewer(
+                    title: 'privacy_policy'.tr(),
+                    assetPath: HominodeLegalDocuments.privacyPolicyAsset,
+                  ),
+                ),
+              );
             },
           ),
           _buildSettingsTile(
@@ -249,7 +263,14 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             title: 'terms_conditions'.tr(),
             subtitle: 'terms_conditions'.tr(),
             onTap: () {
-              _showTermsDialog(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => HominodeLegalDocumentViewer(
+                    title: 'terms_conditions'.tr(),
+                    assetPath: HominodeLegalDocuments.termsAndConditionsAsset,
+                  ),
+                ),
+              );
             },
           ),
           _buildSettingsTile(
@@ -270,7 +291,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildAboutSection(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Column(
         children: [
           _buildSettingsTile(
@@ -304,15 +325,15 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
   // ========================================================================
   Widget _buildSectionHeader(BuildContext context, String titleKey) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 24, 16, 12),
+      padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 12.h),
       child: Align(
         alignment: Alignment.centerLeft,
         child: Text(
           titleKey.tr(),
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF2563EB),
+            color: const Color(0xFF0E4778),
           ),
         ),
       ),
@@ -327,18 +348,18 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
     VoidCallback? onTap,
   }) {
     return ListTile(
-      leading: Icon(icon, color: const Color(0xFF2563EB)),
+      leading: Icon(icon, color: const Color(0xFF0E4778)),
       title: Text(
         title,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600),
       ),
       subtitle: Text(
         subtitle,
-        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        style: TextStyle(fontSize: 12.sp, color: Colors.grey[600]),
       ),
       trailing: trailing,
       onTap: onTap,
-      contentPadding: const EdgeInsets.symmetric(vertical: 8),
+      contentPadding: EdgeInsets.symmetric(vertical: 8.h),
     );
   }
 
@@ -368,38 +389,6 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('close'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showPrivacyPolicyDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('privacy_policy'.tr()),
-        content: SingleChildScrollView(child: Text('privacy_policy'.tr())),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text('close'.tr()),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showTermsDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('terms_conditions'.tr()),
-        content: SingleChildScrollView(child: Text('terms_conditions'.tr())),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -445,9 +434,9 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
                 'faq'.tr(),
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Text('help_support'.tr()),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               Text('contact_support'.tr()),
             ],
           ),
@@ -474,16 +463,16 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
               decoration: InputDecoration(
                 labelText: 'feedback_subject'.tr(),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             TextField(
               decoration: InputDecoration(
                 labelText: 'feedback_message'.tr(),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
               ),
               maxLines: 4,
@@ -498,7 +487,7 @@ class _AppSettingsScreenState extends State<AppSettingsScreen> {
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
             ),
             child: Text('send'.tr()),
           ),

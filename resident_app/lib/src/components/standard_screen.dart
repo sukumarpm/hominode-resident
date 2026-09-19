@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 import 'standard_header.dart';
 
 /// Standard Screen Wrapper - Ensures consistent status bar and header across ALL screens
-/// 
+///
 /// Features:
 /// - Transparent status bar
 /// - Light status bar icons (white)
 /// - Gradient extends into status bar
 /// - Standard header with consistent styling
 /// - Scrollable content area
-/// 
+///
 /// Usage:
 /// ```dart
 /// StandardScreen(
@@ -28,7 +29,7 @@ class StandardScreen extends StatelessWidget {
   final EdgeInsets? padding;
 
   const StandardScreen({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.onBackPressed,
@@ -36,7 +37,7 @@ class StandardScreen extends StatelessWidget {
     this.showBackButton = true,
     this.isScrollable = true,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -57,17 +58,17 @@ class StandardScreen extends StatelessWidget {
               actions: headerActions,
               showBackButton: showBackButton,
             ),
-            
+
             // Content Area
             Expanded(
               child: isScrollable
                   ? SingleChildScrollView(
                       physics: const BouncingScrollPhysics(),
-                      padding: padding ?? const EdgeInsets.all(16),
+                      padding: padding ?? EdgeInsets.all(16.w),
                       child: body,
                     )
                   : Padding(
-                      padding: padding ?? const EdgeInsets.all(16),
+                      padding: padding ?? EdgeInsets.all(16.w),
                       child: body,
                     ),
             ),
@@ -89,7 +90,7 @@ class StandardScreenWithSearch extends StatelessWidget {
   final EdgeInsets? padding;
 
   const StandardScreenWithSearch({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.onBackPressed,
@@ -97,7 +98,7 @@ class StandardScreenWithSearch extends StatelessWidget {
     this.showBackButton = true,
     this.isScrollable = true,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -113,12 +114,8 @@ class StandardScreenWithSearch extends StatelessWidget {
           GestureDetector(
             onTap: onSearchPressed,
             child: Container(
-              padding: const EdgeInsets.all(8),
-              child: const Icon(
-                Icons.search,
-                color: Colors.white,
-                size: 24,
-              ),
+              padding: EdgeInsets.all(8.w),
+              child: Icon(Icons.search, color: Colors.white, size: 24.w),
             ),
           ),
       ],
@@ -137,7 +134,7 @@ class StandardScreenWithMenu extends StatelessWidget {
   final EdgeInsets? padding;
 
   const StandardScreenWithMenu({
-    Key? key,
+    super.key,
     required this.title,
     required this.body,
     this.onBackPressed,
@@ -145,7 +142,7 @@ class StandardScreenWithMenu extends StatelessWidget {
     this.showBackButton = true,
     this.isScrollable = true,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -161,12 +158,8 @@ class StandardScreenWithMenu extends StatelessWidget {
           GestureDetector(
             onTap: onMenuPressed,
             child: Container(
-              padding: const EdgeInsets.all(8),
-              child: const Icon(
-                Icons.more_vert,
-                color: Colors.white,
-                size: 24,
-              ),
+              padding: EdgeInsets.all(8.w),
+              child: Icon(Icons.more_vert, color: Colors.white, size: 24.w),
             ),
           ),
       ],

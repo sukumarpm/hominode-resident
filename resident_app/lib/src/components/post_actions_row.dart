@@ -2,6 +2,7 @@
 // Post actions row with like, comment, share
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 const kLikeRed = Color(0xFFFF3B30);
 const kIconGray = Color(0xFF8C8C8C);
@@ -15,14 +16,14 @@ class PostActionsRow extends StatelessWidget {
   final VoidCallback onSharePressed;
 
   const PostActionsRow({
-    Key? key,
+    super.key,
     required this.likes,
     required this.comments,
     required this.isLiked,
     required this.onLikePressed,
     required this.onCommentPressed,
     required this.onSharePressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,21 +32,21 @@ class PostActionsRow extends StatelessWidget {
         // Like button
         InkWell(
           onTap: onLikePressed,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
             child: Row(
               children: [
                 Icon(
                   isLiked ? Icons.favorite : Icons.favorite_border,
                   color: isLiked ? kLikeRed : kIconGray,
-                  size: 22,
+                  size: 22.w,
                 ),
-                const SizedBox(width: 6),
+                SizedBox(width: 6.w),
                 Text(
                   '$likes',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                     color: isLiked ? kLikeRed : kIconGray,
                   ),
@@ -55,26 +56,22 @@ class PostActionsRow extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(width: 20),
+        SizedBox(width: 20.w),
 
         // Comment button
         InkWell(
           onTap: onCommentPressed,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
             child: Row(
               children: [
-                const Icon(
-                  Icons.chat_bubble_outline,
-                  color: kIconGray,
-                  size: 22,
-                ),
-                const SizedBox(width: 6),
+                Icon(Icons.chat_bubble_outline, color: kIconGray, size: 22.w),
+                SizedBox(width: 6.w),
                 Text(
                   '$comments',
-                  style: const TextStyle(
-                    fontSize: 15,
+                  style: TextStyle(
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                     color: kIconGray,
                   ),
@@ -84,26 +81,22 @@ class PostActionsRow extends StatelessWidget {
           ),
         ),
 
-        const SizedBox(width: 20),
+        SizedBox(width: 20.w),
 
         // Share button
         InkWell(
           onTap: onSharePressed,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 8.h),
             child: Row(
               children: [
-                const Icon(
-                  Icons.share_outlined,
-                  color: kIconGray,
-                  size: 22,
-                ),
-                const SizedBox(width: 6),
-                const Text(
+                Icon(Icons.share_outlined, color: kIconGray, size: 22.w),
+                SizedBox(width: 6.w),
+                Text(
                   'Share',
                   style: TextStyle(
-                    fontSize: 15,
+                    fontSize: 15.sp,
                     fontWeight: FontWeight.w500,
                     color: kIconGray,
                   ),

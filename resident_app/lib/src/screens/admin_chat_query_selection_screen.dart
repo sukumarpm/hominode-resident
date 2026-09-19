@@ -2,14 +2,14 @@
 // Query category selection screen for admin chat
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/admin_chat_model.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
 import 'admin_chat_query_template_screen.dart';
 
 class AdminChatQuerySelectionScreen extends StatelessWidget {
-  const AdminChatQuerySelectionScreen({Key? key}) : super(key: key);
+  const AdminChatQuerySelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +25,14 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
         title: Text(
           'Chat with Admin',
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(
-            height: 1,
-            color: AppColors.border,
-          ),
+          child: Container(height: 1.h, color: AppColors.border),
         ),
       ),
       body: SingleChildScrollView(
@@ -43,72 +40,51 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 8),
-            
+            SizedBox(height: 8.h),
+
             // Header text
             Text(
               'Select your query category:',
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: AppColors.textPrimary,
               ),
             ),
-            
-            const SizedBox(height: 4),
-            
+
+            SizedBox(height: 4.h),
+
             Text(
               'Choose the category that best matches your question',
-              style: TextStyle(
-                fontSize: 14,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
             ),
-            
-            const SizedBox(height: 24),
-            
+
+            SizedBox(height: 24.h),
+
             // Query categories
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.billing,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.maintenance,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.amenities,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.complaints,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.building,
-            ),
-            
-            const SizedBox(height: 16),
-            
-            _buildCategoryCard(
-              context,
-              category: QueryCategory.other,
-            ),
-            
-            const SizedBox(height: 24),
+            _buildCategoryCard(context, category: QueryCategory.billing),
+
+            SizedBox(height: 16.h),
+
+            _buildCategoryCard(context, category: QueryCategory.maintenance),
+
+            SizedBox(height: 16.h),
+
+            _buildCategoryCard(context, category: QueryCategory.amenities),
+
+            SizedBox(height: 16.h),
+
+            _buildCategoryCard(context, category: QueryCategory.complaints),
+
+            SizedBox(height: 16.h),
+
+            _buildCategoryCard(context, category: QueryCategory.building),
+
+            SizedBox(height: 16.h),
+
+            _buildCategoryCard(context, category: QueryCategory.other),
+
+            SizedBox(height: 24.h),
           ],
         ),
       ),
@@ -124,17 +100,15 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => AdminChatQueryTemplateScreen(
-              category: category,
-            ),
+            builder: (_) => AdminChatQueryTemplateScreen(category: category),
           ),
         );
       },
       child: Container(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: AppColors.border, width: 1.5),
           boxShadow: [
             BoxShadow(
@@ -148,22 +122,19 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
           children: [
             // Icon
             Container(
-              width: 56,
-              height: 56,
+              width: 56.w,
+              height: 56.h,
               decoration: BoxDecoration(
                 gradient: _getCategoryGradient(category),
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(16.r),
               ),
               child: Center(
-                child: Text(
-                  category.icon,
-                  style: const TextStyle(fontSize: 28),
-                ),
+                child: Text(category.icon, style: TextStyle(fontSize: 28.sp)),
               ),
             ),
-            
-            const SizedBox(width: 16),
-            
+
+            SizedBox(width: 16.w),
+
             // Text
             Expanded(
               child: Column(
@@ -172,16 +143,16 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
                   Text(
                     category.displayName,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     category.description,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       color: AppColors.textSecondary,
                       height: 1.4,
                     ),
@@ -189,19 +160,19 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
-            const SizedBox(width: 12),
-            
+
+            SizedBox(width: 12.w),
+
             // Arrow
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
                 color: AppColors.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
               child: Icon(
                 Icons.arrow_forward_ios,
-                size: 16,
+                size: 16.w,
                 color: AppColors.primary,
               ),
             ),
@@ -227,7 +198,7 @@ class AdminChatQuerySelectionScreen extends StatelessWidget {
         );
       case QueryCategory.amenities:
         return const LinearGradient(
-          colors: [Color(0xFF3B82F6), Color(0xFF2563EB)],
+          colors: [Color(0xFF3B82F6), Color(0xFF0E4778)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         );

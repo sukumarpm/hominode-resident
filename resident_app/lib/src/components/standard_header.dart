@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../constants/app_sizes.dart';
+import '../constants/app_colors.dart';
 
 /// Standard Header Component - Use across ALL screens for consistency
-/// 
+///
 /// Features:
 /// - Blue gradient background (#2563EB → #1E40AF)
 /// - Gradient extends into status bar area
@@ -13,7 +14,7 @@ import '../constants/app_sizes.dart';
 /// - Rounded bottom corners (18px)
 /// - Safe area handling
 /// - Consistent padding and sizing
-/// 
+///
 /// Usage:
 /// ```dart
 /// StandardHeader(
@@ -30,66 +31,61 @@ class StandardHeader extends StatelessWidget {
   final double? titleSize;
 
   const StandardHeader({
-    Key? key,
+    super.key,
     required this.title,
     this.onBackPressed,
     this.actions,
     this.showBackButton = true,
     this.backgroundColor,
     this.titleSize,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     // Get status bar height
     final statusBarHeight = MediaQuery.of(context).padding.top;
-    
+    final shouldShowBackButton = showBackButton && Navigator.canPop(context);
+
     return Container(
       // Extend gradient into status bar
       padding: EdgeInsets.only(top: statusBarHeight),
       decoration: BoxDecoration(
-        gradient: backgroundColor == null
-            ? const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
-              )
-            : null,
+        gradient: backgroundColor == null ? AppColors.primaryGradient : null,
         color: backgroundColor,
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(18),
-          bottomRight: Radius.circular(18),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(18.r),
+          bottomRight: Radius.circular(18.r),
         ),
       ),
       child: Padding(
         padding: EdgeInsets.fromLTRB(
-          showBackButton ? 8 : 16,
+          shouldShowBackButton ? 8 : 16,
           AppSizes.headerPaddingVertical,
-          16,
+          16.w,
           AppSizes.headerPaddingBottom,
         ),
         child: Row(
           children: [
             // Back button
-            if (showBackButton)
+            if (shouldShowBackButton)
               Semantics(
                 label: 'Back button',
                 button: true,
                 child: GestureDetector(
-                  onTap: onBackPressed ?? () => Navigator.pop(context),
+                  onTap: onBackPressed ?? () => Navigator.maybePop(context),
                   child: Container(
-                    padding: const EdgeInsets.all(8),
-                    child: const Icon(
+                    padding: EdgeInsets.all(8.w),
+                    child: Icon(
                       Icons.arrow_back_ios,
                       color: Colors.white,
-                      size: 20,
+                      size: 20.w,
                     ),
                   ),
                 ),
               ),
-            
-            if (showBackButton) const SizedBox(width: 4),
-            
+
+            if (shouldShowBackButton) SizedBox(width: 4.w),
+
             // Title
             Expanded(
               child: Text(
@@ -104,7 +100,7 @@ class StandardHeader extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            
+
             // Action buttons
             if (actions != null) ...actions!,
           ],
@@ -122,12 +118,12 @@ class StandardHeaderWithSearch extends StatelessWidget {
   final bool showBackButton;
 
   const StandardHeaderWithSearch({
-    Key? key,
+    super.key,
     required this.title,
     this.onBackPressed,
     this.onSearchPressed,
     this.showBackButton = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -143,12 +139,8 @@ class StandardHeaderWithSearch extends StatelessWidget {
             child: GestureDetector(
               onTap: onSearchPressed,
               child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.search,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                padding: EdgeInsets.all(8.w),
+                child: Icon(Icons.search, color: Colors.white, size: 24.w),
               ),
             ),
           ),
@@ -165,12 +157,12 @@ class StandardHeaderWithMenu extends StatelessWidget {
   final bool showBackButton;
 
   const StandardHeaderWithMenu({
-    Key? key,
+    super.key,
     required this.title,
     this.onBackPressed,
     this.onMenuPressed,
     this.showBackButton = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -186,12 +178,8 @@ class StandardHeaderWithMenu extends StatelessWidget {
             child: GestureDetector(
               onTap: onMenuPressed,
               child: Container(
-                padding: const EdgeInsets.all(8),
-                child: const Icon(
-                  Icons.more_vert,
-                  color: Colors.white,
-                  size: 24,
-                ),
+                padding: EdgeInsets.all(8.w),
+                child: Icon(Icons.more_vert, color: Colors.white, size: 24.w),
               ),
             ),
           ),
@@ -209,13 +197,13 @@ class StandardHeaderWithNotification extends StatelessWidget {
   final bool hasUnread;
 
   const StandardHeaderWithNotification({
-    Key? key,
+    super.key,
     required this.title,
     this.onBackPressed,
     this.onNotificationPressed,
     this.showBackButton = true,
     this.hasUnread = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -231,21 +219,21 @@ class StandardHeaderWithNotification extends StatelessWidget {
             child: GestureDetector(
               onTap: onNotificationPressed,
               child: Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(8.w),
                 child: Stack(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.notifications_outlined,
                       color: Colors.white,
-                      size: 24,
+                      size: 24.w,
                     ),
                     if (hasUnread)
                       Positioned(
                         right: 0,
                         top: 0,
                         child: Container(
-                          width: 8,
-                          height: 8,
+                          width: 8.w,
+                          height: 8.h,
                           decoration: const BoxDecoration(
                             color: Color(0xFFE53935),
                             shape: BoxShape.circle,

@@ -1,14 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../models/amenity.dart';
-import '../services/amenities_booking_flow_function.dart' hide AmenityModel;
+import '../widgets/facility_information.dart';
 import '../services/booking_firestore_service.dart';
 import '../widgets/calendar_grid.dart';
 
 class BookingModal extends StatefulWidget {
   final Amenity amenity;
 
-  const BookingModal({super.key, required this.amenity});
+  const BookingModal({super.key, required this.amenity, this.bookingService});
+  final BookingFirestoreService? bookingService;
 
   static Future<void> show(BuildContext context, Amenity amenity) {
     return showGeneralDialog(
@@ -47,9 +51,9 @@ class _BookingModalState extends State<BookingModal> {
   bool _isSubmitting = false;
   bool _isLoadingTimeSlots = false;
   bool _isCheckingAvailability = false;
-  final _bookingService = BookingFirestoreService();
-  final _bookingFlow =
-      AmenitiesBookingFlowFunction(); // NEW: Flow function instance
+  late final _bookingService =
+      widget.bookingService ?? BookingFirestoreService();
+  StreamSubscription<AmenityModel?>? _facilitySubscription;
   List<String> _timeSlots = [];
   AmenityModel? _amenityDetails;
 
@@ -65,58 +69,51 @@ class _BookingModalState extends State<BookingModal> {
     _loadAmenityDetails();
   }
 
-  Future<void> _loadAmenityDetails() async {
-    setState(() => _isLoadingTimeSlots = true);
+  @override
+  void dispose() {
+    _facilitySubscription?.cancel();
+    super.dispose();
+  }
 
-    try {
-      print('🔵 Loading amenity details for: ${widget.amenity.id}');
-
-      final amenity = await _bookingService.getAmenityDetails(
-        widget.amenity.id,
-      );
-
-      if (amenity != null) {
-        setState(() {
-          _amenityDetails = amenity;
-          _timeSlots = amenity.timeSlots;
-          _isLoadingTimeSlots = false;
-        });
-
-        print('✅ Loaded amenity details:');
-        print('   Name: ${amenity.name}');
-        print('   Time slots: ${_timeSlots.length}');
-        print('   Max capacity: ${amenity.maxCapacity}');
-        print('   Has packages: ${amenity.hasPackages}');
-        print('   Allow multiple: ${amenity.allowMultipleBookings}');
-        print('   Price per day: ${amenity.pricePerDay}');
-
-        // Load blocked dates for current month
-        await _loadBlockedDates();
-
-        // CRITICAL: Auto-select today and load availability
-        final today = DateTime.now();
-        final todayDate = DateTime(today.year, today.month, today.day);
-        setState(() {
-          _selectedDate = todayDate;
-        });
-        print('✅ Auto-selected today: ${todayDate.toString().split(' ')[0]}');
-
-        // Load availability for today
-        await _loadSlotAvailability();
-      } else {
-        print('⚠️  No amenity details found, using default time slots');
-        setState(() {
-          _timeSlots = _getDefaultTimeSlots();
-          _isLoadingTimeSlots = false;
-        });
-      }
-    } catch (e) {
-      print('❌ Error loading amenity details: $e');
-      setState(() {
-        _timeSlots = _getDefaultTimeSlots();
-        _isLoadingTimeSlots = false;
-      });
-    }
+  void _loadAmenityDetails() {
+    _isLoadingTimeSlots = true;
+    _facilitySubscription = _bookingService
+        .streamAmenityDetails(widget.amenity.id)
+        .listen(
+          (amenity) async {
+            if (!mounted) return;
+            final firstLoad = _amenityDetails == null;
+            final available = amenity?.isAvailable == true;
+            setState(() {
+              _amenityDetails = available ? amenity : null;
+              _timeSlots = available ? amenity!.timeSlots : [];
+              _isLoadingTimeSlots = false;
+              if (!_timeSlots.contains(_selectedTimeSlot)) {
+                _selectedTimeSlot = null;
+              }
+              if (!available) _selectedDate = null;
+            });
+            if (!available || !firstLoad) return;
+            await _loadBlockedDates();
+            if (!mounted || _amenityDetails?.isAvailable != true) return;
+            final today = DateTime.now();
+            setState(
+              () =>
+                  _selectedDate = DateTime(today.year, today.month, today.day),
+            );
+            await _loadSlotAvailability();
+          },
+          onError: (Object error) {
+            if (!mounted) return;
+            setState(() {
+              _amenityDetails = null;
+              _timeSlots = [];
+              _selectedTimeSlot = null;
+              _selectedDate = null;
+              _isLoadingTimeSlots = false;
+            });
+          },
+        );
   }
 
   Future<void> _loadBlockedDates() async {
@@ -128,30 +125,21 @@ class _BookingModalState extends State<BookingModal> {
       final endOfMonth = DateTime(now.year, now.month + 1, 0);
 
       print(
-        '📅 Checking blocked dates from ${startOfMonth.toString().split(' ')[0]} to ${endOfMonth.toString().split(' ')[0]}',
+        '📅 Checking blocked dates from '
+        '${startOfMonth.toString().split(' ')[0]} to '
+        '${endOfMonth.toString().split(' ')[0]}',
       );
 
-      final blockedDates = <DateTime>{};
+      final blockedDates = await _bookingService.getFullyBookedDates(
+        amenityId: widget.amenity.id,
+        startDate: startOfMonth,
+        endDate: endOfMonth,
+        numberOfPeople: _numberOfPeople,
+      );
 
-      // Check each date in the month
-      for (
-        var date = startOfMonth;
-        date.isBefore(endOfMonth.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))
-      ) {
-        final isBlocked = await _bookingService.isDateFullyBooked(
-          amenityId: widget.amenity.id,
-          date: date,
-        );
-
-        if (isBlocked) {
-          blockedDates.add(date);
-        }
+      if (mounted) {
+        setState(() => _blockedDates = blockedDates);
       }
-
-      setState(() {
-        _blockedDates = blockedDates;
-      });
 
       print('✅ Found ${blockedDates.length} blocked dates');
     } catch (e) {
@@ -183,50 +171,48 @@ class _BookingModalState extends State<BookingModal> {
       final List<String> availableSlots = [];
       final Map<String, Map<String, dynamic>> availability = {};
 
+      final slotResults = await _bookingService.getSlotAvailabilityForDate(
+        amenityId: widget.amenity.id,
+        date: _selectedDate!,
+        numberOfPeople: _numberOfPeople,
+      );
+
       for (final timeSlot in _timeSlots) {
-        try {
-          final slotResult = await _bookingService.checkSlotAvailability(
-            amenityId: widget.amenity.id,
-            date: _selectedDate!,
-            timeSlot: timeSlot,
-            numberOfPeople: _numberOfPeople,
-          );
+        final slotResult =
+            slotResults[timeSlot] ??
+            {
+              'available': false,
+              'reason': 'Unable to check availability',
+              'remainingSpots': 0,
+              'totalCapacity': _amenityDetails!.maxCapacity,
+              'totalPersonsBooked': 0,
+            };
 
-          final bool isAvailable = slotResult['available'] == true;
+        final bool isAvailable = slotResult['available'] == true;
+        final int totalPersonsBooked =
+            (slotResult['totalPersonsBooked'] as num?)?.toInt() ?? 0;
+        final int capacity =
+            (slotResult['totalCapacity'] as num?)?.toInt() ??
+            _amenityDetails!.maxCapacity;
 
-          final int totalPersonsBooked =
-              (slotResult['totalPersonsBooked'] as num?)?.toInt() ?? 0;
-
-          final int capacity = _amenityDetails!.maxCapacity;
-
-          if (isAvailable) {
-            availableSlots.add(timeSlot);
-          }
-
-          print('   📊 Slot "$timeSlot":');
-          print('      - Available: $isAvailable');
-          print('      - Total persons booked: $totalPersonsBooked');
-          print('      - Capacity: $capacity');
-          print('      - Result: $slotResult');
-
-          availability[timeSlot] = {
-            'available': isAvailable,
-            'bookedSpots': totalPersonsBooked,
-            'totalCapacity': capacity,
-            'reason':
-                slotResult['reason'] ??
-                (isAvailable ? 'Available' : 'Not available'),
-          };
-        } catch (e) {
-          print('❌ Error checking slot "$timeSlot": $e');
-
-          availability[timeSlot] = {
-            'available': false,
-            'bookedSpots': 0,
-            'totalCapacity': _amenityDetails!.maxCapacity,
-            'reason': 'Unable to check availability',
-          };
+        if (isAvailable) {
+          availableSlots.add(timeSlot);
         }
+
+        print('   📊 Slot "$timeSlot":');
+        print('      - Available: $isAvailable');
+        print('      - Total persons booked: $totalPersonsBooked');
+        print('      - Capacity: $capacity');
+        print('      - Result: $slotResult');
+
+        availability[timeSlot] = {
+          'available': isAvailable,
+          'bookedSpots': totalPersonsBooked,
+          'totalCapacity': capacity,
+          'reason':
+              slotResult['reason'] ??
+              (isAvailable ? 'Available' : 'Not available'),
+        };
       }
 
       if (!mounted) return;
@@ -246,26 +232,6 @@ class _BookingModalState extends State<BookingModal> {
         setState(() => _isCheckingAvailability = false);
       }
     }
-  }
-
-  List<String> _getDefaultTimeSlots() {
-    // Generate default time slots based on amenity hours
-    return [
-      '6:00 AM - 7:00 AM',
-      '7:00 AM - 8:00 AM',
-      '8:00 AM - 9:00 AM',
-      '9:00 AM - 10:00 AM',
-      '10:00 AM - 11:00 AM',
-      '11:00 AM - 12:00 PM',
-      '12:00 PM - 1:00 PM',
-      '1:00 PM - 2:00 PM',
-      '2:00 PM - 3:00 PM',
-      '3:00 PM - 4:00 PM',
-      '4:00 PM - 5:00 PM',
-      '5:00 PM - 6:00 PM',
-      '6:00 PM - 7:00 PM',
-      '7:00 PM - 8:00 PM',
-    ];
   }
 
   bool _isSlotAvailable(String timeSlot) {
@@ -348,27 +314,23 @@ class _BookingModalState extends State<BookingModal> {
   }
 
   bool get _canConfirm {
-    return _selectedDate != null &&
+    return _amenityDetails?.isAvailable == true &&
+        !_isLoadingTimeSlots &&
+        _selectedDate != null &&
         _selectedTimeSlot != null &&
         !_isSubmitting &&
         _numberOfPeople > 0;
   }
 
-  double get _selectedPrice {
-    if (_amenityDetails == null) return 0;
-
-    if (_bookingType == 'daily') {
-      return _amenityDetails!.pricePerDay ?? 0;
-    } else if (_amenityDetails!.subscriptionPackages != null) {
-      final packageKey = _bookingType == 'weekly'
-          ? 'Weekly'
-          : _bookingType == 'monthly'
-          ? 'Monthly'
-          : 'Yearly';
-      return _amenityDetails!.subscriptionPackages![packageKey] ?? 0;
-    }
-
-    return 0;
+  String get _selectedPriceLabel {
+    final amenity = _amenityDetails;
+    if (amenity == null) return 'Price unavailable';
+    if (_bookingType == 'daily') return amenity.priceDisplay;
+    final packageKey = _getPackageType();
+    return AmenityModel.formatPrice(
+      amenity.subscriptionPackages?[packageKey],
+      isFree: amenity.isFree,
+    );
   }
 
   // NEW: Calculate end date based on booking type
@@ -484,12 +446,12 @@ class _BookingModalState extends State<BookingModal> {
         child: Container(
           width: modalWidth,
           constraints: BoxConstraints(
-            maxWidth: 500,
+            maxWidth: 500.w,
             maxHeight: screenHeight - 48,
           ),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(18.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.2),
@@ -504,85 +466,95 @@ class _BookingModalState extends State<BookingModal> {
               _buildHeader(context),
               Flexible(
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(20),
+                  padding: EdgeInsets.all(20.w),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildInfoCard(),
+                      if (_isLoadingTimeSlots)
+                        const Center(child: CircularProgressIndicator())
+                      else if (_amenityDetails == null)
+                        const Text(
+                          'This facility is unavailable or no longer exists.',
+                        )
+                      else ...[
+                        _buildInfoCard(),
 
-                      // Booking Type Selector (if packages available)
-                      if (_amenityDetails?.hasPackages ?? false) ...[
-                        const SizedBox(height: 24),
-                        _buildBookingTypeSelector(),
-                      ],
+                        // Booking Type Selector (if packages available)
+                        if (_amenityDetails?.hasPackages ?? false) ...[
+                          SizedBox(height: 24.h),
+                          _buildBookingTypeSelector(),
+                        ],
 
-                      // Number of People Selector (NEW)
-                      if (_amenityDetails?.allowMultipleBookings ?? false) ...[
-                        const SizedBox(height: 24),
-                        _buildPeopleSelector(),
-                      ],
+                        // Number of People Selector (NEW)
+                        if (_amenityDetails?.allowMultipleBookings ??
+                            false) ...[
+                          SizedBox(height: 24.h),
+                          _buildPeopleSelector(),
+                        ],
 
-                      // Package Summary (NEW)
-                      if (_bookingType != 'daily' && _selectedDate != null) ...[
-                        const SizedBox(height: 24),
-                        _buildPackageSummary(),
-                      ],
+                        // Package Summary (NEW)
+                        if (_bookingType != 'daily' &&
+                            _selectedDate != null) ...[
+                          SizedBox(height: 24.h),
+                          _buildPackageSummary(),
+                        ],
 
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Select Date',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                        SizedBox(height: 24.h),
+                        Text(
+                          'Select Date',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      CalendarGrid(
-                        selectedDate: _selectedDate,
-                        onDateSelected: (date) {
-                          setState(() {
-                            _selectedDate = date;
-                            _selectedTimeSlot =
-                                null; // Reset time slot when date changes
-                          });
-                          _loadSlotAvailability(); // Load availability for selected date
-                        },
-                        blockedDates: _blockedDates,
-                      ),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Select Time Slot',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
+                        SizedBox(height: 12.h),
+                        CalendarGrid(
+                          selectedDate: _selectedDate,
+                          onDateSelected: (date) {
+                            setState(() {
+                              _selectedDate = date;
+                              _selectedTimeSlot =
+                                  null; // Reset time slot when date changes
+                            });
+                            _loadSlotAvailability(); // Load availability for selected date
+                          },
+                          blockedDates: _blockedDates,
                         ),
-                      ),
-                      const SizedBox(height: 12),
-                      _isLoadingTimeSlots
-                          ? const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: CircularProgressIndicator(),
-                              ),
-                            )
-                          : _timeSlots.isEmpty
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Text(
-                                  'No time slots available',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey[600],
+                        SizedBox(height: 24.h),
+                        Text(
+                          'Select Time Slot',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        _isLoadingTimeSlots
+                            ? Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.w),
+                                  child: CircularProgressIndicator(),
+                                ),
+                              )
+                            : _timeSlots.isEmpty
+                            ? Center(
+                                child: Padding(
+                                  padding: EdgeInsets.all(24.w),
+                                  child: Text(
+                                    'No time slots available',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      color: Colors.grey[600],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            )
-                          : _buildTimeSlotSelector(),
-                      const SizedBox(height: 24),
-                      _buildConfirmButton(),
+                              )
+                            : _buildTimeSlotSelector(),
+                        SizedBox(height: 24.h),
+                        _buildConfirmButton(),
+                      ],
                     ],
                   ),
                 ),
@@ -596,7 +568,7 @@ class _BookingModalState extends State<BookingModal> {
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0))),
       ),
@@ -604,10 +576,12 @@ class _BookingModalState extends State<BookingModal> {
         children: [
           Expanded(
             child: Text(
-              'Book ${widget.amenity.name}',
+              _amenityDetails == null
+                  ? 'Facility'
+                  : 'Book ${_amenityDetails!.name}',
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 20,
+              style: TextStyle(
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1E293B),
               ),
@@ -616,17 +590,13 @@ class _BookingModalState extends State<BookingModal> {
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
             child: Container(
-              width: 32,
-              height: 32,
+              width: 32.w,
+              height: 32.h,
               decoration: BoxDecoration(
                 color: Colors.grey[100],
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.close,
-                size: 18,
-                color: Color(0xFF6B7280),
-              ),
+              child: Icon(Icons.close, size: 18.w, color: Color(0xFF6B7280)),
             ),
           ),
         ],
@@ -634,89 +604,39 @@ class _BookingModalState extends State<BookingModal> {
     );
   }
 
-  Widget _buildInfoCard() {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F7F9),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.access_time, size: 18, color: Color(0xFF9B9B9B)),
-              const SizedBox(width: 8),
-              Text(
-                'Timings: ${widget.amenity.openTime} - ${widget.amenity.closeTime}',
-                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              const Icon(
-                Icons.payments_outlined,
-                size: 18,
-                color: Color(0xFF9B9B9B),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Price: ${widget.amenity.price}',
-                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
-              ),
-            ],
-          ),
-          if (_amenityDetails?.allowMultipleBookings ?? false) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.people_outline,
-                  size: 18,
-                  color: Color(0xFF9B9B9B),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Capacity: Up to ${_amenityDetails!.maxCapacity} users',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF6B7280),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
+  Widget _buildInfoCard() => Container(
+    padding: EdgeInsets.all(14.w),
+    decoration: BoxDecoration(
+      color: const Color(0xFFF6F7F9),
+      borderRadius: BorderRadius.circular(12.r),
+    ),
+    child: FacilityInformation(amenity: _amenityDetails!),
+  );
 
   Widget _buildBookingTypeSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Booking Type',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         Container(
           decoration: BoxDecoration(
             color: const Color(0xFFF6F7F9),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           child: Column(
             children: [
               _buildBookingTypeOption(
                 'daily',
                 'Daily',
-                '₹${_amenityDetails?.pricePerDay?.toStringAsFixed(0) ?? '0'}/day',
+                _amenityDetails!.priceDisplay,
               ),
               if (_amenityDetails?.subscriptionPackages?.containsKey(
                     'Weekly',
@@ -725,7 +645,11 @@ class _BookingModalState extends State<BookingModal> {
                 _buildBookingTypeOption(
                   'weekly',
                   'Weekly Package',
-                  '₹${_amenityDetails!.subscriptionPackages!['Weekly']!.toStringAsFixed(0)}/week',
+                  AmenityModel.formatPrice(
+                    _amenityDetails!.subscriptionPackages!['Weekly'],
+                    isFree: _amenityDetails!.isFree,
+                    suffix: '/week',
+                  ),
                 ),
               if (_amenityDetails?.subscriptionPackages?.containsKey(
                     'Monthly',
@@ -734,7 +658,11 @@ class _BookingModalState extends State<BookingModal> {
                 _buildBookingTypeOption(
                   'monthly',
                   'Monthly Package',
-                  '₹${_amenityDetails!.subscriptionPackages!['Monthly']!.toStringAsFixed(0)}/month',
+                  AmenityModel.formatPrice(
+                    _amenityDetails!.subscriptionPackages!['Monthly'],
+                    isFree: _amenityDetails!.isFree,
+                    suffix: '/month',
+                  ),
                 ),
               if (_amenityDetails?.subscriptionPackages?.containsKey(
                     'Yearly',
@@ -743,7 +671,11 @@ class _BookingModalState extends State<BookingModal> {
                 _buildBookingTypeOption(
                   'yearly',
                   'Yearly Package',
-                  '₹${_amenityDetails!.subscriptionPackages!['Yearly']!.toStringAsFixed(0)}/year',
+                  AmenityModel.formatPrice(
+                    _amenityDetails!.subscriptionPackages!['Yearly'],
+                    isFree: _amenityDetails!.isFree,
+                    suffix: '/year',
+                  ),
                 ),
             ],
           ),
@@ -766,38 +698,42 @@ class _BookingModalState extends State<BookingModal> {
         });
       },
       child: Container(
-        padding: const EdgeInsets.all(14),
+        padding: EdgeInsets.all(14.w),
         decoration: BoxDecoration(
           color: isSelected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
           border: isSelected
-              ? Border.all(color: const Color(0xFF2563EB), width: 2)
+              ? Border.all(color: const Color(0xFF0E4778), width: 2)
               : null,
         ),
         child: Row(
           children: [
             Container(
-              width: 20,
-              height: 20,
+              width: 20.w,
+              height: 20.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected
-                      ? const Color(0xFF2563EB)
+                      ? const Color(0xFF0E4778)
                       : const Color(0xFFD1D5DB),
                   width: 2,
                 ),
                 color: isSelected
-                    ? const Color(0xFF2563EB)
+                    ? const Color(0xFF0E4778)
                     : Colors.transparent,
               ),
               child: isSelected
-                  ? const Center(
-                      child: Icon(Icons.circle, size: 10, color: Colors.white),
+                  ? Center(
+                      child: Icon(
+                        Icons.circle,
+                        size: 10.w,
+                        color: Colors.white,
+                      ),
                     )
                   : null,
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -805,20 +741,20 @@ class _BookingModalState extends State<BookingModal> {
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
                       color: isSelected
                           ? Colors.black
                           : const Color(0xFF6B7280),
                     ),
                   ),
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                   Text(
                     price,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: isSelected
-                          ? const Color(0xFF2563EB)
+                          ? const Color(0xFF0E4778)
                           : const Color(0xFF9CA3AF),
                       fontWeight: FontWeight.w500,
                     ),
@@ -837,53 +773,49 @@ class _BookingModalState extends State<BookingModal> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Number of People',
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: const Color(0xFFF6F7F9),
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.people_outline,
-                size: 24,
-                color: Color(0xFF6B7280),
-              ),
-              const SizedBox(width: 12),
+              Icon(Icons.people_outline, size: 24.w, color: Color(0xFF6B7280)),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '$_numberOfPeople ${_numberOfPeople == 1 ? "Person" : "People"}',
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    SizedBox(height: 2.h),
                     Text(
                       'Each person counts toward capacity',
-                      style: const TextStyle(
-                        fontSize: 12,
+                      style: TextStyle(
+                        fontSize: 12.sp,
                         color: Color(0xFF9CA3AF),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Row(
                 children: [
                   GestureDetector(
@@ -899,29 +831,29 @@ class _BookingModalState extends State<BookingModal> {
                       }
                     },
                     child: Container(
-                      width: 36,
-                      height: 36,
+                      width: 36.w,
+                      height: 36.h,
                       decoration: BoxDecoration(
                         color: _numberOfPeople > 1
                             ? Colors.white
                             : const Color(0xFFE5E7EB),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: BorderRadius.circular(8.r),
                         border: Border.all(
                           color: _numberOfPeople > 1
-                              ? const Color(0xFF2563EB)
+                              ? const Color(0xFF0E4778)
                               : const Color(0xFFD1D5DB),
                         ),
                       ),
                       child: Icon(
                         Icons.remove,
-                        size: 20,
+                        size: 20.w,
                         color: _numberOfPeople > 1
-                            ? const Color(0xFF2563EB)
+                            ? const Color(0xFF0E4778)
                             : const Color(0xFF9CA3AF),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: 12.w),
                   GestureDetector(
                     onTap: () {
                       final maxCapacity = _amenityDetails?.maxCapacity ?? 10;
@@ -936,17 +868,17 @@ class _BookingModalState extends State<BookingModal> {
                       }
                     },
                     child: Container(
-                      width: 36,
-                      height: 36,
+                      width: 36.w,
+                      height: 36.h,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: const Color(0xFF2563EB)),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: const Color(0xFF0E4778)),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.add,
-                        size: 20,
-                        color: Color(0xFF2563EB),
+                        size: 20.w,
+                        color: Color(0xFF0E4778),
                       ),
                     ),
                   ),
@@ -966,42 +898,39 @@ class _BookingModalState extends State<BookingModal> {
     final packageType = _getPackageType();
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: const Color(0xFFEFF6FF),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF2563EB).withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFF0E4778).withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            children: const [
-              Icon(Icons.card_membership, size: 20, color: Color(0xFF2563EB)),
-              SizedBox(width: 8),
+            children: [
+              Icon(Icons.card_membership, size: 20.w, color: Color(0xFF0E4778)),
+              SizedBox(width: 8.w),
               Text(
                 'Package Details',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 15.sp,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           _buildPackageDetailRow('Package Type', packageType ?? 'N/A'),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           _buildPackageDetailRow('Start Date', _formatDate(_selectedDate!)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           _buildPackageDetailRow('End Date', _formatDate(endDate)),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           _buildPackageDetailRow('Validity', '$validityDays days'),
-          const SizedBox(height: 8),
-          _buildPackageDetailRow(
-            'Price',
-            '₹${_selectedPrice.toStringAsFixed(0)}',
-          ),
+          SizedBox(height: 8.h),
+          _buildPackageDetailRow('Price', _selectedPriceLabel),
         ],
       ),
     );
@@ -1013,12 +942,12 @@ class _BookingModalState extends State<BookingModal> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+          style: TextStyle(fontSize: 13.sp, color: Color(0xFF6B7280)),
         ),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 13,
+          style: TextStyle(
+            fontSize: 13.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
@@ -1049,26 +978,26 @@ class _BookingModalState extends State<BookingModal> {
     if (_selectedDate == null) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: EdgeInsets.all(24.w),
           child: Text(
             'Please select a date first',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
           ),
         ),
       );
     }
 
     if (_isCheckingAvailability) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(24),
+          padding: EdgeInsets.all(24.w),
           child: Column(
             children: [
               CircularProgressIndicator(),
-              SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text(
                 'Checking availability...',
-                style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+                style: TextStyle(fontSize: 13.sp, color: Color(0xFF6B7280)),
               ),
             ],
           ),
@@ -1095,19 +1024,19 @@ class _BookingModalState extends State<BookingModal> {
                 }
               : null,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
               color: !isAvailable
                   ? const Color(0xFFF3F4F6)
                   : isSelected
-                  ? const Color(0xFF2563EB)
+                  ? const Color(0xFF0E4778)
                   : Colors.white,
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(10.r),
               border: Border.all(
                 color: !isAvailable
                     ? const Color(0xFFE5E7EB)
                     : isSelected
-                    ? const Color(0xFF2563EB)
+                    ? const Color(0xFF0E4778)
                     : const Color(0xFFD1D5DB),
                 width: isSelected ? 2 : 1,
               ),
@@ -1118,7 +1047,7 @@ class _BookingModalState extends State<BookingModal> {
                 Text(
                   slot,
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: !isAvailable
                         ? const Color(0xFF9CA3AF)
@@ -1128,13 +1057,13 @@ class _BookingModalState extends State<BookingModal> {
                   ),
                 ),
                 if (showCapacity) ...[
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     isAvailable
                         ? '$remainingSpots/$totalCapacity spots booked'
                         : 'Slot Full',
                     style: TextStyle(
-                      fontSize: 11,
+                      fontSize: 11.sp,
                       color: !isAvailable
                           ? const Color(0xFF9CA3AF)
                           : isSelected
@@ -1154,31 +1083,31 @@ class _BookingModalState extends State<BookingModal> {
   Widget _buildConfirmButton() {
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: 56.h,
       child: ElevatedButton(
         onPressed: _canConfirm ? _handleConfirm : null,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
+          backgroundColor: const Color(0xFF0E4778),
           foregroundColor: Colors.white,
           disabledBackgroundColor: const Color(0xFFE6E6E6),
           disabledForegroundColor: const Color(0xFF9B9B9B),
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
         ),
         child: _isSubmitting
-            ? const SizedBox(
-                width: 20,
-                height: 20,
+            ? SizedBox(
+                width: 20.w,
+                height: 20.h,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
-            : const Text(
+            : Text(
                 'Confirm Booking',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
               ),
       ),
     );

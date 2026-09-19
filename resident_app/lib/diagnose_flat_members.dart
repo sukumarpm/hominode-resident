@@ -14,7 +14,7 @@ void main() async {
 }
 
 class DiagnoseFlatMembersApp extends StatelessWidget {
-  const DiagnoseFlatMembersApp({Key? key}) : super(key: key);
+  const DiagnoseFlatMembersApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class DiagnoseFlatMembersApp extends StatelessWidget {
 }
 
 class DiagnoseFlatMembersScreen extends StatefulWidget {
-  const DiagnoseFlatMembersScreen({Key? key}) : super(key: key);
+  const DiagnoseFlatMembersScreen({super.key});
 
   @override
   State<DiagnoseFlatMembersScreen> createState() => _DiagnoseFlatMembersScreenState();

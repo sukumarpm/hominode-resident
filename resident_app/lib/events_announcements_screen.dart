@@ -2,7 +2,7 @@
 // Events & Announcements Screen with Firestore integration
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'src/components/app_segmented_control.dart';
@@ -13,7 +13,7 @@ import 'src/services/announcements_events_service.dart';
 import 'src/providers/language_provider.dart';
 
 // Design Constants
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 const kSectionTitle = Color(0xFF111827);
 const kSubtitle = Color(0xFF6B7280);
 const kCardBackground = Color(0xFFFFFFFF);
@@ -25,15 +25,16 @@ const kSpacing = 16.0;
 const kHighPriorityBg = Color(0xFFFEE2E2);
 const kHighPriorityText = Color(0xFFEF4444);
 const kMediumPriorityBg = Color(0xFFDBEAFE);
-const kMediumPriorityText = Color(0xFF2563EB);
+const kMediumPriorityText = Color(0xFF0E4778);
 const kLowPriorityBg = Color(0xFFD1FAE5);
 const kLowPriorityText = Color(0xFF10B981);
 
 class EventsAnnouncementsScreen extends StatefulWidget {
-  const EventsAnnouncementsScreen({Key? key}) : super(key: key);
+  const EventsAnnouncementsScreen({super.key});
 
   @override
-  State<EventsAnnouncementsScreen> createState() => _EventsAnnouncementsScreenState();
+  State<EventsAnnouncementsScreen> createState() =>
+      _EventsAnnouncementsScreenState();
 }
 
 class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
@@ -51,22 +52,19 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
           padding: EdgeInsets.zero,
           body: Column(
             children: [
-              const SizedBox(height: 20),
-              
+              SizedBox(height: 20.h),
+
               // Segmented Control
               AppSegmentedControl(
-                segments: [
-                  'announcements'.tr(),
-                  'events'.tr(),
-                ],
+                segments: ['announcements'.tr(), 'events'.tr()],
                 selectedIndex: _selectedTab,
                 onChanged: (index) {
                   setState(() => _selectedTab = index);
                 },
               ),
-              
-              const SizedBox(height: 20),
-              
+
+              SizedBox(height: 20.h),
+
               // Content
               Expanded(
                 child: _selectedTab == 0
@@ -100,27 +98,20 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
+                Icon(Icons.error_outline, size: 64.w, color: Colors.grey[400]),
+                SizedBox(height: 16.h),
                 Text(
                   'error_loading_announcements'.tr(),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Please try again later',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -138,25 +129,22 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
               children: [
                 Icon(
                   Icons.campaign_outlined,
-                  size: 64,
+                  size: 64.w,
                   color: Colors.grey[400],
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 Text(
                   'No Announcements',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Check back later for updates',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -195,27 +183,20 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
+                Icon(Icons.error_outline, size: 64.w, color: Colors.grey[400]),
+                SizedBox(height: 16.h),
                 Text(
                   'error_loading_events'.tr(),
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Please try again later',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -231,27 +212,20 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.event_outlined,
-                  size: 64,
-                  color: Colors.grey[400],
-                ),
-                const SizedBox(height: 16),
+                Icon(Icons.event_outlined, size: 64.w, color: Colors.grey[400]),
+                SizedBox(height: 16.h),
                 Text(
                   'No Events',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.grey[700],
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Text(
                   'Check back later for upcoming events',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[500],
-                  ),
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
                 ),
               ],
             ),
@@ -273,7 +247,7 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
   /// Announcement Card
   Widget _buildAnnouncementCard(AnnouncementModel announcement) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
         color: kCardBackground,
         borderRadius: BorderRadius.circular(kCardRadius),
@@ -287,7 +261,7 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -296,69 +270,61 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
               children: [
                 // Category
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
                     announcement.category,
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: TextStyle(
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 // Priority Badge
                 _buildPriorityBadge(announcement.priority),
               ],
             ),
-            
-            const SizedBox(height: 12),
-            
+
+            SizedBox(height: 12.h),
+
             // Title
             Text(
               announcement.title,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: kSectionTitle,
               ),
             ),
-            
-            const SizedBox(height: 8),
-            
+
+            SizedBox(height: 8.h),
+
             // Description (max 2 lines)
             Text(
               announcement.description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: kSubtitle,
-                height: 1.5,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: kSubtitle, height: 1.5),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            
-            const SizedBox(height: 12),
-            
+
+            SizedBox(height: 12.h),
+
             // Created Date
             Row(
               children: [
-                const Icon(
-                  Icons.access_time,
-                  size: 14,
-                  color: kSubtitle,
-                ),
-                const SizedBox(width: 4),
+                Icon(Icons.access_time, size: 14.w, color: kSubtitle),
+                SizedBox(width: 4.w),
                 Text(
                   _formatDate(announcement.createdAt),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: kSubtitle,
-                  ),
+                  style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                 ),
               ],
             ),
@@ -371,7 +337,7 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
   /// Event Card
   Widget _buildEventCard(EventModel event) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: EdgeInsets.only(bottom: 12.h),
       decoration: BoxDecoration(
         color: kCardBackground,
         borderRadius: BorderRadius.circular(kCardRadius),
@@ -385,7 +351,7 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -394,155 +360,119 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
               children: [
                 // Category
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(6),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: Text(
                     event.category,
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: TextStyle(
+                      fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF6B7280),
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
                 // Status Badge
                 _buildStatusBadge(event.status),
               ],
             ),
-            
-            const SizedBox(height: 12),
-            
+
+            SizedBox(height: 12.h),
+
             // Title
             Text(
               event.title,
-              style: const TextStyle(
-                fontSize: 16,
+              style: TextStyle(
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
                 color: kSectionTitle,
               ),
             ),
-            
-            const SizedBox(height: 8),
-            
+
+            SizedBox(height: 8.h),
+
             // Description (max 2 lines)
             Text(
               event.description,
-              style: const TextStyle(
-                fontSize: 14,
-                color: kSubtitle,
-                height: 1.5,
-              ),
+              style: TextStyle(fontSize: 14.sp, color: kSubtitle, height: 1.5),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-            
-            const SizedBox(height: 12),
-            
+
+            SizedBox(height: 12.h),
+
             // Event Date and Time
             if (event.eventDate != null) ...[
               Row(
                 children: [
-                  const Icon(
-                    Icons.calendar_today,
-                    size: 14,
-                    color: kSubtitle,
-                  ),
-                  const SizedBox(width: 4),
+                  Icon(Icons.calendar_today, size: 14.w, color: kSubtitle),
+                  SizedBox(width: 4.w),
                   Text(
                     _formatEventDate(event.eventDate!),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: kSubtitle,
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                   ),
                   if (event.time != null && event.time!.isNotEmpty) ...[
-                    const SizedBox(width: 8),
-                    const Icon(
-                      Icons.access_time,
-                      size: 14,
-                      color: kSubtitle,
-                    ),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 8.w),
+                    Icon(Icons.access_time, size: 14.w, color: kSubtitle),
+                    SizedBox(width: 4.w),
                     Text(
                       event.time!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: kSubtitle,
-                      ),
+                      style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                     ),
                   ],
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6.h),
             ],
-            
+
             // Location
             if (event.location != null && event.location!.isNotEmpty) ...[
               Row(
                 children: [
-                  const Icon(
-                    Icons.location_on,
-                    size: 14,
-                    color: kSubtitle,
-                  ),
-                  const SizedBox(width: 4),
+                  Icon(Icons.location_on, size: 14.w, color: kSubtitle),
+                  SizedBox(width: 4.w),
                   Expanded(
                     child: Text(
                       event.location!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: kSubtitle,
-                      ),
+                      style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6.h),
             ],
-            
+
             // RSVP Count (if available)
             if (event.totalCapacity != null && event.totalCapacity! > 0) ...[
               Row(
                 children: [
-                  const Icon(
-                    Icons.people_outline,
-                    size: 14,
-                    color: kSubtitle,
-                  ),
-                  const SizedBox(width: 4),
+                  Icon(Icons.people_outline, size: 14.w, color: kSubtitle),
+                  SizedBox(width: 4.w),
                   Text(
                     '${event.rsvpCount ?? 0}/${event.totalCapacity} attending',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: kSubtitle,
-                    ),
+                    style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
+              SizedBox(height: 6.h),
             ],
-            
+
             // Created Date
             Row(
               children: [
-                const Icon(
-                  Icons.schedule,
-                  size: 14,
-                  color: kSubtitle,
-                ),
-                const SizedBox(width: 4),
+                Icon(Icons.schedule, size: 14.w, color: kSubtitle),
+                SizedBox(width: 4.w),
                 Text(
                   'Posted ${_formatDate(event.createdAt)}',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: kSubtitle,
-                  ),
+                  style: TextStyle(fontSize: 12.sp, color: kSubtitle),
                 ),
               ],
             ),
@@ -576,15 +506,15 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: textColor,
         ),
@@ -627,15 +557,15 @@ class _EventsAnnouncementsScreenState extends State<EventsAnnouncementsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 11,
+          fontSize: 11.sp,
           fontWeight: FontWeight.w600,
           color: textColor,
         ),

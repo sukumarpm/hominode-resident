@@ -14,7 +14,7 @@ void main() {
 }
 
 class OTPFlowDemoApp extends StatelessWidget {
-  const OTPFlowDemoApp({Key? key}) : super(key: key);
+  const OTPFlowDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class OTPFlowDemoApp extends StatelessWidget {
 }
 
 class OTPFlowDemoHome extends StatelessWidget {
-  const OTPFlowDemoHome({Key? key}) : super(key: key);
+  const OTPFlowDemoHome({super.key});
 
   @override
   Widget build(BuildContext context) {

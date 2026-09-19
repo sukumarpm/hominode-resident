@@ -14,7 +14,7 @@ void main() async {
 }
 
 class FlatAccessControlTestApp extends StatelessWidget {
-  const FlatAccessControlTestApp({Key? key}) : super(key: key);
+  const FlatAccessControlTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class FlatAccessControlTestApp extends StatelessWidget {
 }
 
 class FlatAccessControlTestScreen extends StatefulWidget {
-  const FlatAccessControlTestScreen({Key? key}) : super(key: key);
+  const FlatAccessControlTestScreen({super.key});
 
   @override
   State<FlatAccessControlTestScreen> createState() => _FlatAccessControlTestScreenState();

@@ -2,7 +2,6 @@
 // Flat Management Screen with Occupancy Grid
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/flat_model.dart';
 import '../models/building_model.dart';
 import '../services/flat_service.dart';
@@ -10,7 +9,7 @@ import '../services/building_service.dart';
 import '../components/standard_screen.dart';
 
 class FlatManagementScreen extends StatefulWidget {
-  const FlatManagementScreen({Key? key}) : super(key: key);
+  const FlatManagementScreen({super.key});
 
   @override
   State<FlatManagementScreen> createState() => _FlatManagementScreenState();
@@ -19,7 +18,7 @@ class FlatManagementScreen extends StatefulWidget {
 class _FlatManagementScreenState extends State<FlatManagementScreen> {
   final _flatService = FlatService();
   final _buildingService = BuildingService();
-  
+
   List<BuildingModel> _buildings = [];
   BuildingModel? _selectedBuilding;
   List<FlatModel> _flats = [];
@@ -33,10 +32,10 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
 
   Future<void> _loadBuildings() async {
     setState(() => _isLoading = true);
-    
+
     try {
       final buildings = await _buildingService.getBuildings();
-      
+
       if (mounted) {
         setState(() {
           _buildings = buildings;
@@ -58,12 +57,14 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
 
   Future<void> _loadFlats() async {
     if (_selectedBuilding == null) return;
-    
+
     setState(() => _isLoading = true);
-    
+
     try {
-      final flats = await _flatService.getFlatsByBuilding(_selectedBuilding!.id);
-      
+      final flats = await _flatService.getFlatsByBuilding(
+        _selectedBuilding!.id,
+      );
+
       if (mounted) {
         setState(() {
           _flats = flats;
@@ -88,21 +89,23 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
         children: [
           // Building selector and actions
           _buildHeader(),
-          
+
           // Legend
           _buildLegend(),
-          
+
           // Flat grid
           Expanded(
             child: _isLoading
                 ? const Center(
                     child: CircularProgressIndicator(
-                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2563EB)),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFF0E4778),
+                      ),
                     ),
                   )
                 : _flats.isEmpty
-                    ? _buildEmptyState()
-                    : _buildFlatGrid(),
+                ? _buildEmptyState()
+                : _buildFlatGrid(),
           ),
         ],
       ),
@@ -128,7 +131,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
           // Building dropdown
           if (_buildings.isNotEmpty)
             DropdownButtonFormField<BuildingModel>(
-              value: _selectedBuilding,
+              initialValue: _selectedBuilding,
               decoration: InputDecoration(
                 labelText: 'Select Building',
                 prefixIcon: const Icon(Icons.business),
@@ -149,9 +152,9 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                 });
               },
             ),
-          
+
           const SizedBox(height: 12),
-          
+
           // Action buttons
           Row(
             children: [
@@ -161,7 +164,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                   icon: const Icon(Icons.add, size: 18),
                   label: const Text('Add Flat'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
+                    backgroundColor: const Color(0xFF0E4778),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(
@@ -177,9 +180,9 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                   icon: const Icon(Icons.grid_on, size: 18),
                   label: const Text('Bulk Create'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF2563EB),
+                    foregroundColor: const Color(0xFF0E4778),
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    side: const BorderSide(color: Color(0xFF2563EB)),
+                    side: const BorderSide(color: Color(0xFF0E4778)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
@@ -239,11 +242,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.home_outlined,
-            size: 80,
-            color: Colors.grey[400],
-          ),
+          Icon(Icons.home_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
             'No Flats in This Building',
@@ -256,10 +255,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
           const SizedBox(height: 8),
           Text(
             'Add flats to get started',
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[500],
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -282,7 +278,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
       itemBuilder: (context, index) {
         final floor = floors[index];
         final flats = flatsByFloor[floor]!;
-        
+
         return _buildFloorSection(floor, flats);
       },
     );
@@ -305,7 +301,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
             ),
           ),
         ),
-        
+
         // Flats grid
         GridView.builder(
           shrinkWrap: true,
@@ -321,7 +317,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
             return _buildFlatCard(flats[index]);
           },
         ),
-        
+
         const SizedBox(height: 24),
       ],
     );
@@ -363,11 +359,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
               ),
               if (flat.residentIds.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                const Icon(
-                  Icons.person,
-                  color: Colors.white,
-                  size: 16,
-                ),
+                const Icon(Icons.person, color: Colors.white, size: 16),
               ],
             ],
           ),
@@ -475,14 +467,18 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: status,
-                  decoration: const InputDecoration(
-                    labelText: 'Status',
-                  ),
+                  initialValue: status,
+                  decoration: const InputDecoration(labelText: 'Status'),
                   items: const [
                     DropdownMenuItem(value: 'vacant', child: Text('Vacant')),
-                    DropdownMenuItem(value: 'occupied', child: Text('Occupied')),
-                    DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
+                    DropdownMenuItem(
+                      value: 'occupied',
+                      child: Text('Occupied'),
+                    ),
+                    DropdownMenuItem(
+                      value: 'maintenance',
+                      child: Text('Maintenance'),
+                    ),
                   ],
                   onChanged: (value) {
                     if (value != null) status = value;
@@ -533,7 +529,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               foregroundColor: Colors.white,
             ),
             child: const Text('Add'),
@@ -710,9 +706,8 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                 showDialog(
                   context: context,
                   barrierDismissible: false,
-                  builder: (context) => const Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  builder: (context) =>
+                      const Center(child: CircularProgressIndicator()),
                 );
 
                 final created = await _flatService.bulkCreateFlats(
@@ -729,7 +724,9 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
 
                   if (created > 0) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Created $created flats successfully')),
+                      SnackBar(
+                        content: Text('Created $created flats successfully'),
+                      ),
                     );
                     _loadFlats();
                   } else {
@@ -741,7 +738,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
+              backgroundColor: const Color(0xFF0E4778),
               foregroundColor: Colors.white,
             ),
             child: const Text('Create'),
@@ -777,58 +774,60 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
               _buildDetailRow('Floor', flat.floor.toString()),
               _buildDetailRow('Status', flat.status.toUpperCase()),
               if (flat.area > 0) _buildDetailRow('Area', '${flat.area} sq ft'),
-              if (flat.bedrooms > 0) _buildDetailRow('Bedrooms', flat.bedrooms.toString()),
-              if (flat.bathrooms > 0) _buildDetailRow('Bathrooms', flat.bathrooms.toString()),
-              
+              if (flat.bedrooms > 0)
+                _buildDetailRow('Bedrooms', flat.bedrooms.toString()),
+              if (flat.bathrooms > 0)
+                _buildDetailRow('Bathrooms', flat.bathrooms.toString()),
+
               const SizedBox(height: 16),
               const Text(
                 'Residents',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
-                ),
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
               ),
               const SizedBox(height: 8),
-              
+
               if (residents.isEmpty)
                 const Text(
                   'No residents assigned',
-                  style: TextStyle(
-                    color: Color(0xFF6B7280),
-                    fontSize: 13,
-                  ),
+                  style: TextStyle(color: Color(0xFF6B7280), fontSize: 13),
                 )
               else
-                ...residents.map((resident) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.person, size: 16, color: Color(0xFF6B7280)),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              resident['name'] ?? 'Unknown',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w500,
-                                fontSize: 13,
-                              ),
-                            ),
-                            Text(
-                              resident['email'] ?? '',
-                              style: const TextStyle(
-                                color: Color(0xFF6B7280),
-                                fontSize: 11,
-                              ),
-                            ),
-                          ],
+                ...residents.map(
+                  (resident) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.person,
+                          size: 16,
+                          color: Color(0xFF6B7280),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                resident['name'] ?? 'Unknown',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              Text(
+                                resident['email'] ?? '',
+                                style: const TextStyle(
+                                  color: Color(0xFF6B7280),
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                )),
+                ),
             ],
           ),
         ),
@@ -877,19 +876,13 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
             width: 80,
             child: Text(
               label,
-              style: const TextStyle(
-                color: Color(0xFF6B7280),
-                fontSize: 13,
-              ),
+              style: const TextStyle(color: Color(0xFF6B7280), fontSize: 13),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 13,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
             ),
           ),
         ],
@@ -930,10 +923,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Select Resident:',
-                style: TextStyle(fontSize: 13),
-              ),
+              const Text('Select Resident:', style: TextStyle(fontSize: 13)),
               const SizedBox(height: 8),
               Container(
                 constraints: const BoxConstraints(maxHeight: 300),
@@ -951,17 +941,25 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                           padding: const EdgeInsets.all(12),
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
-                            color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
+                            color: isSelected
+                                ? const Color(0xFFEFF6FF)
+                                : Colors.white,
                             border: Border.all(
-                              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE5E7EB),
+                              color: isSelected
+                                  ? const Color(0xFF0E4778)
+                                  : const Color(0xFFE5E7EB),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF9CA3AF),
+                                isSelected
+                                    ? Icons.radio_button_checked
+                                    : Icons.radio_button_unchecked,
+                                color: isSelected
+                                    ? const Color(0xFF0E4778)
+                                    : const Color(0xFF9CA3AF),
                                 size: 20,
                               ),
                               const SizedBox(width: 12),
@@ -1016,18 +1014,22 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                       if (mounted) {
                         if (success) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Resident assigned successfully')),
+                            const SnackBar(
+                              content: Text('Resident assigned successfully'),
+                            ),
                           );
                           _loadFlats();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to assign resident')),
+                            const SnackBar(
+                              content: Text('Failed to assign resident'),
+                            ),
                           );
                         }
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF0E4778),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Assign'),
@@ -1039,7 +1041,10 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
   }
 
   /// Show Remove Resident Dialog
-  void _showRemoveResidentDialog(FlatModel flat, List<Map<String, dynamic>> residents) {
+  void _showRemoveResidentDialog(
+    FlatModel flat,
+    List<Map<String, dynamic>> residents,
+  ) {
     String? selectedResidentId;
 
     showDialog(
@@ -1076,17 +1081,25 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                     padding: const EdgeInsets.all(12),
                     margin: const EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFFEF2F2) : Colors.white,
+                      color: isSelected
+                          ? const Color(0xFFFEF2F2)
+                          : Colors.white,
                       border: Border.all(
-                        color: isSelected ? const Color(0xFFEF4444) : const Color(0xFFE5E7EB),
+                        color: isSelected
+                            ? const Color(0xFFEF4444)
+                            : const Color(0xFFE5E7EB),
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          color: isSelected ? const Color(0xFFEF4444) : const Color(0xFF9CA3AF),
+                          isSelected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: isSelected
+                              ? const Color(0xFFEF4444)
+                              : const Color(0xFF9CA3AF),
                           size: 20,
                         ),
                         const SizedBox(width: 12),
@@ -1115,7 +1128,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
             ],
           ),
           actions: [
@@ -1137,12 +1150,16 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                       if (mounted) {
                         if (success) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Resident removed successfully')),
+                            const SnackBar(
+                              content: Text('Resident removed successfully'),
+                            ),
                           );
                           _loadFlats();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Failed to remove resident')),
+                            const SnackBar(
+                              content: Text('Failed to remove resident'),
+                            ),
                           );
                         }
                       }
@@ -1224,12 +1241,17 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
               onPressed: () async {
                 Navigator.pop(context);
 
-                final success = await _flatService.updateFlatStatus(flat.id, selectedStatus);
+                final success = await _flatService.updateFlatStatus(
+                  flat.id,
+                  selectedStatus,
+                );
 
                 if (mounted) {
                   if (success) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Status updated successfully')),
+                      const SnackBar(
+                        content: Text('Status updated successfully'),
+                      ),
                     );
                     _loadFlats();
                   } else {
@@ -1240,7 +1262,7 @@ class _FlatManagementScreenState extends State<FlatManagementScreen> {
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
+                backgroundColor: const Color(0xFF0E4778),
                 foregroundColor: Colors.white,
               ),
               child: const Text('Update'),

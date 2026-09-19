@@ -7,11 +7,11 @@ class UploadPhotosWidget extends StatelessWidget {
   final Function(int) onRemoveImage;
 
   const UploadPhotosWidget({
-    Key? key,
+    super.key,
     required this.selectedImages,
     required this.onUploadTap,
     required this.onRemoveImage,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

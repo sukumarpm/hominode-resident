@@ -1,6 +1,9 @@
 // lib/src/services/visitor_firestore_service.dart
 // Visitor Firestore Service - Save and manage visitor data
 
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,7 +42,8 @@ class VisitorResult {
 /// Visitor Firestore Service
 class VisitorFirestoreService {
   // Singleton pattern
-  static final VisitorFirestoreService instance = VisitorFirestoreService._internal();
+  static final VisitorFirestoreService instance =
+      VisitorFirestoreService._internal();
   factory VisitorFirestoreService() => instance;
   VisitorFirestoreService._internal();
 
@@ -48,6 +52,24 @@ class VisitorFirestoreService {
 
   // Collection name
   static const String visitorsCollection = 'visitors';
+  final Random _secureRandom = Random.secure();
+
+  static const String _passAlphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+  String _generateVisitorPassCode() {
+    final raw = List.generate(
+      8,
+      (_) => _passAlphabet[_secureRandom.nextInt(_passAlphabet.length)],
+    ).join();
+
+    return '${raw.substring(0, 4)}-${raw.substring(4)}';
+  }
+
+  String _generateQrToken() {
+    final bytes = List<int>.generate(24, (_) => _secureRandom.nextInt(256));
+
+    return base64UrlEncode(bytes).replaceAll('=', '');
+  }
 
   // ============================================================================
   // ADD EXPECTED VISITOR
@@ -71,15 +93,18 @@ class VisitorFirestoreService {
 
       // Get user ID using the same logic as UserDataService
       String? userId;
-      
+
       // First try Firebase Auth
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         print('🆔 Firebase Auth User: ${firebaseUser.uid}');
-        
+
         // Try to find user document by Firebase Auth UID
-        final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-        
+        final doc = await _firestore
+            .collection('users')
+            .doc(firebaseUser.uid)
+            .get();
+
         if (doc.exists) {
           userId = doc.id;
           print('✅ Found user document by Firebase Auth UID');
@@ -91,20 +116,20 @@ class VisitorFirestoreService {
               .where('authUid', isEqualTo: firebaseUser.uid)
               .limit(1)
               .get();
-          
+
           if (querySnapshot.docs.isNotEmpty) {
             userId = querySnapshot.docs.first.id;
             print('✅ Found user document by authUid field');
           }
         }
       }
-      
+
       // Fallback to SharedPreferences
       if (userId == null) {
         print('⚠️  No Firebase Auth user, checking SharedPreferences...');
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return VisitorResult.failure(
@@ -112,14 +137,14 @@ class VisitorFirestoreService {
             errorCode: 'not-authenticated',
           );
         }
-        
+
         print('🆔 Using stored User ID: $userId');
       }
 
       // Fetch user data from Firestore
       print('📥 Fetching user data from Firestore...');
       final userDoc = await _firestore.collection('users').doc(userId).get();
-      
+
       if (!userDoc.exists) {
         print('❌ User document not found in Firestore');
         print('   User ID: $userId');
@@ -129,19 +154,28 @@ class VisitorFirestoreService {
           errorCode: 'user-not-found',
         );
       }
-      
+
       final userData = userDoc.data();
-      final userName = userData?['name'] ?? firebaseUser?.displayName ?? 'Unknown User';
+      final userName =
+          userData?['name'] ?? firebaseUser?.displayName ?? 'Unknown User';
       final userEmail = userData?['email'] ?? firebaseUser?.email ?? '';
       final flatId = userData?['flatId'] ?? '';
       final flatLabel = userData?['flatLabel'] ?? userData?['flatId'] ?? '';
       final adminId = userData?['adminId'];
-      
+      final communityId = userData?['communityId']?.toString().trim() ?? '';
+      if (communityId.isEmpty) {
+        return VisitorResult.failure(
+          message: 'Your resident account is not assigned to a community.',
+          errorCode: 'community-not-assigned',
+        );
+      }
+
       print('✅ User data fetched: $userName ($userEmail)');
       print('🏢 Flat ID: $flatId');
       print('🏢 Flat Label: $flatLabel');
       print('👤 Admin ID: $adminId');
 
+      // Combine date and time
       // Combine date and time
       final expectedArrival = DateTime(
         expectedDate.year,
@@ -151,30 +185,63 @@ class VisitorFirestoreService {
         expectedTime.minute,
       );
 
+      // ------------------------------------------------------------
+      // Visitor gate credentials
+      // ------------------------------------------------------------
+      //
+      // visitorPassCode:
+      // Human-readable code that Security can type manually.
+      //
+      // qrToken:
+      // Opaque random credential used by the QR code.
+      // Do not put visitor personal information in the QR.
+      //
+      final visitorPassCode = _generateVisitorPassCode();
+      final qrToken = _generateQrToken();
+
       // Create visitor document
       final visitorData = {
         'hostUserId': userId,
         'hostName': userName,
         'hostEmail': userEmail,
+
         'flatId': flatId,
         'flatLabel': flatLabel,
+
         'adminId': adminId,
+        'communityId': communityId,
+
         'visitorName': visitorName,
         'purpose': purpose,
+
         'expectedArrival': Timestamp.fromDate(expectedArrival),
+
         'phoneNumber': phoneNumber,
         'vehicleNumber': vehicleNumber,
-        'status': 'expected', // expected, arrived, departed, cancelled
+
+        // ----------------------------------------------------------
+        // Gate credentials
+        // ----------------------------------------------------------
+        'visitorPassCode': visitorPassCode,
+        'qrToken': qrToken,
+
+        // ----------------------------------------------------------
+        // Visitor status
+        // ----------------------------------------------------------
+        'status': 'expected',
         'isApproved': false,
+
         'approvedBy': null,
         'approvedAt': null,
+
         'actualArrival': null,
         'departure': null,
+
         'createdAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       };
 
-      print('📦 Visitor data: $visitorData');
+      print('📦 Visitor data created');
 
       // Add to Firestore
       final docRef = await _firestore
@@ -183,6 +250,7 @@ class VisitorFirestoreService {
 
       print('✅ Visitor added successfully!');
       print('🆔 Visitor ID: ${docRef.id}');
+      print('🎫 Visitor Pass Code: $visitorPassCode');
 
       return VisitorResult.success(
         message: 'Visitor added successfully',
@@ -203,6 +271,38 @@ class VisitorFirestoreService {
     }
   }
 
+  Future<String> _requireResidentCommunityId() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      throw StateError('Resident is not authenticated.');
+    }
+
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+
+    if (!userDoc.exists || userDoc.data() == null) {
+      throw StateError('Resident profile not found.');
+    }
+
+    final data = userDoc.data()!;
+
+    if (data['role'] != 'resident') {
+      throw StateError('Invalid resident role.');
+    }
+
+    if (data['isActive'] != true || data['approvalStatus'] != 'approved') {
+      throw StateError('Resident profile is not approved.');
+    }
+
+    final communityId = data['communityId'];
+
+    if (communityId is! String || communityId.trim().isEmpty) {
+      throw StateError('Resident community is not assigned.');
+    }
+
+    return communityId.trim();
+  }
+
   // ============================================================================
   // GET VISITORS
   // ============================================================================
@@ -212,7 +312,7 @@ class VisitorFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -221,17 +321,18 @@ class VisitorFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
         }
-        
+
         print('🆔 Using Firestore User ID: $userId');
       }
-
+      final communityId = await _requireResidentCommunityId();
       final snapshot = await _firestore
           .collection(visitorsCollection)
+          .where('communityId', isEqualTo: communityId)
           .where('hostUserId', isEqualTo: userId)
           .get();
 
@@ -240,7 +341,7 @@ class VisitorFirestoreService {
         data['id'] = doc.id;
         return data;
       }).toList();
-      
+
       // Sort in memory
       visitors.sort((a, b) {
         final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
@@ -250,7 +351,7 @@ class VisitorFirestoreService {
         if (bTime == null) return -1;
         return bTime.compareTo(aTime);
       });
-      
+
       return visitors;
     } catch (e) {
       print('❌ Error fetching visitors: $e');
@@ -264,7 +365,7 @@ class VisitorFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -273,12 +374,12 @@ class VisitorFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
         }
-        
+
         print('🆔 Using Firestore User ID: $userId');
       }
 
@@ -291,7 +392,7 @@ class VisitorFirestoreService {
 
       final userData = userDoc.data();
       final userRole = userData?['role'] ?? 'resident';
-      
+
       if (userRole != 'admin') {
         print('⚠️  User is not an admin, returning personal visitors only');
         return await getMyVisitors();
@@ -310,7 +411,7 @@ class VisitorFirestoreService {
         data['id'] = doc.id;
         return data;
       }).toList();
-      
+
       // Sort in memory
       visitors.sort((a, b) {
         final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
@@ -320,9 +421,9 @@ class VisitorFirestoreService {
         if (bTime == null) return -1;
         return bTime.compareTo(aTime);
       });
-      
+
       print('✅ Found ${visitors.length} visitors for admin');
-      
+
       return visitors;
     } catch (e) {
       print('❌ Error fetching admin visitors: $e');
@@ -346,7 +447,7 @@ class VisitorFirestoreService {
         data['id'] = doc.id;
         return data;
       }).toList();
-      
+
       // Sort in memory
       visitors.sort((a, b) {
         final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
@@ -356,9 +457,9 @@ class VisitorFirestoreService {
         if (bTime == null) return -1;
         return bTime.compareTo(aTime);
       });
-      
+
       print('✅ Found ${visitors.length} visitors for flat $flatId');
-      
+
       return visitors;
     } catch (e) {
       print('❌ Error fetching visitors by flat: $e');
@@ -372,7 +473,7 @@ class VisitorFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -380,7 +481,7 @@ class VisitorFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
@@ -396,7 +497,7 @@ class VisitorFirestoreService {
 
       final userData = userDoc.data();
       final userRole = userData?['role'] ?? 'resident';
-      
+
       if (userRole == 'admin') {
         print('👤 User is admin, fetching admin visitors');
         return await getAdminVisitors();
@@ -415,7 +516,7 @@ class VisitorFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -424,17 +525,19 @@ class VisitorFirestoreService {
         // Fallback to Firestore-only authentication
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
-        
+
         if (userId == null) {
           print('❌ No user ID found');
           return [];
         }
-        
+
         print('🆔 Using Firestore User ID: $userId');
       }
+      final communityId = await _requireResidentCommunityId();
 
       final snapshot = await _firestore
           .collection(visitorsCollection)
+          .where('communityId', isEqualTo: communityId)
           .where('hostUserId', isEqualTo: userId)
           .where('status', isEqualTo: 'expected')
           .get();
@@ -444,7 +547,7 @@ class VisitorFirestoreService {
         data['id'] = doc.id;
         return data;
       }).toList();
-      
+
       // Sort in memory
       visitors.sort((a, b) {
         final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
@@ -454,7 +557,7 @@ class VisitorFirestoreService {
         if (bTime == null) return -1;
         return aTime.compareTo(bTime); // Ascending order (earliest first)
       });
-      
+
       return visitors;
     } catch (e) {
       print('❌ Error fetching expected visitors: $e');
@@ -464,95 +567,71 @@ class VisitorFirestoreService {
 
   /// Stream visitors (real-time updates)
   Stream<List<Map<String, dynamic>>> streamMyVisitors() async* {
-    // Get user ID using the same logic as UserDataService
     String? userId;
-    
-    // First try Firebase Auth
+
     final firebaseUser = _auth.currentUser;
+
     if (firebaseUser != null) {
-      print('🆔 Firebase Auth User for stream: ${firebaseUser.uid}');
-      
-      // Try to find user document by Firebase Auth UID
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
-      if (doc.exists) {
-        userId = doc.id;
-        print('✅ Found user document by Firebase Auth UID for stream');
-      } else {
-        // Try to find by authUid field
-        print('🔍 Searching by authUid field for stream...');
-        final querySnapshot = await _firestore
-            .collection('users')
-            .where('authUid', isEqualTo: firebaseUser.uid)
-            .limit(1)
-            .get();
-        
-        if (querySnapshot.docs.isNotEmpty) {
-          userId = querySnapshot.docs.first.id;
-          print('✅ Found user document by authUid field for stream');
-        }
-      }
-    }
-    
-    // Fallback to SharedPreferences
-    if (userId == null) {
-      print('⚠️  No Firebase Auth user, checking SharedPreferences for stream...');
+      userId = firebaseUser.uid;
+      print('🆔 Firebase Auth User for stream: $userId');
+    } else {
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ No user ID found for stream');
         yield [];
         return;
       }
-      
-      print('🆔 Using stored User ID for stream: $userId');
     }
 
     print('📡 Streaming visitors for user: $userId');
+    final communityId = await _requireResidentCommunityId();
 
     yield* _firestore
         .collection(visitorsCollection)
+        .where('communityId', isEqualTo: communityId)
         .where('hostUserId', isEqualTo: userId)
         .snapshots()
-        .handleError((error) {
-          print('❌ Error streaming visitors: $error');
-        })
         .map((snapshot) {
-      final visitors = snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
-      
-      // Sort in memory instead of using orderBy (avoids index requirement)
-      visitors.sort((a, b) {
-        final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
-        final bTime = (b['expectedArrival'] as Timestamp?)?.toDate();
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-        return bTime.compareTo(aTime); // Descending order (newest first)
-      });
-      
-      print('✅ Streamed ${visitors.length} visitors');
-      return visitors;
-    });
+          final visitors = snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return data;
+          }).toList();
+
+          visitors.sort((a, b) {
+            final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
+            final bTime = (b['expectedArrival'] as Timestamp?)?.toDate();
+
+            if (aTime == null && bTime == null) return 0;
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+
+            return bTime.compareTo(aTime);
+          });
+
+          print('✅ Streamed ${visitors.length} visitors');
+          return visitors;
+        });
   }
 
   /// Stream admin visitors (real-time updates for admin)
   Stream<List<Map<String, dynamic>>> streamAdminVisitors() async* {
     // Get user ID using the same logic as UserDataService
     String? userId;
-    
+
     // First try Firebase Auth
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
       print('🆔 Firebase Auth User for admin stream: ${firebaseUser.uid}');
-      
+
       // Try to find user document by Firebase Auth UID
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
-      
+      final doc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
+
       if (doc.exists) {
         userId = doc.id;
         print('✅ Found user document by Firebase Auth UID for admin stream');
@@ -564,26 +643,28 @@ class VisitorFirestoreService {
             .where('authUid', isEqualTo: firebaseUser.uid)
             .limit(1)
             .get();
-        
+
         if (querySnapshot.docs.isNotEmpty) {
           userId = querySnapshot.docs.first.id;
           print('✅ Found user document by authUid field for admin stream');
         }
       }
     }
-    
+
     // Fallback to SharedPreferences
     if (userId == null) {
-      print('⚠️  No Firebase Auth user, checking SharedPreferences for admin stream...');
+      print(
+        '⚠️  No Firebase Auth user, checking SharedPreferences for admin stream...',
+      );
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ No user ID found for admin stream');
         yield [];
         return;
       }
-      
+
       print('🆔 Using stored User ID for admin stream: $userId');
     }
 
@@ -598,7 +679,7 @@ class VisitorFirestoreService {
 
     final userData = userDoc.data();
     final userRole = userData?['role'] ?? 'resident';
-    
+
     if (userRole != 'admin') {
       print('⚠️  User is not an admin, returning personal visitors stream');
       yield* streamMyVisitors();
@@ -612,31 +693,31 @@ class VisitorFirestoreService {
         .where('adminId', isEqualTo: userId)
         .snapshots()
         .map((snapshot) {
-      final visitors = snapshot.docs.map((doc) {
-        final data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
-      
-      // Sort in memory
-      visitors.sort((a, b) {
-        final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
-        final bTime = (b['expectedArrival'] as Timestamp?)?.toDate();
-        if (aTime == null && bTime == null) return 0;
-        if (aTime == null) return 1;
-        if (bTime == null) return -1;
-        return bTime.compareTo(aTime);
-      });
-      
-      return visitors;
-    });
+          final visitors = snapshot.docs.map((doc) {
+            final data = doc.data();
+            data['id'] = doc.id;
+            return data;
+          }).toList();
+
+          // Sort in memory
+          visitors.sort((a, b) {
+            final aTime = (a['expectedArrival'] as Timestamp?)?.toDate();
+            final bTime = (b['expectedArrival'] as Timestamp?)?.toDate();
+            if (aTime == null && bTime == null) return 0;
+            if (aTime == null) return 1;
+            if (bTime == null) return -1;
+            return bTime.compareTo(aTime);
+          });
+
+          return visitors;
+        });
   }
 
   /// Stream visitors based on user role
   Stream<List<Map<String, dynamic>>> streamVisitorsForCurrentUser() async* {
     // Try to get user ID from Firebase Auth first
     String? userId;
-    
+
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
       userId = firebaseUser.uid;
@@ -644,7 +725,7 @@ class VisitorFirestoreService {
       // Fallback to Firestore-only authentication
       final prefs = await SharedPreferences.getInstance();
       userId = prefs.getString('user_id');
-      
+
       if (userId == null) {
         print('❌ No user ID found');
         yield [];
@@ -662,7 +743,7 @@ class VisitorFirestoreService {
 
     final userData = userDoc.data();
     final userRole = userData?['role'] ?? 'resident';
-    
+
     if (userRole == 'admin') {
       print('👤 User is admin, streaming admin visitors');
       yield* streamAdminVisitors();
@@ -682,21 +763,14 @@ class VisitorFirestoreService {
     required String status,
   }) async {
     try {
-      await _firestore
-          .collection(visitorsCollection)
-          .doc(visitorId)
-          .update({
+      await _firestore.collection(visitorsCollection).doc(visitorId).update({
         'status': status,
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      return VisitorResult.success(
-        message: 'Visitor status updated',
-      );
+      return VisitorResult.success(message: 'Visitor status updated');
     } catch (e) {
-      return VisitorResult.failure(
-        message: 'Failed to update visitor status',
-      );
+      return VisitorResult.failure(message: 'Failed to update visitor status');
     }
   }
 
@@ -705,7 +779,7 @@ class VisitorFirestoreService {
     try {
       // Try to get user ID from Firebase Auth first
       String? userId;
-      
+
       final firebaseUser = _auth.currentUser;
       if (firebaseUser != null) {
         userId = firebaseUser.uid;
@@ -714,50 +788,36 @@ class VisitorFirestoreService {
         final prefs = await SharedPreferences.getInstance();
         userId = prefs.getString('user_id');
       }
-      
+
       if (userId == null) {
         return VisitorResult.failure(message: 'Not authenticated');
       }
 
-      await _firestore
-          .collection(visitorsCollection)
-          .doc(visitorId)
-          .update({
+      await _firestore.collection(visitorsCollection).doc(visitorId).update({
         'isApproved': true,
         'approvedBy': userId,
         'approvedAt': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      return VisitorResult.success(
-        message: 'Visitor approved',
-      );
+      return VisitorResult.success(message: 'Visitor approved');
     } catch (e) {
-      return VisitorResult.failure(
-        message: 'Failed to approve visitor',
-      );
+      return VisitorResult.failure(message: 'Failed to approve visitor');
     }
   }
 
   /// Mark visitor as arrived
   Future<VisitorResult> markVisitorArrived(String visitorId) async {
     try {
-      await _firestore
-          .collection(visitorsCollection)
-          .doc(visitorId)
-          .update({
+      await _firestore.collection(visitorsCollection).doc(visitorId).update({
         'status': 'arrived',
         'actualArrival': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      return VisitorResult.success(
-        message: 'Visitor marked as arrived',
-      );
+      return VisitorResult.success(message: 'Visitor marked as arrived');
     } catch (e) {
-      return VisitorResult.failure(
-        message: 'Failed to update visitor',
-      );
+      return VisitorResult.failure(message: 'Failed to update visitor');
     }
   }
 
@@ -765,11 +825,8 @@ class VisitorFirestoreService {
   Future<VisitorResult> markVisitorDeparted(String visitorId) async {
     try {
       print('🔵 Marking visitor as departed: $visitorId');
-      
-      await _firestore
-          .collection(visitorsCollection)
-          .doc(visitorId)
-          .update({
+
+      await _firestore.collection(visitorsCollection).doc(visitorId).update({
         'status': 'departed',
         'departure': FieldValue.serverTimestamp(),
         'updatedAt': FieldValue.serverTimestamp(),
@@ -777,14 +834,10 @@ class VisitorFirestoreService {
 
       print('✅ Visitor marked as departed');
 
-      return VisitorResult.success(
-        message: 'Visitor marked as departed',
-      );
+      return VisitorResult.success(message: 'Visitor marked as departed');
     } catch (e) {
       print('❌ Error marking visitor as departed: $e');
-      return VisitorResult.failure(
-        message: 'Failed to update visitor',
-      );
+      return VisitorResult.failure(message: 'Failed to update visitor');
     }
   }
 
@@ -795,18 +848,11 @@ class VisitorFirestoreService {
   /// Delete/Cancel visitor
   Future<VisitorResult> deleteVisitor(String visitorId) async {
     try {
-      await _firestore
-          .collection(visitorsCollection)
-          .doc(visitorId)
-          .delete();
+      await _firestore.collection(visitorsCollection).doc(visitorId).delete();
 
-      return VisitorResult.success(
-        message: 'Visitor deleted',
-      );
+      return VisitorResult.success(message: 'Visitor deleted');
     } catch (e) {
-      return VisitorResult.failure(
-        message: 'Failed to delete visitor',
-      );
+      return VisitorResult.failure(message: 'Failed to delete visitor');
     }
   }
 

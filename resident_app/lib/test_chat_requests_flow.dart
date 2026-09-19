@@ -15,7 +15,7 @@ void main() async {
 }
 
 class TestChatRequestsApp extends StatelessWidget {
-  const TestChatRequestsApp({Key? key}) : super(key: key);
+  const TestChatRequestsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class TestChatRequestsApp extends StatelessWidget {
 }
 
 class TestChatRequestsScreen extends StatefulWidget {
-  const TestChatRequestsScreen({Key? key}) : super(key: key);
+  const TestChatRequestsScreen({super.key});
 
   @override
   State<TestChatRequestsScreen> createState() => _TestChatRequestsScreenState();
@@ -306,7 +306,7 @@ class _TestChatRequestsScreenState extends State<TestChatRequestsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          ..._requests.map((request) => _buildRequestCard(request)).toList(),
+          ..._requests.map((request) => _buildRequestCard(request)),
         ],
       ),
     );

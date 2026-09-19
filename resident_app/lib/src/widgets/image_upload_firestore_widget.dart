@@ -13,14 +13,14 @@ class ImageUploadFirestoreWidget extends StatefulWidget {
   final Function(ImageResult result)? onError;
 
   const ImageUploadFirestoreWidget({
-    Key? key,
+    super.key,
     required this.collectionPath,
     required this.documentId,
     required this.fieldName,
     required this.onUploadComplete,
     this.folder,
     this.onError,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageUploadFirestoreWidget> createState() =>

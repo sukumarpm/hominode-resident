@@ -6,11 +6,11 @@ class ReadMoreText extends StatefulWidget {
   final int maxLines;
 
   const ReadMoreText({
-    Key? key,
+    super.key,
     required this.text,
     this.style,
     this.maxLines = 2,
-  }) : super(key: key);
+  });
 
   @override
   State<ReadMoreText> createState() => _ReadMoreTextState();
@@ -43,7 +43,7 @@ class _ReadMoreTextState extends State<ReadMoreText> {
                 _isExpanded ? 'Read less' : 'Read more',
                 style: const TextStyle(
                   fontSize: 14,
-                  color: Color(0xFF2563EB),
+                  color: Color(0xFF0E4778),
                   fontWeight: FontWeight.w600,
                 ),
               ),

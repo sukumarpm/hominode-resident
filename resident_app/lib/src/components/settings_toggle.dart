@@ -10,12 +10,12 @@ class SettingsToggle extends StatefulWidget {
   final double height;
 
   const SettingsToggle({
-    Key? key,
+    super.key,
     required this.value,
     required this.onChanged,
     this.width = 48.0,
     this.height = 28.0,
-  }) : super(key: key);
+  });
 
   @override
   State<SettingsToggle> createState() => _SettingsToggleState();
@@ -75,7 +75,7 @@ class _SettingsToggleState extends State<SettingsToggle>
             decoration: BoxDecoration(
               color: Color.lerp(
                 const Color(0xFFE5E7EB),
-                const Color(0xFF2563EB),
+                const Color(0xFF0E4778),
                 _animation.value,
               ),
               borderRadius: BorderRadius.circular(widget.height / 2),
@@ -85,9 +85,7 @@ class _SettingsToggleState extends State<SettingsToggle>
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 180),
                   curve: Curves.easeInOut,
-                  left: widget.value
-                      ? widget.width - widget.height + 2
-                      : 2,
+                  left: widget.value ? widget.width - widget.height + 2 : 2,
                   top: 2,
                   child: Container(
                     width: widget.height - 4,

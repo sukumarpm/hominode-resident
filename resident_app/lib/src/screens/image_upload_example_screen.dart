@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../services/image_upload_service.dart';
 import '../widgets/image_upload_widget.dart';
 
@@ -14,10 +13,10 @@ class ImageUploadExampleScreen extends StatefulWidget {
   final String collectionPath;
 
   const ImageUploadExampleScreen({
-    Key? key,
+    super.key,
     required this.documentId,
     required this.collectionPath,
-  }) : super(key: key);
+  });
 
   @override
   State<ImageUploadExampleScreen> createState() =>
@@ -131,7 +130,7 @@ class _ImageUploadExampleScreenState extends State<ImageUploadExampleScreen> {
 
 /// Example: How to use in a complaint submission screen
 class ComplaintWithImageExample extends StatefulWidget {
-  const ComplaintWithImageExample({Key? key}) : super(key: key);
+  const ComplaintWithImageExample({super.key});
 
   @override
   State<ComplaintWithImageExample> createState() =>

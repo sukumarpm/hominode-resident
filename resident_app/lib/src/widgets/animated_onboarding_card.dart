@@ -7,9 +7,9 @@ class AnimatedOnboardingCard extends StatefulWidget {
   final IconData icon;
 
   const AnimatedOnboardingCard({
-    Key? key,
+    super.key,
     required this.icon,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedOnboardingCard> createState() => _AnimatedOnboardingCardState();

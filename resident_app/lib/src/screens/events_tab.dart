@@ -2,21 +2,19 @@
 // Events tab with upcoming and past events - Using Flow Function
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/event_model.dart';
 import '../services/events_announcements_flow_function.dart';
-import '../components/event_card.dart';
-import '../modals/event_detail_modal.dart';
 
 class EventsTab extends StatefulWidget {
-  const EventsTab({Key? key}) : super(key: key);
+  const EventsTab({super.key});
 
   @override
   State<EventsTab> createState() => _EventsTabState();
 }
 
 class _EventsTabState extends State<EventsTab> {
-  final EventsAnnouncementsFlowFunction _flowFunction = EventsAnnouncementsFlowFunction();
+  final EventsAnnouncementsFlowFunction _flowFunction =
+      EventsAnnouncementsFlowFunction();
   List<EventModel> _upcomingEvents = [];
   List<EventModel> _pastEvents = [];
   bool _isLoading = true;
@@ -31,24 +29,28 @@ class _EventsTabState extends State<EventsTab> {
     setState(() => _isLoading = true);
     try {
       print('🔵 EventsTab: Loading events using flow function');
-      
+
       // Get all events from flow function
       final allEvents = await _flowFunction.getUpcomingEvents();
-      
+
       print('✅ EventsTab: Received ${allEvents.length} events');
-      
+
       // Separate upcoming and past events
       final now = DateTime.now();
-      final upcoming = allEvents.where((e) => e.eventDate.isAfter(now)).toList();
+      final upcoming = allEvents
+          .where((e) => e.eventDate.isAfter(now))
+          .toList();
       final past = allEvents.where((e) => e.eventDate.isBefore(now)).toList();
-      
+
       setState(() {
         _upcomingEvents = upcoming;
         _pastEvents = past;
         _isLoading = false;
       });
-      
-      print('✅ EventsTab: ${upcoming.length} upcoming, ${past.length} past events');
+
+      print(
+        '✅ EventsTab: ${upcoming.length} upcoming, ${past.length} past events',
+      );
     } catch (e) {
       print('❌ EventsTab: Error loading events - $e');
       setState(() => _isLoading = false);
@@ -87,20 +89,23 @@ class _EventsTabState extends State<EventsTab> {
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(
                   'No upcoming events',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF9CA3AF),
-                  ),
+                  style: TextStyle(fontSize: 14, color: Color(0xFF9CA3AF)),
                 ),
               )
             else
-              ..._upcomingEvents.map((event) => Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                    child: EventCardNew(
-                      event: event,
-                      onTap: () => _showEventDetail(event),
-                    ),
-                  )),
+              ..._upcomingEvents.map(
+                (event) => Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 16,
+                  ),
+                  child: EventCardNew(
+                    event: event,
+                    onTap: () => _showEventDetail(event),
+                  ),
+                ),
+              ),
             // Past Events
             if (_pastEvents.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -116,14 +121,20 @@ class _EventsTabState extends State<EventsTab> {
                 ),
               ),
               const SizedBox(height: 16),
-              ..._pastEvents.map((event) => Padding(
-                    padding: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
-                    child: EventCardNew(
-                      event: event,
-                      onTap: () => _showEventDetail(event),
-                      isPast: true,
-                    ),
-                  )),
+              ..._pastEvents.map(
+                (event) => Padding(
+                  padding: const EdgeInsets.only(
+                    left: 16,
+                    right: 16,
+                    bottom: 12,
+                  ),
+                  child: EventCardNew(
+                    event: event,
+                    onTap: () => _showEventDetail(event),
+                    isPast: true,
+                  ),
+                ),
+              ),
             ],
           ],
         ),
@@ -186,7 +197,20 @@ class _EventsTabState extends State<EventsTab> {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[date.month - 1]} ${date.day}, ${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
@@ -201,11 +225,11 @@ class EventCardNew extends StatelessWidget {
   final bool isPast;
 
   const EventCardNew({
-    Key? key,
+    super.key,
     required this.event,
     required this.onTap,
     this.isPast = false,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -216,10 +240,7 @@ class EventCardNew extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: const Color(0xFFEDEDED),
-            width: 1,
-          ),
+          border: Border.all(color: const Color(0xFFEDEDED), width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -249,9 +270,14 @@ class EventCardNew extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                    color: isPast ? const Color(0xFFF3F4F6) : const Color(0xFFEFF6FF),
+                    color: isPast
+                        ? const Color(0xFFF3F4F6)
+                        : const Color(0xFFEFF6FF),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -259,14 +285,16 @@ class EventCardNew extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: isPast ? const Color(0xFF6B7280) : const Color(0xFF2563EB),
+                      color: isPast
+                          ? const Color(0xFF6B7280)
+                          : const Color(0xFF0E4778),
                     ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 8),
-            
+
             // Description
             Text(
               event.description,
@@ -279,7 +307,7 @@ class EventCardNew extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 12),
-            
+
             // Date and Location
             Row(
               children: [
@@ -329,7 +357,20 @@ class EventCardNew extends StatelessWidget {
   }
 
   String _formatDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 }

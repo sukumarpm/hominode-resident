@@ -2,7 +2,6 @@
 // FIXED: Messages screen with proper search bar, segmented control, and layout
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'chat_conversation_screen_fixed.dart';
 import '../components/app_segmented_control.dart';
 import '../components/primary_header.dart';
@@ -36,7 +35,7 @@ class Message {
 // MESSAGES SCREEN - FIXED VERSION
 // ============================================================================
 class MessagesScreenFixed extends StatefulWidget {
-  const MessagesScreenFixed({Key? key}) : super(key: key);
+  const MessagesScreenFixed({super.key});
 
   @override
   State<MessagesScreenFixed> createState() => _MessagesScreenFixedState();

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'src/services/payment_service.dart';
 
 // ============================================================================
 // DESIGN CONSTANTS (matching exact design specs)
 // ============================================================================
 
 /// Primary blue color for selected state and accents
-const kPrimary = Color(0xFF2563EB);
+const kPrimary = Color(0xFF0E4778);
 
 /// Modal background (white)
 const kModalBackground = Color(0xFFFFFFFF);
@@ -31,7 +33,7 @@ const kBankIconBg = Color(0xFFE9FBF0); // soft green
 const kUpiIconColor = Color(0xFF9333EA);
 
 /// Card icon color (blue)
-const kCardIconColor = Color(0xFF2563EB);
+const kCardIconColor = Color(0xFF0E4778);
 
 /// Bank icon color (green)
 const kBankIconColor = Color(0xFF10B981);
@@ -46,7 +48,7 @@ const kCardRadius = 16.0;
 const kIconRadius = 12.0;
 
 /// Card padding (horizontal and vertical)
-const kCardPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
+final kCardPadding = EdgeInsets.symmetric(horizontal: 20.w, vertical: 18.h);
 
 /// Spacing between cards
 const kCardSpacing = 12.0;
@@ -64,21 +66,11 @@ const kIconSize = 64.0;
 const kCloseButtonSize = 44.0;
 
 // ============================================================================
-// PAYMENT METHOD ENUM
-// ============================================================================
-
-enum PaymentMethod {
-  upi,
-  card,
-  netBanking,
-}
-
-// ============================================================================
 // HELPER FUNCTION TO SHOW MODAL
 // ============================================================================
 
 /// Shows the payment method selection modal as a centered overlay
-/// 
+///
 /// Usage:
 /// ```dart
 /// showPaymentMethodModal(context, (method) {
@@ -88,7 +80,7 @@ enum PaymentMethod {
 /// ```
 Future<void> showPaymentMethodModal(
   BuildContext context,
-  ValueChanged<PaymentMethod> onSelect,
+  Future<void> Function(PaymentMethod) onSelect,
 ) {
   return showDialog(
     context: context,
@@ -103,12 +95,9 @@ Future<void> showPaymentMethodModal(
 // ============================================================================
 
 class PaymentMethodModal extends StatefulWidget {
-  final ValueChanged<PaymentMethod> onSelect;
+  final Future<void> Function(PaymentMethod) onSelect;
 
-  const PaymentMethodModal({
-    Key? key,
-    required this.onSelect,
-  }) : super(key: key);
+  const PaymentMethodModal({super.key, required this.onSelect});
 
   @override
   State<PaymentMethodModal> createState() => _PaymentMethodModalState();
@@ -116,24 +105,32 @@ class PaymentMethodModal extends StatefulWidget {
 
 class _PaymentMethodModalState extends State<PaymentMethodModal> {
   PaymentMethod? _selectedMethod;
+  bool _isProcessing = false;
 
-  void _handleCardTap(PaymentMethod method) {
+  Future<void> _handleCardTap(PaymentMethod method) async {
+    if (_isProcessing) return;
+
     setState(() {
       _selectedMethod = method;
+      _isProcessing = true;
     });
-    
-    // Call callback and dismiss modal
-    widget.onSelect(method);
-    Navigator.of(context).pop();
+
+    try {
+      await widget.onSelect(method);
+    } finally {
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+      insetPadding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
+        constraints: BoxConstraints(maxWidth: 500.w),
         decoration: BoxDecoration(
           color: kModalBackground,
           borderRadius: BorderRadius.circular(kModalRadius),
@@ -151,17 +148,17 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
             children: [
               // Header with title and close button
               Padding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
                   kModalHorizontalPadding,
                   kModalVerticalPadding,
-                  12,
-                  20,
+                  12.w,
+                  20.h,
                 ),
                 child: Row(
                   children: [
                     // Spacer for centering title
                     const SizedBox(width: kCloseButtonSize),
-                    
+
                     // Title (centered)
                     Expanded(
                       child: Text(
@@ -169,23 +166,25 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.black,
-                          fontSize: 22,
+                          fontSize: 22.sp,
                           fontWeight: FontWeight.w600,
                           letterSpacing: -0.3,
                         ),
                       ),
                     ),
-                    
+
                     // Close button
                     SizedBox(
                       width: kCloseButtonSize,
                       height: kCloseButtonSize,
                       child: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: _isProcessing
+                            ? null
+                            : () => Navigator.of(context).pop(),
                         icon: Icon(
                           Icons.close,
                           color: kCloseIconColor,
-                          size: 24,
+                          size: 24.w,
                         ),
                         padding: EdgeInsets.zero,
                         splashRadius: 22,
@@ -194,7 +193,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   ],
                 ),
               ),
-              
+
               // Payment method cards
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -212,11 +211,13 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                       iconColor: kUpiIconColor,
                       iconBackgroundColor: kUpiIconBg,
                       isSelected: _selectedMethod == PaymentMethod.upi,
-                      onTap: () => _handleCardTap(PaymentMethod.upi),
+                      onTap: _isProcessing
+                          ? null
+                          : () => _handleCardTap(PaymentMethod.upi),
                     ),
-                    
+
                     const SizedBox(height: kCardSpacing),
-                    
+
                     // Credit/Debit Card
                     PaymentMethodCard(
                       title: 'Credit/Debit Card',
@@ -224,11 +225,13 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                       iconColor: kCardIconColor,
                       iconBackgroundColor: kCardIconBg,
                       isSelected: _selectedMethod == PaymentMethod.card,
-                      onTap: () => _handleCardTap(PaymentMethod.card),
+                      onTap: _isProcessing
+                          ? null
+                          : () => _handleCardTap(PaymentMethod.card),
                     ),
-                    
+
                     const SizedBox(height: kCardSpacing),
-                    
+
                     // Net Banking
                     PaymentMethodCard(
                       title: 'Net Banking',
@@ -236,8 +239,34 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                       iconColor: kBankIconColor,
                       iconBackgroundColor: kBankIconBg,
                       isSelected: _selectedMethod == PaymentMethod.netBanking,
-                      onTap: () => _handleCardTap(PaymentMethod.netBanking),
+                      onTap: _isProcessing
+                          ? null
+                          : () => _handleCardTap(PaymentMethod.netBanking),
                     ),
+                    if (_isProcessing) ...[
+                      SizedBox(height: 20.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 18.w,
+                            height: 18.h,
+                            child: const CircularProgressIndicator(
+                              strokeWidth: 2,
+                            ),
+                          ),
+                          SizedBox(width: 10.w),
+                          Text(
+                            'Processing test payment...',
+                            style: TextStyle(
+                              color: kSubtitleColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -259,17 +288,17 @@ class PaymentMethodCard extends StatelessWidget {
   final Color iconColor;
   final Color iconBackgroundColor;
   final bool isSelected;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const PaymentMethodCard({
-    Key? key,
+    super.key,
     required this.title,
     required this.subtitle,
     required this.iconColor,
     required this.iconBackgroundColor,
     required this.isSelected,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -282,9 +311,7 @@ class PaymentMethodCard extends StatelessWidget {
           width: double.infinity,
           padding: kCardPadding,
           decoration: BoxDecoration(
-            color: isSelected 
-                ? kPrimary.withOpacity(0.04) 
-                : kModalBackground,
+            color: isSelected ? kPrimary.withOpacity(0.04) : kModalBackground,
             borderRadius: BorderRadius.circular(kCardRadius),
             border: Border.all(
               color: isSelected ? kPrimary : kCardBorder,
@@ -311,12 +338,12 @@ class PaymentMethodCard extends StatelessWidget {
                 child: Icon(
                   Icons.credit_card_rounded,
                   color: iconColor,
-                  size: 32,
+                  size: 32.w,
                 ),
               ),
-              
-              const SizedBox(width: 16),
-              
+
+              SizedBox(width: 16.w),
+
               // Text column
               Expanded(
                 child: Column(
@@ -327,20 +354,20 @@ class PaymentMethodCard extends StatelessWidget {
                       title,
                       style: TextStyle(
                         color: Colors.black,
-                        fontSize: 18,
+                        fontSize: 18.sp,
                         fontWeight: FontWeight.w600,
                         letterSpacing: -0.2,
                       ),
                     ),
-                    
-                    const SizedBox(height: 4),
-                    
+
+                    SizedBox(height: 4.h),
+
                     // Subtitle
                     Text(
                       subtitle,
                       style: TextStyle(
                         color: kSubtitleColor,
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.w400,
                         letterSpacing: -0.1,
                       ),

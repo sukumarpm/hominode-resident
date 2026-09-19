@@ -9,11 +9,11 @@ class UnifiedSearchBar extends StatefulWidget {
   final TextEditingController? controller;
 
   const UnifiedSearchBar({
-    Key? key,
+    super.key,
     required this.onChanged,
     this.hintText = 'Search...',
     this.controller,
-  }) : super(key: key);
+  });
 
   @override
   State<UnifiedSearchBar> createState() => _UnifiedSearchBarState();

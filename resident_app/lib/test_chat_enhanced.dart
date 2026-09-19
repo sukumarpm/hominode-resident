@@ -14,7 +14,7 @@ void main() async {
 }
 
 class ChatTestApp extends StatelessWidget {
-  const ChatTestApp({Key? key}) : super(key: key);
+  const ChatTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class ChatTestApp extends StatelessWidget {
 }
 
 class ChatTestScreen extends StatefulWidget {
-  const ChatTestScreen({Key? key}) : super(key: key);
+  const ChatTestScreen({super.key});
 
   @override
   State<ChatTestScreen> createState() => _ChatTestScreenState();
@@ -432,7 +432,7 @@ class _ChatTestScreenState extends State<ChatTestScreen> {
                     },
                   ),
                 ),
-              )).toList(),
+              )),
             ],
           ],
         ),

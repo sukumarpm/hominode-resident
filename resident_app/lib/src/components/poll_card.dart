@@ -6,7 +6,7 @@ import '../models/poll.dart';
 import '../widgets/poll_progress_bar.dart';
 
 // Design tokens
-const Color kPrimary = Color(0xFF2563EB);
+const Color kPrimary = Color(0xFF0E4778);
 const Color kVotedGreen = Color(0xFF00A84F);
 const Color kTextMuted = Color(0xFF9CA3AF);
 const Color kCardBorder = Color(0xFFE6E6E6);
@@ -20,12 +20,12 @@ class PollCard extends StatefulWidget {
   final bool isQueued;
 
   const PollCard({
-    Key? key,
+    super.key,
     required this.poll,
     this.onVote,
     this.isSubmitting = false,
     this.isQueued = false,
-  }) : super(key: key);
+  });
 
   @override
   State<PollCard> createState() => _PollCardState();
@@ -40,8 +40,7 @@ class _PollCardState extends State<PollCard> {
     _selectedOptionId = widget.poll.userVotedOptionId;
   }
 
-  bool get _showResults =>
-      widget.poll.hasUserVoted || widget.poll.isClosed;
+  bool get _showResults => widget.poll.hasUserVoted || widget.poll.isClosed;
 
   @override
   Widget build(BuildContext context) {
@@ -86,14 +85,14 @@ class _PollCardState extends State<PollCard> {
             children: [
               Text(
                 '${widget.poll.totalVotes} total votes',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: kTextMuted,
-                ),
+                style: const TextStyle(fontSize: 14, color: kTextMuted),
               ),
               if (widget.isQueued)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.orange.shade100,
                     borderRadius: BorderRadius.circular(6),
@@ -109,7 +108,10 @@ class _PollCardState extends State<PollCard> {
                 )
               else if (_showResults)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   decoration: BoxDecoration(
                     color: kVotedGreen,
                     borderRadius: BorderRadius.circular(8),
@@ -131,12 +133,18 @@ class _PollCardState extends State<PollCard> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: kPrimary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 0,
-                    minimumSize: const Size(100, 44), // Accessibility: 44px touch target
+                    minimumSize: const Size(
+                      100,
+                      44,
+                    ), // Accessibility: 44px touch target
                   ),
                   child: widget.isSubmitting
                       ? const SizedBox(
@@ -144,7 +152,9 @@ class _PollCardState extends State<PollCard> {
                           height: 16,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text(
@@ -219,7 +229,9 @@ class _PollCardState extends State<PollCard> {
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.black,
-                      fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+                      fontWeight: isSelected
+                          ? FontWeight.w500
+                          : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -251,15 +263,14 @@ class _PollCardState extends State<PollCard> {
                     style: TextStyle(
                       fontSize: 15,
                       color: Colors.black,
-                      fontWeight: isUserVote ? FontWeight.w600 : FontWeight.w400,
+                      fontWeight: isUserVote
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                   ),
                   Text(
                     '${option.votes} votes (${formatPercent(percent)})',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: kTextMuted,
-                    ),
+                    style: const TextStyle(fontSize: 13, color: kTextMuted),
                   ),
                 ],
               ),

@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../models/complaint.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 
 void showAddComplaintModal(
   BuildContext context, {
@@ -14,7 +14,8 @@ void showAddComplaintModal(
     required String title,
     required String description,
     required ComplaintCategory category,
-  }) onSubmit,
+  })
+  onSubmit,
 }) {
   showModalBottomSheet(
     context: context,
@@ -29,12 +30,10 @@ class AddComplaintModal extends StatefulWidget {
     required String title,
     required String description,
     required ComplaintCategory category,
-  }) onSubmit;
+  })
+  onSubmit;
 
-  const AddComplaintModal({
-    Key? key,
-    required this.onSubmit,
-  }) : super(key: key);
+  const AddComplaintModal({super.key, required this.onSubmit});
 
   @override
   State<AddComplaintModal> createState() => _AddComplaintModalState();
@@ -120,7 +119,7 @@ class _AddComplaintModalState extends State<AddComplaintModal> {
 
               // Category dropdown
               DropdownButtonFormField<ComplaintCategory>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(
@@ -204,7 +203,9 @@ class _AddComplaintModalState extends State<AddComplaintModal> {
                           height: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text(
@@ -284,15 +285,12 @@ class _AddComplaintModalState extends State<AddComplaintModal> {
                     ),
                     child: const Icon(
                       Icons.camera_alt,
-                      color: Color(0xFF2563EB),
+                      color: Color(0xFF0E4778),
                     ),
                   ),
                   title: const Text(
                     'Camera',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Take a new photo'),
                   onTap: () => Navigator.pop(context, ImageSource.camera),
@@ -313,10 +311,7 @@ class _AddComplaintModalState extends State<AddComplaintModal> {
                   ),
                   title: const Text(
                     'Gallery',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                   subtitle: const Text('Choose from gallery'),
                   onTap: () => Navigator.pop(context, ImageSource.gallery),
@@ -410,7 +405,7 @@ class _AddComplaintModalState extends State<AddComplaintModal> {
                       'Change photo',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Color(0xFF2563EB),
+                        color: Color(0xFF0E4778),
                         decoration: TextDecoration.underline,
                       ),
                     ),

@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'Lyvo';
+  String get appTitle => 'Hominode';
 
   @override
   String get appSubtitle => 'Tu comunidad, conectada';

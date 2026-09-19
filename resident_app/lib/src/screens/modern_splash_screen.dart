@@ -6,9 +6,7 @@
 // 3. Ensure logo1.png exists at: resident_app/assets/logo1.png
 // 4. For debug with absolute path, see commented alternative below
 
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,12 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lyvo',
+      title: 'Hominode',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        useMaterial3: true,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: const ModernSplashScreen(),
     );
   }
@@ -56,10 +51,7 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
     );
 
     // Scale animation with easeOutBack curve (overshoot effect)
-    _scaleAnimation = Tween<double>(
-      begin: 0.60,
-      end: 1.00,
-    ).animate(
+    _scaleAnimation = Tween<double>(begin: 0.60, end: 1.00).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.68, curve: Curves.easeOutBack),
@@ -67,10 +59,7 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
     );
 
     // Fade animation for logo and card
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.0, 0.68, curve: Curves.easeOut),
@@ -81,12 +70,7 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
     _progressAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: Curves.easeInOut,
-      ),
-    );
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // Start animation
     _controller.forward();
@@ -101,11 +85,8 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
             transitionDuration: const Duration(milliseconds: 500),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
-              return FadeTransition(
-                opacity: animation,
-                child: child,
-              );
-            },
+                  return FadeTransition(opacity: animation, child: child);
+                },
           ),
         );
       }
@@ -129,8 +110,8 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF2563EB), // Primary blue
-              Color(0xFF1E40AF), // Secondary blue
+              Color(0xFF0E4778), // Primary blue
+              Color(0xFF061C4C), // Secondary blue
             ],
           ),
         ),
@@ -179,7 +160,7 @@ class _ModernSplashScreenState extends State<ModernSplashScreen>
 
                     // App title
                     const Text(
-                      'Lyvo',
+                      'Hominode',
                       style: TextStyle(
                         fontSize: 28.0,
                         fontWeight: FontWeight.w700,
@@ -305,33 +286,23 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-        backgroundColor: const Color(0xFF2563EB),
+        backgroundColor: const Color(0xFF0E4778),
         foregroundColor: Colors.white,
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.home,
-              size: 80.0,
-              color: Color(0xFF2563EB),
-            ),
+            const Icon(Icons.home, size: 80.0, color: Color(0xFF0E4778)),
             const SizedBox(height: 24.0),
             const Text(
-              'Welcome to Lyvo!',
-              style: TextStyle(
-                fontSize: 24.0,
-                fontWeight: FontWeight.w600,
-              ),
+              'Welcome to Hominode!',
+              style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12.0),
             Text(
               'Your Community, Connected',
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.grey[600],
-              ),
+              style: TextStyle(fontSize: 16.0, color: Colors.grey[600]),
             ),
           ],
         ),

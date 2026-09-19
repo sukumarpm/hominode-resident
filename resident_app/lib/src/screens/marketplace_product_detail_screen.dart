@@ -2,28 +2,25 @@
 // Product detail screen with phone request functionality
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../models/listing_model.dart';
-import '../models/marketplace_request_model.dart';
 import '../services/listing_firestore_service.dart';
-import '../services/marketplace_request_service.dart';
 import '../services/image_display_flow_function.dart';
 import '../constants/app_colors.dart';
 
 class MarketplaceProductDetailScreen extends StatefulWidget {
   final ListingModel listing;
 
-  const MarketplaceProductDetailScreen({
-    Key? key,
-    required this.listing,
-  }) : super(key: key);
+  const MarketplaceProductDetailScreen({super.key, required this.listing});
 
   @override
-  State<MarketplaceProductDetailScreen> createState() => _MarketplaceProductDetailScreenState();
+  State<MarketplaceProductDetailScreen> createState() =>
+      _MarketplaceProductDetailScreenState();
 }
 
-class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetailScreen> {
+class _MarketplaceProductDetailScreenState
+    extends State<MarketplaceProductDetailScreen> {
   final ListingFirestoreService _listingService = ListingFirestoreService();
   bool _isRequestingPhone = false;
   bool _phoneRequested = false;
@@ -42,10 +39,12 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
     try {
       final currentUserId = await _listingService.getCurrentUserId();
       _currentUserId = currentUserId;
-      
+
       // Check if user already requested phone
-      final hasRequested = widget.listing.phoneRequestIds.contains(currentUserId);
-      
+      final hasRequested = widget.listing.phoneRequestIds.contains(
+        currentUserId,
+      );
+
       setState(() {
         _isOwnProduct = currentUserId == widget.listing.sellerId;
         _phoneRequested = hasRequested;
@@ -59,9 +58,9 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
   Future<void> _checkPhoneRequestStatus() async {
     try {
       // Check if request was accepted
-      final acceptedNumbers =
-          await _listingService.getAcceptedPhoneNumbersForBuyer(widget.listing.id!);
-      
+      final acceptedNumbers = await _listingService
+          .getAcceptedPhoneNumbersForBuyer(widget.listing.id!);
+
       if (acceptedNumbers.isNotEmpty) {
         setState(() {
           _phoneRequested = true;
@@ -113,7 +112,7 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
           children: [
             // Image Gallery
             Container(
-              height: 300,
+              height: 300.h,
               color: Colors.grey.shade200,
               child: widget.listing.images.isNotEmpty
                   ? PageView.builder(
@@ -124,16 +123,22 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
                           imageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Center(
-                            child: Icon(Icons.image_not_supported, color: Colors.grey.shade400),
+                            child: Icon(
+                              Icons.image_not_supported,
+                              color: Colors.grey.shade400,
+                            ),
                           ),
                         );
                       },
                     )
                   : FutureBuilder<ImageDisplayResult>(
                       future: ImageDisplayFlowFunction.instance
-                          .getMarketplaceProductImage(listingId: widget.listing.id ?? ''),
+                          .getMarketplaceProductImage(
+                            listingId: widget.listing.id ?? '',
+                          ),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return Center(
                             child: CircularProgressIndicator(
                               color: AppColors.primary,
@@ -141,123 +146,133 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
                           );
                         }
 
-                        if (snapshot.hasData && snapshot.data!.success && snapshot.data!.imageUrl != null) {
+                        if (snapshot.hasData &&
+                            snapshot.data!.success &&
+                            snapshot.data!.imageUrl != null) {
                           return Image.network(
                             snapshot.data!.imageUrl!,
                             fit: BoxFit.cover,
                             errorBuilder: (_, __, ___) => Center(
-                              child: Icon(Icons.image_not_supported, color: Colors.grey.shade400, size: 64),
+                              child: Icon(
+                                Icons.image_not_supported,
+                                color: Colors.grey.shade400,
+                                size: 64.w,
+                              ),
                             ),
                           );
                         }
 
                         // No image found
                         return Center(
-                          child: Icon(Icons.image_not_supported, color: Colors.grey.shade400, size: 64),
+                          child: Icon(
+                            Icons.image_not_supported,
+                            color: Colors.grey.shade400,
+                            size: 64.w,
+                          ),
                         );
                       },
                     ),
             ),
-            
+
             // Details Section
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: EdgeInsets.all(20.w),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Title
                   Text(
                     widget.listing.title,
-                    style: const TextStyle(
-                      fontSize: 24,
+                    style: TextStyle(
+                      fontSize: 24.sp,
                       fontWeight: FontWeight.w700,
                       color: Colors.black,
                     ),
                   ),
-                  
-                  const SizedBox(height: 12),
-                  
+
+                  SizedBox(height: 12.h),
+
                   // Price
                   Text(
                     widget.listing.formattedPrice,
-                    style: const TextStyle(
-                      fontSize: 28,
+                    style: TextStyle(
+                      fontSize: 28.sp,
                       fontWeight: FontWeight.w700,
                       color: AppColors.primary,
                     ),
                   ),
-                  
-                  const SizedBox(height: 16),
-                  
+
+                  SizedBox(height: 16.h),
+
                   // Info Row
                   Row(
                     children: [
                       _buildInfoChip('Condition', widget.listing.condition),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 12.w),
                       _buildInfoChip('Category', widget.listing.category),
                     ],
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  SizedBox(height: 24.h),
+
                   // Seller Info
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
                       color: Colors.grey.shade50,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
+                        Text(
                           'Seller Information',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.black,
                           ),
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
                         Row(
                           children: [
                             Container(
-                              width: 48,
-                              height: 48,
+                              width: 48.w,
+                              height: 48.h,
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
                               child: Center(
                                 child: Text(
                                   widget.listing.sellerName[0].toUpperCase(),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 20,
+                                    fontSize: 20.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            SizedBox(width: 12.w),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     widget.listing.sellerName,
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
                                       fontWeight: FontWeight.w600,
                                       color: Colors.black,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
+                                  SizedBox(height: 4.h),
                                   Text(
                                     'Building Member',
                                     style: TextStyle(
-                                      fontSize: 13,
+                                      fontSize: 13.sp,
                                       color: Colors.grey.shade600,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -270,44 +285,43 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
                       ],
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  SizedBox(height: 24.h),
+
                   // Description
-                  const Text(
+                  Text(
                     'Description',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
                     widget.listing.description,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       color: Colors.grey.shade700,
                       height: 1.6,
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  SizedBox(height: 24.h),
+
                   // Posted Date
                   Text(
                     'Posted on ${widget.listing.formattedDate}',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       color: Colors.grey.shade600,
                     ),
                   ),
-                  
-                  const SizedBox(height: 24),
-                  
+
+                  SizedBox(height: 24.h),
+
                   // Request Phone Button or Show Phone (for buyers only)
-                  if (!_isOwnProduct)
-                    _buildPhoneSection(),
+                  if (!_isOwnProduct) _buildPhoneSection(),
                 ],
               ),
             ),
@@ -320,10 +334,10 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
   Widget _buildInfoChip(String label, String value) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
         decoration: BoxDecoration(
           color: Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -331,16 +345,16 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
             Text(
               label,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 11.sp,
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 4),
+            SizedBox(height: 4.h),
             Text(
               value,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
                 color: Colors.black,
               ),
@@ -355,31 +369,32 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton(
-        onPressed: _phoneRequested || _isRequestingPhone ? null : _requestPhoneNumber,
+        onPressed: _phoneRequested || _isRequestingPhone
+            ? null
+            : _requestPhoneNumber,
         style: ElevatedButton.styleFrom(
           backgroundColor: _phoneRequested ? Colors.grey : AppColors.primary,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 16.h),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
           elevation: 0,
         ),
         child: _isRequestingPhone
-            ? const SizedBox(
-                height: 20,
-                width: 20,
+            ? SizedBox(
+                height: 20.h,
+                width: 20.w,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                 ),
               )
             : Text(
-                _phoneRequested ? 'Request Sent - Waiting for Seller' : 'Request Phone Number',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                _phoneRequested
+                    ? 'Request Sent - Waiting for Seller'
+                    : 'Request Phone Number',
+                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
               ),
       ),
     );
@@ -387,11 +402,13 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
 
   Widget _buildPhoneSection() {
     return FutureBuilder<List<Map<String, dynamic>>>(
-      future: _listingService.getAcceptedPhoneNumbersForBuyer(widget.listing.id!),
+      future: _listingService.getAcceptedPhoneNumbersForBuyer(
+        widget.listing.id!,
+      ),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const SizedBox(
-            height: 60,
+          return SizedBox(
+            height: 60.h,
             child: Center(child: CircularProgressIndicator()),
           );
         }
@@ -409,10 +426,10 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
         final sellerName = phoneData['sellerName'] ?? 'Seller';
 
         return Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: Colors.green.shade50,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: Colors.green.shade200),
           ),
           child: Column(
@@ -420,33 +437,37 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
             children: [
               Row(
                 children: [
-                  Icon(Icons.check_circle, color: Colors.green.shade600, size: 20),
-                  const SizedBox(width: 8),
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green.shade600,
+                    size: 20.w,
+                  ),
+                  SizedBox(width: 8.w),
                   Text(
                     'Request Accepted',
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.green.shade600,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              SizedBox(height: 12.h),
               Text(
                 'Seller Phone Number',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 12.sp,
                   color: Colors.grey.shade600,
                   fontWeight: FontWeight.w500,
                 ),
               ),
-              const SizedBox(height: 8),
+              SizedBox(height: 8.h),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(color: Colors.green.shade200),
                 ),
                 child: Row(
@@ -454,8 +475,8 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
                   children: [
                     Text(
                       phone,
-                      style: const TextStyle(
-                        fontSize: 16,
+                      style: TextStyle(
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                         color: Colors.black,
                       ),
@@ -463,15 +484,15 @@ class _MarketplaceProductDetailScreenState extends State<MarketplaceProductDetai
                     GestureDetector(
                       onTap: () => _copyToClipboard(phone),
                       child: Container(
-                        padding: const EdgeInsets.all(8),
+                        padding: EdgeInsets.all(8.w),
                         decoration: BoxDecoration(
                           color: AppColors.primary,
-                          borderRadius: BorderRadius.circular(6),
+                          borderRadius: BorderRadius.circular(6.r),
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.copy,
                           color: Colors.white,
-                          size: 16,
+                          size: 16.w,
                         ),
                       ),
                     ),

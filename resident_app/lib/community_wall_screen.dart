@@ -2,18 +2,20 @@
 // Community Wall main screen
 
 import 'package:flutter/material.dart';
-import 'src/models/post.dart';
-import 'src/services/post_firestore_service.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import 'comments_screen.dart';
 import 'src/components/post_card.dart';
+import 'src/components/standard_screen.dart';
 import 'src/modals/add_post_modal.dart';
 import 'src/modals/post_menu_bottomsheet.dart';
-import 'src/components/standard_screen.dart';
-import 'comments_screen.dart';
+import 'src/models/post.dart';
+import 'src/services/post_firestore_service.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 
 class CommunityWallScreen extends StatefulWidget {
-  const CommunityWallScreen({Key? key}) : super(key: key);
+  const CommunityWallScreen({super.key});
 
   @override
   State<CommunityWallScreen> createState() => _CommunityWallScreenState();
@@ -50,7 +52,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
         content: content,
         imageUrl: imageUrl,
       );
-      
+
       if (result.success) {
         _loadPosts(); // Refresh posts list
         _showSnackBar('Post created successfully!', Colors.green);
@@ -79,10 +81,10 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     });
 
     try {
-      final result = wasLiked 
+      final result = wasLiked
           ? await _service.unlikePost(post.id)
           : await _service.likePost(post.id);
-      
+
       if (!result.success) {
         // Revert on error
         setState(() {
@@ -112,9 +114,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
   void _handleComment(Post post) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => CommentsScreen(post: post),
-      ),
+      MaterialPageRoute(builder: (context) => CommentsScreen(post: post)),
     ).then((_) {
       // Refresh posts when returning from comments screen
       _loadPosts();
@@ -172,7 +172,7 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
     if (confirmed == true) {
       try {
         final result = await _service.deletePost(post.id);
-        
+
         if (result.success) {
           setState(() {
             _posts.removeWhere((p) => p.id == post.id);
@@ -209,8 +209,11 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
 
     if (confirmed == true) {
       try {
-        final result = await _service.reportPost(post.id, 'Inappropriate content');
-        
+        final result = await _service.reportPost(
+          post.id,
+          'Inappropriate content',
+        );
+
         if (result.success) {
           _showSnackBar('Post reported', Colors.green);
         } else {
@@ -238,49 +241,46 @@ class _CommunityWallScreenState extends State<CommunityWallScreen> {
       backgroundColor: const Color(0xFFF7F7F7),
       body: StandardScreen(
         title: 'Community Wall',
-        showBackButton: false,
+        showBackButton: true,
         isScrollable: false,
         padding: EdgeInsets.zero,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : _posts.isEmpty
-                ? const Center(
-                    child: Padding(
-                      padding: EdgeInsets.all(32),
-                      child: Text(
-                        'No posts yet. Be the first to post!',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Color(0xFF9CA3AF),
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  )
-                : RefreshIndicator(
-                    onRefresh: _loadPosts,
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      itemCount: _posts.length,
-                      itemBuilder: (context, index) {
-                        final post = _posts[index];
-                        return PostCard(
-                          post: post,
-                          onLikePressed: () => _handleLike(post),
-                          onCommentPressed: () => _handleComment(post),
-                          onSharePressed: () => _handleShare(post),
-                          onMenuPressed: () => _handleMenu(post),
-                        );
-                      },
-                    ),
+            ? Center(
+                child: Padding(
+                  padding: EdgeInsets.all(32.w),
+                  child: Text(
+                    'No posts yet. Be the first to post!',
+                    style: TextStyle(fontSize: 14.sp, color: Color(0xFF9CA3AF)),
+                    textAlign: TextAlign.center,
                   ),
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: _loadPosts,
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  itemCount: _posts.length,
+                  itemBuilder: (context, index) {
+                    final post = _posts[index];
+                    return PostCard(
+                      post: post,
+                      onLikePressed: () => _handleLike(post),
+                      onCommentPressed: () => _handleComment(post),
+                      onSharePressed: () => _handleShare(post),
+                      onMenuPressed: () => _handleMenu(post),
+                    );
+                  },
+                ),
+              ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showAddPostModal(context, onSubmit: _handleAddPost);
         },
         backgroundColor: kPrimaryBlue,
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        child: Icon(Icons.add, color: Colors.white, size: 28.w),
       ),
     );
   }

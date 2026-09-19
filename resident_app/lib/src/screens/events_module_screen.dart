@@ -2,7 +2,6 @@
 // Main Events Module screen with tab switching
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
 import '../components/primary_header.dart';
 import '../components/app_segmented_control.dart';
 import 'events_tab.dart';
@@ -13,9 +12,9 @@ class EventsModuleScreen extends StatefulWidget {
   final int initialTab;
 
   const EventsModuleScreen({
-    Key? key,
+    super.key,
     this.initialTab = 0,
-  }) : super(key: key);
+  });
 
   @override
   State<EventsModuleScreen> createState() => _EventsModuleScreenState();

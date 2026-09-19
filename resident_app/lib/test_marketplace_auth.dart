@@ -15,7 +15,7 @@ void main() async {
 }
 
 class MarketplaceAuthTestApp extends StatelessWidget {
-  const MarketplaceAuthTestApp({Key? key}) : super(key: key);
+  const MarketplaceAuthTestApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class MarketplaceAuthTestApp extends StatelessWidget {
 }
 
 class MarketplaceAuthTestScreen extends StatefulWidget {
-  const MarketplaceAuthTestScreen({Key? key}) : super(key: key);
+  const MarketplaceAuthTestScreen({super.key});
 
   @override
   State<MarketplaceAuthTestScreen> createState() => _MarketplaceAuthTestScreenState();
@@ -41,7 +41,7 @@ class _MarketplaceAuthTestScreenState extends State<MarketplaceAuthTestScreen> {
   
   String _status = 'Ready to test';
   bool _isLoading = false;
-  List<String> _logs = [];
+  final List<String> _logs = [];
 
   void _addLog(String log) {
     setState(() {

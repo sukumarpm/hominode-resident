@@ -13,7 +13,7 @@ void main() async {
 }
 
 class TestMessagesFixesApp extends StatelessWidget {
-  const TestMessagesFixesApp({Key? key}) : super(key: key);
+  const TestMessagesFixesApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class TestMessagesFixesApp extends StatelessWidget {
 }
 
 class TestMessagesFixesScreen extends StatefulWidget {
-  const TestMessagesFixesScreen({Key? key}) : super(key: key);
+  const TestMessagesFixesScreen({super.key});
 
   @override
   State<TestMessagesFixesScreen> createState() => _TestMessagesFixesScreenState();
@@ -290,7 +290,7 @@ class _TestMessagesFixesScreenState extends State<TestMessagesFixesScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          ..._members.map((member) => _buildMemberCard(member)).toList(),
+          ..._members.map((member) => _buildMemberCard(member)),
         ],
       ),
     );

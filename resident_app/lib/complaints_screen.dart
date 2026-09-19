@@ -2,6 +2,7 @@
 // Complaints & Requests screen
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'src/models/complaint.dart';
 import 'src/models/staff_model.dart';
 import 'src/services/complaints_service.dart';
@@ -11,13 +12,13 @@ import 'src/modals/complaint_detail_modal.dart';
 import 'src/components/standard_screen.dart';
 import 'src/components/app_segmented_control.dart';
 
-const kPrimaryBlue = Color(0xFF2563EB);
+const kPrimaryBlue = Color(0xFF0E4778);
 const kPendingRed = Color(0xFFDC2626);
 const kInProgressOrange = Color(0xFFF97316);
 const kCompletedGreen = Color(0xFF10B981);
 
 class ComplaintsScreen extends StatefulWidget {
-  const ComplaintsScreen({Key? key}) : super(key: key);
+  const ComplaintsScreen({super.key});
 
   @override
   State<ComplaintsScreen> createState() => _ComplaintsScreenState();
@@ -27,9 +28,9 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   final ComplaintsService _service = ComplaintsService();
   final StaffFirestoreService _staffService = StaffFirestoreService.instance;
   List<Complaint> _complaints = [];
-  Map<String, StaffModel> _staffCache = {}; // Cache staff details
+  final Map<String, StaffModel> _staffCache = {}; // Cache staff details
   bool _isLoading = true;
-  bool _useRealtime = true; // Toggle for real-time updates
+  final bool _useRealtime = true; // Toggle for real-time updates
   int _selectedTabIndex = 0; // 0 = Active, 1 = History
 
   @override
@@ -44,71 +45,82 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   // Get active complaints (pending + in progress)
   List<Complaint> get _activeComplaints => _complaints
-      .where((c) => c.status == ComplaintStatus.pending || 
-                    c.status == ComplaintStatus.inProgress)
+      .where(
+        (c) =>
+            c.status == ComplaintStatus.pending ||
+            c.status == ComplaintStatus.inProgress,
+      )
       .toList();
 
   // Get completed complaints (history)
-  List<Complaint> get _completedComplaints => _complaints
-      .where((c) => c.status == ComplaintStatus.completed)
-      .toList();
+  List<Complaint> get _completedComplaints =>
+      _complaints.where((c) => c.status == ComplaintStatus.completed).toList();
 
   void _setupRealtimeUpdates() {
     setState(() => _isLoading = true);
-    
+
     print('🔄 Setting up real-time complaint updates...');
-    
-    _service.streamComplaints().listen((complaints) async {
-      print('🔄 Real-time update received: ${complaints.length} complaints');
-      
-      for (var complaint in complaints) {
-        print('  - ${complaint.id}: ${complaint.status} (${complaint.assignedTo ?? "unassigned"})');
-      }
-      
-      // Fetch staff details for assigned complaints
-      for (var complaint in complaints) {
-        if (complaint.assignedStaffId != null && 
-            !_staffCache.containsKey(complaint.assignedStaffId)) {
-          print('📥 Fetching staff: ${complaint.assignedStaffId}');
-          final staff = await _staffService.getStaffById(complaint.assignedStaffId!);
-          if (staff != null) {
-            _staffCache[complaint.assignedStaffId!] = staff;
-            print('✅ Staff cached: ${staff.name}');
+
+    _service.streamComplaints().listen(
+      (complaints) async {
+        print('🔄 Real-time update received: ${complaints.length} complaints');
+
+        for (var complaint in complaints) {
+          print(
+            '  - ${complaint.id}: ${complaint.status} (${complaint.assignedTo ?? "unassigned"})',
+          );
+        }
+
+        // Fetch staff details for assigned complaints
+        for (var complaint in complaints) {
+          if (complaint.assignedStaffId != null &&
+              !_staffCache.containsKey(complaint.assignedStaffId)) {
+            print('📥 Fetching staff: ${complaint.assignedStaffId}');
+            final staff = await _staffService.getStaffById(
+              complaint.assignedStaffId!,
+            );
+            if (staff != null) {
+              _staffCache[complaint.assignedStaffId!] = staff;
+              print('✅ Staff cached: ${staff.name}');
+            }
           }
         }
-      }
-      
-      if (mounted) {
-        setState(() {
-          _complaints = complaints;
-          _isLoading = false;
-        });
-        print('✅ UI updated with ${complaints.length} complaints');
-      }
-    }, onError: (error) {
-      print('❌ Stream error: $error');
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    });
+
+        if (mounted) {
+          setState(() {
+            _complaints = complaints;
+            _isLoading = false;
+          });
+          print('✅ UI updated with ${complaints.length} complaints');
+        }
+      },
+      onError: (error) {
+        print('❌ Stream error: $error');
+        if (mounted) {
+          setState(() => _isLoading = false);
+        }
+      },
+    );
   }
 
   Future<void> _loadComplaints() async {
     setState(() => _isLoading = true);
     try {
       final complaints = await _service.fetchComplaints();
-      
+
       // Fetch staff details for assigned complaints
       for (var complaint in complaints) {
-        if (complaint.assignedStaffId != null && 
+        if (complaint.assignedStaffId != null &&
             !_staffCache.containsKey(complaint.assignedStaffId)) {
-          final staff = await _staffService.getStaffById(complaint.assignedStaffId!);
+          final staff = await _staffService.getStaffById(
+            complaint.assignedStaffId!,
+          );
           if (staff != null) {
             _staffCache[complaint.assignedStaffId!] = staff;
           }
         }
       }
-      
+
       setState(() {
         _complaints = complaints;
         _isLoading = false;
@@ -179,30 +191,33 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       builder: (context) => SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             Container(
-              width: 40,
-              height: 4,
+              width: 40.w,
+              height: 4.h,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
             ListTile(
-              leading: const Icon(Icons.visibility_outlined, color: kPrimaryBlue),
+              leading: const Icon(
+                Icons.visibility_outlined,
+                color: kPrimaryBlue,
+              ),
               title: const Text('View Details'),
               onTap: () {
                 Navigator.pop(context);
-                final staff = complaint.assignedStaffId != null 
-                    ? _staffCache[complaint.assignedStaffId] 
+                final staff = complaint.assignedStaffId != null
+                    ? _staffCache[complaint.assignedStaffId]
                     : null;
                 showComplaintDetailModal(
                   context,
@@ -218,13 +233,16 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
             if (complaint.status == ComplaintStatus.pending)
               ListTile(
                 leading: const Icon(Icons.delete_outline, color: Colors.red),
-                title: const Text('Delete Complaint', style: TextStyle(color: Colors.red)),
+                title: const Text(
+                  'Delete Complaint',
+                  style: TextStyle(color: Colors.red),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _handleDeleteComplaint(complaint);
                 },
               ),
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
           ],
         ),
       ),
@@ -233,21 +251,23 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final displayComplaints = _selectedTabIndex == 0 ? _activeComplaints : _completedComplaints;
-    
+    final displayComplaints = _selectedTabIndex == 0
+        ? _activeComplaints
+        : _completedComplaints;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       body: StandardScreen(
         title: 'Complaints & Requests',
-        showBackButton: false,
+        onBackPressed: () => Navigator.maybePop(context),
         isScrollable: false,
         padding: EdgeInsets.zero,
         body: _isLoading
             ? const Center(child: CircularProgressIndicator())
             : Column(
                 children: [
-                  const SizedBox(height: 20),
-                  
+                  SizedBox(height: 20.h),
+
                   // Segmented Control
                   AppSegmentedControl(
                     segments: const ['Active', 'History'],
@@ -258,9 +278,9 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                       });
                     },
                   ),
-                  
-                  const SizedBox(height: 20),
-                  
+
+                  SizedBox(height: 20.h),
+
                   // Content
                   Expanded(
                     child: RefreshIndicator(
@@ -269,32 +289,35 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
                         child: Column(
                           children: [
                             // Status summary cards (only for active tab)
-                            if (_selectedTabIndex == 0)
-                              _buildStatusSummary(),
-                            
+                            if (_selectedTabIndex == 0) _buildStatusSummary(),
+
                             // Complaints list
                             Padding(
-                              padding: const EdgeInsets.all(16),
+                              padding: EdgeInsets.all(16.w),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    _selectedTabIndex == 0 ? 'Active Complaints' : 'Complaint History',
-                                    style: const TextStyle(
-                                      fontSize: 18,
+                                    _selectedTabIndex == 0
+                                        ? 'Active Complaints'
+                                        : 'Complaint History',
+                                    style: TextStyle(
+                                      fontSize: 18.sp,
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF111111),
                                     ),
                                   ),
-                                  const SizedBox(height: 16),
+                                  SizedBox(height: 16.h),
                                   if (displayComplaints.isEmpty)
                                     _buildEmptyState()
                                   else
-                                    ...displayComplaints.map((complaint) => Padding(
-                                          padding: const EdgeInsets.only(bottom: 16),
-                                          child: _buildComplaintCard(complaint),
-                                        )),
-                                  const SizedBox(height: 80), // Space for FAB
+                                    ...displayComplaints.map(
+                                      (complaint) => Padding(
+                                        padding: EdgeInsets.only(bottom: 16.h),
+                                        child: _buildComplaintCard(complaint),
+                                      ),
+                                    ),
+                                  SizedBox(height: 80.h), // Space for FAB
                                 ],
                               ),
                             ),
@@ -311,7 +334,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
           showCreateComplaintModal(context, onCreated: _handleComplaintCreated);
         },
         backgroundColor: kPrimaryBlue,
-        child: const Icon(Icons.add, color: Colors.white, size: 28),
+        child: Icon(Icons.add, color: Colors.white, size: 28.w),
       ),
     );
   }
@@ -319,34 +342,33 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   Widget _buildEmptyState() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: EdgeInsets.all(32.w),
         child: Column(
           children: [
             Icon(
-              _selectedTabIndex == 0 ? Icons.check_circle_outline : Icons.history,
-              size: 64,
+              _selectedTabIndex == 0
+                  ? Icons.check_circle_outline
+                  : Icons.history,
+              size: 64.w,
               color: const Color(0xFF9CA3AF),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             Text(
-              _selectedTabIndex == 0 
+              _selectedTabIndex == 0
                   ? 'No active complaints'
                   : 'No complaint history',
-              style: const TextStyle(
-                fontSize: 18,
+              style: TextStyle(
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF6B7280),
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             Text(
               _selectedTabIndex == 0
                   ? 'Create a new complaint to get started'
                   : 'Completed complaints will appear here',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF9CA3AF),
-              ),
+              style: TextStyle(fontSize: 14.sp, color: Color(0xFF9CA3AF)),
               textAlign: TextAlign.center,
             ),
           ],
@@ -358,32 +380,32 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   Widget _buildOldHeader() {
     return Container(
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF2563EB), Color(0xFF1E40AF)],
+          colors: [Color(0xFF0E4778), Color(0xFF061C4C)],
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24),
-          bottomRight: Radius.circular(24),
+          bottomLeft: Radius.circular(24.r),
+          bottomRight: Radius.circular(24.r),
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 16, 16, 20),
+        padding: EdgeInsets.fromLTRB(8.w, 16.h, 16.w, 20.h),
         child: Row(
           children: [
             IconButton(
               onPressed: () => Navigator.pop(context),
-              icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
-              padding: const EdgeInsets.all(8),
+              icon: Icon(Icons.arrow_back_ios, color: Colors.white, size: 20.w),
+              padding: EdgeInsets.all(8.w),
             ),
-            const SizedBox(width: 4),
-            const Text(
+            SizedBox(width: 4.w),
+            Text(
               'Complaints & Requests',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 20.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -395,7 +417,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
 
   Widget _buildStatusSummary() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       child: Row(
         children: [
           Expanded(
@@ -406,7 +428,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
               backgroundColor: const Color(0xFFFEE2E2),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: _buildStatusCard(
               count: _inProgressCount,
@@ -415,7 +437,7 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
               backgroundColor: const Color(0xFFFFF3E8),
             ),
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
           Expanded(
             child: _buildStatusCard(
               count: _completedCount,
@@ -436,26 +458,26 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     required Color backgroundColor,
   }) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: EdgeInsets.symmetric(vertical: 20.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Column(
         children: [
           Text(
             '$count',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 28.sp,
               fontWeight: FontWeight.w700,
               color: color,
             ),
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: 4.h),
           Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -466,10 +488,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
   }
 
   Widget _buildComplaintCard(Complaint complaint) {
-    final staff = complaint.assignedStaffId != null 
-        ? _staffCache[complaint.assignedStaffId] 
+    final staff = complaint.assignedStaffId != null
+        ? _staffCache[complaint.assignedStaffId]
         : null;
-    
+
     return GestureDetector(
       onTap: () {
         showComplaintDetailModal(
@@ -487,10 +509,10 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
         _showComplaintOptions(complaint);
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(16.r),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.06),
@@ -499,149 +521,149 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
             ),
           ],
         ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Icon
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Icon
+                Container(
+                  width: 48.w,
+                  height: 48.h,
+                  decoration: BoxDecoration(
+                    color: _getIconBackgroundColor(complaint.category),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Icon(
+                    _getIconForCategory(complaint.category),
+                    color: _getIconColor(complaint.category),
+                    size: 24.w,
+                  ),
+                ),
+                SizedBox(width: 12.w),
+                // Content
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              complaint.title,
+                              style: TextStyle(
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF111111),
+                              ),
+                            ),
+                          ),
+                          _buildStatusBadge(complaint.status),
+                        ],
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        complaint.description,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        '${complaint.categoryDisplayName} • ${complaint.formattedDate}',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (staff != null) ...[
+              SizedBox(height: 12.h),
               Container(
-                width: 48,
-                height: 48,
+                padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
-                  color: _getIconBackgroundColor(complaint.category),
-                  borderRadius: BorderRadius.circular(12),
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Icon(
-                  _getIconForCategory(complaint.category),
-                  color: _getIconColor(complaint.category),
-                  size: 24,
-                ),
-              ),
-              const SizedBox(width: 12),
-              // Content
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            complaint.title,
-                            style: const TextStyle(
-                              fontSize: 16,
+                    Container(
+                      width: 40.w,
+                      height: 40.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0E4778).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person,
+                        color: Color(0xFF0E4778),
+                        size: 20.w,
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            staff.name,
+                            style: TextStyle(
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                               color: Color(0xFF111111),
                             ),
                           ),
-                        ),
-                        _buildStatusBadge(complaint.status),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      complaint.description,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color(0xFF9CA3AF),
+                          SizedBox(height: 2.h),
+                          Text(
+                            '${staff.roleDisplayName} • ${staff.phone}',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
+            ] else if (complaint.assignedTo != null) ...[
+              SizedBox(height: 12.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF3F4F6),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.person_outline,
+                      size: 16.w,
+                      color: Color(0xFF6B7280),
+                    ),
+                    SizedBox(width: 8.w),
                     Text(
-                      '${complaint.categoryDisplayName} • ${complaint.formattedDate}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF9CA3AF),
+                      'Assigned to: ${complaint.assignedTo}',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Color(0xFF6B7280),
                       ),
                     ),
                   ],
                 ),
               ),
             ],
-          ),
-          if (staff != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2563EB).withOpacity(0.1),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Color(0xFF2563EB),
-                      size: 20,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          staff.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF111111),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          '${staff.roleDisplayName} • ${staff.phone}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF6B7280),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ] else if (complaint.assignedTo != null) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.person_outline,
-                    size: 16,
-                    color: Color(0xFF6B7280),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Assigned to: ${complaint.assignedTo}',
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF6B7280),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ],
-        ],
+        ),
       ),
-    ),
     );
   }
 
@@ -669,15 +691,15 @@ class _ComplaintsScreenState extends State<ComplaintsScreen> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 12.sp,
           fontWeight: FontWeight.w600,
           color: color,
         ),

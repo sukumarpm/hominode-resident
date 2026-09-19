@@ -2,12 +2,25 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Optionally share your location once when requesting emergency assistance.</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-551984029668-ios-cb57ef578d5066b50db1f1</string>
+			</array>
+		</dict>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Resident App</string>
+	<string>Hominode</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +28,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>resident_app</string>
+	<string>Hominode</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,13 +39,18 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>We need camera access to attach photos to complaints</string>
+	<string>Hominode uses the camera to add photos to marketplace listings.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>We need microphone access for video recording</string>
+	<string>Hominode uses the microphone for video recording.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>We need photo library access to attach photos to complaints</string>
-	<key>UIApplicationSceneManifest</key>
+	<string>Hominode uses the photo library to attach photos to marketplace listings.</string>
+	<key>_UIApplicationSceneManifest</key>
+	
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>

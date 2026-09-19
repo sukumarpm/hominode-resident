@@ -3,8 +3,6 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
-import '../constants/app_colors.dart';
 
 // ============================================================================
 // MODELS
@@ -63,10 +61,7 @@ class ChatMessageFixed {
 class ChatConversationScreenFixed extends StatefulWidget {
   final ConversationFixed conversation;
 
-  const ChatConversationScreenFixed({
-    Key? key,
-    required this.conversation,
-  }) : super(key: key);
+  const ChatConversationScreenFixed({super.key, required this.conversation});
 
   @override
   State<ChatConversationScreenFixed> createState() =>
@@ -94,7 +89,8 @@ class _ChatConversationScreenFixedState
       _messages.addAll([
         ChatMessageFixed(
           id: 'msg_1',
-          text: 'Hello! I have checked the issue. Will arrive at your flat in 30 minutes.',
+          text:
+              'Hello! I have checked the issue. Will arrive at your flat in 30 minutes.',
           timestamp: DateTime.now().subtract(const Duration(minutes: 6)),
           status: MessageStatus.read,
           isMe: false,
@@ -129,13 +125,15 @@ class _ChatConversationScreenFixedState
       if (mounted) {
         setState(() {
           _isTyping = false;
-          _messages.add(ChatMessageFixed(
-            id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
-            text: 'I am on my way now.',
-            timestamp: DateTime.now(),
-            status: MessageStatus.delivered,
-            isMe: false,
-          ));
+          _messages.add(
+            ChatMessageFixed(
+              id: 'msg_${DateTime.now().millisecondsSinceEpoch}',
+              text: 'I am on my way now.',
+              timestamp: DateTime.now(),
+              status: MessageStatus.delivered,
+              isMe: false,
+            ),
+          );
         });
         _scrollToBottom();
       }
@@ -191,8 +189,9 @@ class _ChatConversationScreenFixedState
           setState(() {
             final index = _messages.indexWhere((m) => m.id == tempMessage.id);
             if (index != -1) {
-              _messages[index] =
-                  tempMessage.copyWith(status: MessageStatus.delivered);
+              _messages[index] = tempMessage.copyWith(
+                status: MessageStatus.delivered,
+              );
             }
           });
         }
@@ -252,7 +251,7 @@ class _ChatConversationScreenFixedState
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: widget.conversation.iconBg ?? const Color(0xFF2563EB),
+              color: widget.conversation.iconBg ?? const Color(0xFF0E4778),
               borderRadius: BorderRadius.circular(12),
             ),
             child: widget.conversation.icon != null
@@ -335,10 +334,7 @@ class _ChatConversationScreenFixedState
           children: [
             const Text(
               'Typing',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF6B7280),
-              ),
+              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
             ),
             const SizedBox(width: 6),
             SizedBox(
@@ -346,11 +342,7 @@ class _ChatConversationScreenFixedState
               height: 10,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  _TypingDot(),
-                  _TypingDot(),
-                  _TypingDot(),
-                ],
+                children: const [_TypingDot(), _TypingDot(), _TypingDot()],
               ),
             ),
           ],
@@ -388,10 +380,7 @@ class _ChatConversationScreenFixedState
                 decoration: BoxDecoration(
                   color: const Color(0xFFF8F9FA),
                   borderRadius: BorderRadius.circular(22),
-                  border: Border.all(
-                    color: const Color(0xFFE5E7EB),
-                    width: 1,
-                  ),
+                  border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -435,7 +424,7 @@ class _ChatConversationScreenFixedState
               decoration: BoxDecoration(
                 color: _messageController.text.trim().isEmpty
                     ? const Color(0xFFE5E7EB)
-                    : const Color(0xFF2563EB),
+                    : const Color(0xFF0E4778),
                 shape: BoxShape.circle,
               ),
               child: Material(
@@ -488,17 +477,16 @@ class _MessageBubble extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
-        mainAxisAlignment:
-            message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+        mainAxisAlignment: message.isMe
+            ? MainAxisAlignment.end
+            : MainAxisAlignment.start,
         children: [
           if (message.isMe) const Spacer(),
           Container(
             constraints: BoxConstraints(maxWidth: maxWidth),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             decoration: BoxDecoration(
-              color: message.isMe
-                  ? const Color(0xFF2563EB)
-                  : Colors.white,
+              color: message.isMe ? const Color(0xFF0E4778) : Colors.white,
               border: message.isMe
                   ? null
                   : Border.all(color: const Color(0xFFE5E7EB)),
@@ -523,7 +511,9 @@ class _MessageBubble extends StatelessWidget {
                   message.text,
                   style: TextStyle(
                     fontSize: 15,
-                    color: message.isMe ? Colors.white : const Color(0xFF111111),
+                    color: message.isMe
+                        ? Colors.white
+                        : const Color(0xFF111111),
                     height: 1.4,
                   ),
                 ),
@@ -556,7 +546,9 @@ class _MessageBubble extends StatelessWidget {
   }
 
   String _formatTime(DateTime time) {
-    final hour = time.hour > 12 ? time.hour - 12 : (time.hour == 0 ? 12 : time.hour);
+    final hour = time.hour > 12
+        ? time.hour - 12
+        : (time.hour == 0 ? 12 : time.hour);
     final minute = time.minute.toString().padLeft(2, '0');
     final period = time.hour >= 12 ? 'PM' : 'AM';
     return '$hour:$minute $period';

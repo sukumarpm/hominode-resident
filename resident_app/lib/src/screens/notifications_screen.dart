@@ -2,7 +2,7 @@
 // Notifications screen matching app design standards
 
 import 'package:flutter/material.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/notice_model.dart';
 import '../services/notice_firestore_service.dart';
 import '../components/primary_header.dart';
@@ -10,7 +10,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
 
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({Key? key}) : super(key: key);
+  const NotificationsScreen({super.key});
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
@@ -29,17 +29,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   Future<void> _loadNotifications() async {
     setState(() => _isLoading = true);
-    
+
     try {
       print('========================================');
       print('🔵 NOTIFICATIONS SCREEN: Loading notifications');
       print('========================================');
       print('🔵 Calling NoticeFirestoreService.getNotices()...');
-      
+
       final notices = await _noticeService.getNotices();
-      
+
       print('🔵 NoticeFirestoreService returned ${notices.length} notices');
-      
+
       if (mounted) {
         setState(() {
           _allNotices = notices;
@@ -75,24 +75,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 children: [
                   // Category badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: _getIconBgColorForCategory(notice.category),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
                           _getIconForCategory(notice.category),
-                          size: 14,
+                          size: 14.w,
                           color: _getIconColorForCategory(notice.category),
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4.w),
                         Text(
                           _getCategoryLabel(notice.category),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                             color: _getIconColorForCategory(notice.category),
                           ),
@@ -102,15 +105,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   // Priority badge
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 10.w,
+                      vertical: 4.h,
+                    ),
                     decoration: BoxDecoration(
                       color: _getPriorityBgColor(notice.priority),
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
                       _getPriorityLabel(notice.priority),
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         color: _getPriorityTextColor(notice.priority),
                       ),
@@ -118,48 +124,48 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               // Content
               Text(
                 notice.content,
-                style: const TextStyle(fontSize: 15, height: 1.5),
+                style: TextStyle(fontSize: 15.sp, height: 1.5),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
               // Author
               if (notice.authorName.isNotEmpty) ...[
                 Row(
                   children: [
                     Icon(
                       Icons.person_outline,
-                      size: 16,
+                      size: 16.w,
                       color: AppColors.textSecondary,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6.w),
                     Text(
                       'Posted by: ${notice.authorName}',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
               ],
               // Published date
               Row(
                 children: [
                   Icon(
                     Icons.calendar_today_outlined,
-                    size: 16,
+                    size: 16.w,
                     color: AppColors.textSecondary,
                   ),
-                  const SizedBox(width: 6),
+                  SizedBox(width: 6.w),
                   Text(
                     'Published: ${_formatFullDate(notice.publishDate)}',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: AppColors.textSecondary,
                     ),
                   ),
@@ -167,19 +173,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ),
               // Expiry date
               if (notice.expiryDate != null) ...[
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Row(
                   children: [
                     Icon(
                       Icons.event_busy_outlined,
-                      size: 16,
+                      size: 16.w,
                       color: AppColors.textSecondary,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6.w),
                     Text(
                       'Expires: ${_formatFullDate(notice.expiryDate!)}',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         color: AppColors.textSecondary,
                       ),
                     ),
@@ -188,43 +194,47 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               ],
               // Attachments
               if (notice.attachments.isNotEmpty) ...[
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
                 const Divider(),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 Row(
                   children: [
                     Icon(
                       Icons.attach_file,
-                      size: 16,
+                      size: 16.w,
                       color: AppColors.textSecondary,
                     ),
-                    const SizedBox(width: 6),
+                    SizedBox(width: 6.w),
                     Text(
                       'Attachments (${notice.attachments.length})',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColors.textPrimary,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                ...notice.attachments.map((attachment) => Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Text(
-                    '• $attachment',
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
+                SizedBox(height: 8.h),
+                ...notice.attachments.map(
+                  (attachment) => Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: Text(
+                      '• $attachment',
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: AppColors.textSecondary,
+                      ),
                     ),
                   ),
-                )),
+                ),
               ],
             ],
           ),
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -236,7 +246,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   String _formatFullDate(DateTime date) {
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return '${months[date.month - 1]} ${date.day}, ${date.year} at ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 
@@ -279,7 +302,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final cat = category.toLowerCase();
     if (cat == 'maintenance') return Icons.build_outlined;
     if (cat == 'event') return Icons.event_outlined;
-    if (cat == 'emergency' || cat == 'urgent') return Icons.warning_amber_outlined;
+    if (cat == 'emergency' || cat == 'urgent') {
+      return Icons.warning_amber_outlined;
+    }
     if (cat == 'billing') return Icons.receipt_outlined;
     if (cat == 'security') return Icons.security_outlined;
     return Icons.notifications_outlined;
@@ -302,7 +327,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (cat == 'emergency' || cat == 'urgent') return const Color(0xFFDC2626);
     if (cat == 'billing') return const Color(0xFF10B981);
     if (cat == 'security') return const Color(0xFFDC2626);
-    return const Color(0xFF2563EB);
+    return const Color(0xFF0E4778);
   }
 
   String _formatDate(DateTime date) {
@@ -322,7 +347,20 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     } else if (difference.inDays < 7) {
       return '${difference.inDays}d ago';
     } else {
-      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      final months = [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ];
       return '${months[date.month - 1]} ${date.day}, ${date.year}';
     }
   }
@@ -334,37 +372,37 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       body: Column(
         children: [
           const PrimaryHeader(title: 'Notifications'),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           // Notifications list
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _allNotices.isEmpty
-                    ? _buildEmptyState()
-                    : RefreshIndicator(
-                        onRefresh: _loadNotifications,
-                        child: ListView.builder(
-                          padding: const EdgeInsets.fromLTRB(
-                            AppSizes.pagePadding,
-                            0,
-                            AppSizes.pagePadding,
-                            AppSizes.pagePadding,
-                          ),
-                          itemCount: _allNotices.length,
-                          itemBuilder: (context, index) {
-                            final notice = _allNotices[index];
-                            
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: _NoticeCard(
-                                notice: notice,
-                                onTap: () => _showNoticeDetail(notice),
-                                formatDate: _formatDate,
-                              ),
-                            );
-                          },
-                        ),
+                ? _buildEmptyState()
+                : RefreshIndicator(
+                    onRefresh: _loadNotifications,
+                    child: ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSizes.pagePadding,
+                        0,
+                        AppSizes.pagePadding,
+                        AppSizes.pagePadding,
                       ),
+                      itemCount: _allNotices.length,
+                      itemBuilder: (context, index) {
+                        final notice = _allNotices[index];
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _NoticeCard(
+                            notice: notice,
+                            onTap: () => _showNoticeDetail(notice),
+                            formatDate: _formatDate,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
           ),
         ],
       ),
@@ -378,25 +416,22 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         children: [
           Icon(
             Icons.notifications_none,
-            size: 64,
+            size: 64.w,
             color: AppColors.textSecondary,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           Text(
             'No notifications',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: AppColors.textPrimary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             'You\'re all caught up!',
-            style: TextStyle(
-              fontSize: 14,
-              color: AppColors.textSecondary,
-            ),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary),
           ),
         ],
       ),
@@ -423,14 +458,11 @@ class _NoticeCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: AppColors.border,
-            width: 1,
-          ),
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: AppColors.border, width: 1),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.04),
@@ -444,19 +476,19 @@ class _NoticeCard extends StatelessWidget {
           children: [
             // Icon box
             Container(
-              width: 48,
-              height: 48,
+              width: 48.w,
+              height: 48.h,
               decoration: BoxDecoration(
                 color: _getIconBgColor(notice.category),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Icon(
                 _getIcon(notice.category),
-                size: 24,
+                size: 24.w,
                 color: _getIconColor(notice.category),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             // Content
             Expanded(
               child: Column(
@@ -465,16 +497,16 @@ class _NoticeCard extends StatelessWidget {
                   Text(
                     notice.title,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     notice.content,
                     style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w400,
                       color: AppColors.textSecondary,
                       height: 1.4,
@@ -482,52 +514,57 @@ class _NoticeCard extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 6),
+                  SizedBox(height: 6.h),
                   Row(
                     children: [
                       // Priority badge
-                      if (notice.priority == 'high' || notice.priority == 'urgent')
+                      if (notice.priority == 'high' ||
+                          notice.priority == 'urgent')
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 2.h,
+                          ),
                           decoration: BoxDecoration(
                             color: const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(4),
+                            borderRadius: BorderRadius.circular(4.r),
                           ),
-                          child: const Text(
+                          child: Text(
                             'URGENT',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 11.sp,
                               fontWeight: FontWeight.w700,
                               color: Color(0xFFDC2626),
                             ),
                           ),
                         ),
-                      if (notice.priority == 'high' || notice.priority == 'urgent')
-                        const SizedBox(width: 8),
+                      if (notice.priority == 'high' ||
+                          notice.priority == 'urgent')
+                        SizedBox(width: 8.w),
                       // Category label
                       Text(
                         _getCategoryDisplayLabel(notice.category),
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                           color: _getIconColor(notice.category),
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       Text(
                         '•',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: AppColors.textSecondary,
                         ),
                       ),
-                      const SizedBox(width: 4),
+                      SizedBox(width: 4.w),
                       // Time
                       Expanded(
                         child: Text(
                           formatDate(notice.publishDate),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColors.textSecondary,
                           ),
@@ -537,19 +574,19 @@ class _NoticeCard extends StatelessWidget {
                   ),
                   // Author name
                   if (notice.authorName.isNotEmpty) ...[
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Row(
                       children: [
                         Icon(
                           Icons.person_outline,
-                          size: 12,
+                          size: 12.w,
                           color: AppColors.textSecondary,
                         ),
-                        const SizedBox(width: 4),
+                        SizedBox(width: 4.w),
                         Text(
                           notice.authorName,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: AppColors.textSecondary,
                           ),
                         ),
@@ -568,7 +605,7 @@ class _NoticeCard extends StatelessWidget {
   IconData _getIcon(String category) {
     // Handle both 'category' and 'type' field names
     final cat = category.toLowerCase();
-    
+
     if (cat == 'maintenance') {
       return Icons.build_outlined;
     } else if (cat == 'event') {
@@ -598,7 +635,7 @@ class _NoticeCard extends StatelessWidget {
 
   Color _getIconBgColor(String category) {
     final cat = category.toLowerCase();
-    
+
     if (cat == 'maintenance') {
       return const Color(0xFFFFF3E8);
     } else if (cat == 'event') {
@@ -617,7 +654,7 @@ class _NoticeCard extends StatelessWidget {
 
   Color _getIconColor(String category) {
     final cat = category.toLowerCase();
-    
+
     if (cat == 'maintenance') {
       return const Color(0xFFF97316);
     } else if (cat == 'event') {
@@ -630,7 +667,7 @@ class _NoticeCard extends StatelessWidget {
       return const Color(0xFFDC2626);
     } else {
       // general or default
-      return const Color(0xFF2563EB);
+      return const Color(0xFF0E4778);
     }
   }
 }

@@ -11,13 +11,13 @@ class PollProgressBar extends StatelessWidget {
   final BorderRadius? borderRadius;
 
   const PollProgressBar({
-    Key? key,
+    super.key,
     required this.percent,
     this.fillColor = Colors.black,
     this.trackColor = const Color(0xFFE6E6E6),
     this.height = 6.0,
     this.borderRadius,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

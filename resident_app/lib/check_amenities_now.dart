@@ -95,6 +95,6 @@ void main() async {
     print('\n⚠️  User has no adminId field!');
   }
   
-  print('\n' + '=' * 50);
+  print('\n${'=' * 50}');
   print('✅ Check complete!\n');
 }

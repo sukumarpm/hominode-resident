@@ -2,36 +2,37 @@
 // Create new marketplace listing
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'dart:io';
 import '../services/listing_firestore_service.dart';
-import '../services/image_upload_flow_function.dart';
 import '../services/cloudinary_service.dart';
 import '../constants/app_colors.dart';
 import '../constants/app_sizes.dart';
 
 class MarketplaceCreateListingScreen extends StatefulWidget {
-  const MarketplaceCreateListingScreen({Key? key}) : super(key: key);
+  const MarketplaceCreateListingScreen({super.key});
 
   @override
-  State<MarketplaceCreateListingScreen> createState() => _MarketplaceCreateListingScreenState();
+  State<MarketplaceCreateListingScreen> createState() =>
+      _MarketplaceCreateListingScreenState();
 }
 
-class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListingScreen> {
+class _MarketplaceCreateListingScreenState
+    extends State<MarketplaceCreateListingScreen> {
   final ListingFirestoreService _listingService = ListingFirestoreService();
   final _formKey = GlobalKey<FormState>();
   final ImagePicker _imagePicker = ImagePicker();
-  
+
   final _titleController = TextEditingController();
   final _priceController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   String _selectedCategory = 'Furniture';
   String _selectedCondition = 'Like New';
   bool _isCreating = false;
   List<File> _selectedImages = [];
-  
+
   final List<String> _categories = [
     'Furniture',
     'Electronics',
@@ -42,7 +43,7 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
     'Toys',
     'Home Decor',
     'Kitchen',
-    'Other'
+    'Other',
   ];
   final List<String> _conditions = ['Like New', 'Good', 'Fair', 'Poor'];
 
@@ -134,39 +135,41 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Images Section
-                const Text(
+                Text(
                   'Product Images',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 12),
-                
+                SizedBox(height: 12.h),
+
                 // Image Preview
                 if (_selectedImages.isNotEmpty)
                   Column(
                     children: [
                       SizedBox(
-                        height: 120,
+                        height: 120.h,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: _selectedImages.length,
                           itemBuilder: (context, index) {
                             return Padding(
-                              padding: const EdgeInsets.only(right: 8),
+                              padding: EdgeInsets.only(right: 8.w),
                               child: Stack(
                                 children: [
                                   Container(
-                                    width: 120,
-                                    height: 120,
+                                    width: 120.w,
+                                    height: 120.h,
                                     decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(color: AppColors.border),
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: AppColors.border,
+                                      ),
                                     ),
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius: BorderRadius.circular(8.r),
                                       child: Image.file(
                                         _selectedImages[index],
                                         fit: BoxFit.cover,
@@ -181,13 +184,15 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: Colors.red,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12.r,
+                                          ),
                                         ),
-                                        padding: const EdgeInsets.all(4),
-                                        child: const Icon(
+                                        padding: EdgeInsets.all(4.w),
+                                        child: Icon(
                                           Icons.close,
                                           color: Colors.white,
-                                          size: 16,
+                                          size: 16.w,
                                         ),
                                       ),
                                     ),
@@ -198,10 +203,10 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                           },
                         ),
                       ),
-                      const SizedBox(height: 12),
+                      SizedBox(height: 12.h),
                     ],
                   ),
-                
+
                 // Image Picker Buttons
                 Row(
                   children: [
@@ -216,7 +221,7 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                         ),
                       ),
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12.w),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: _pickImageFromCamera,
@@ -230,27 +235,30 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                     ),
                   ],
                 ),
-                
-                const SizedBox(height: 24),
-                
+
+                SizedBox(height: 24.h),
+
                 // Title
-                const Text(
+                Text(
                   'Product Title',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 TextFormField(
                   controller: _titleController,
                   decoration: InputDecoration(
                     hintText: 'e.g., IKEA Study Table',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -259,28 +267,31 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                     return null;
                   },
                 ),
-                
-                const SizedBox(height: 20),
-                
+
+                SizedBox(height: 20.h),
+
                 // Price
-                const Text(
+                Text(
                   'Price (₹)',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 TextFormField(
                   controller: _priceController,
                   keyboardType: TextInputType.number,
                   decoration: InputDecoration(
                     hintText: 'e.g., 2500',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -292,21 +303,21 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                     return null;
                   },
                 ),
-                
-                const SizedBox(height: 20),
-                
+
+                SizedBox(height: 20.h),
+
                 // Category
-                const Text(
+                Text(
                   'Category',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 DropdownButtonFormField<String>(
-                  value: _selectedCategory,
+                  initialValue: _selectedCategory,
                   items: _categories.map((category) {
                     return DropdownMenuItem(
                       value: category,
@@ -318,26 +329,29 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                 ),
-                
-                const SizedBox(height: 20),
-                
+
+                SizedBox(height: 20.h),
+
                 // Condition
-                const Text(
+                Text(
                   'Condition',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 DropdownButtonFormField<String>(
-                  value: _selectedCondition,
+                  initialValue: _selectedCondition,
                   items: _conditions.map((condition) {
                     return DropdownMenuItem(
                       value: condition,
@@ -349,33 +363,39 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                   },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                 ),
-                
-                const SizedBox(height: 20),
-                
+
+                SizedBox(height: 20.h),
+
                 // Description
-                const Text(
+                Text(
                   'Description',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     fontWeight: FontWeight.w600,
                     color: Colors.black,
                   ),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 TextFormField(
                   controller: _descriptionController,
                   maxLines: 5,
                   decoration: InputDecoration(
                     hintText: 'Describe your product...',
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 12.h,
+                    ),
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -384,9 +404,9 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                     return null;
                   },
                 ),
-                
-                const SizedBox(height: 32),
-                
+
+                SizedBox(height: 32.h),
+
                 // Create Button
                 SizedBox(
                   width: double.infinity,
@@ -395,25 +415,27 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: EdgeInsets.symmetric(vertical: 16.h),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                       elevation: 0,
                     ),
                     child: _isCreating
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
+                        ? SizedBox(
+                            height: 20.h,
+                            width: 20.w,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
-                        : const Text(
+                        : Text(
                             'Create Listing',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
@@ -436,21 +458,26 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
 
     try {
       // Step 1: Upload images to Cloudinary if selected
-      print('🔵 MARKETPLACE: Creating listing with ${_selectedImages.length} images...');
-      
+      print(
+        '🔵 MARKETPLACE: Creating listing with ${_selectedImages.length} images...',
+      );
+
       List<String> uploadedImageUrls = [];
-      
+
       if (_selectedImages.isNotEmpty) {
-        print('🔐 STEP 1: Uploading ${_selectedImages.length} images to Cloudinary...');
-        
+        print(
+          '🔐 STEP 1: Uploading ${_selectedImages.length} images to Cloudinary...',
+        );
+
         for (int i = 0; i < _selectedImages.length; i++) {
           try {
             final imageUrl = await CloudinaryService.uploadImage(
               imagePath: _selectedImages[i].path,
               folder: 'marketplace',
-              publicId: 'marketplace_${DateTime.now().millisecondsSinceEpoch}_$i',
+              publicId:
+                  'marketplace_${DateTime.now().millisecondsSinceEpoch}_$i',
             );
-            
+
             if (imageUrl.isNotEmpty) {
               uploadedImageUrls.add(imageUrl);
               print('✅ Image ${i + 1} uploaded: $imageUrl');
@@ -469,13 +496,13 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
             return;
           }
         }
-        
+
         print('✅ STEP 1 PASSED: All images uploaded');
       }
-      
+
       // Step 2: Create listing with image URLs
       print('🔐 STEP 2: Creating listing in Firestore...');
-      
+
       final result = await _listingService.createListing(
         title: _titleController.text.trim(),
         price: int.parse(_priceController.text.trim()),
@@ -491,7 +518,7 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
         if (result.success) {
           print('✅ STEP 2 PASSED: Listing created successfully');
           print('✅ MARKETPLACE: Listing creation complete');
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Listing created successfully'),
@@ -501,7 +528,7 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
           Navigator.pop(context, true); // Return true to refresh list
         } else {
           print('❌ STEP 2 FAILED: ${result.message}');
-          
+
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result.message ?? 'Failed to create listing'),
@@ -513,15 +540,12 @@ class _MarketplaceCreateListingScreenState extends State<MarketplaceCreateListin
     } catch (e, stackTrace) {
       print('❌ MARKETPLACE: Error creating listing: $e');
       print('   Stack trace: $stackTrace');
-      
+
       if (mounted) {
         setState(() => _isCreating = false);
-        
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }

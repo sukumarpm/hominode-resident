@@ -9,10 +9,10 @@ class MarketplaceFilterChips extends StatelessWidget {
   final Function(String) onCategorySelected;
 
   const MarketplaceFilterChips({
-    Key? key,
+    super.key,
     required this.selectedCategory,
     required this.onCategorySelected,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

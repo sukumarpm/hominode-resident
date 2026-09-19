@@ -128,7 +128,7 @@ class ProfileImageService {
       print('✅ User document found');
 
       // Get image URL from Firestore (real data only)
-      final data = doc.data() as Map<String, dynamic>?;
+      final data = doc.data();
       
       if (data == null) {
         print('❌ User document has no data');
@@ -197,7 +197,7 @@ class ProfileImageService {
 
         print('✅ User document received from stream');
 
-        final data = doc.data() as Map<String, dynamic>?;
+        final data = doc.data();
         
         if (data == null) {
           print('❌ User document has no data');

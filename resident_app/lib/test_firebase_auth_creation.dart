@@ -15,7 +15,7 @@ void main() async {
 }
 
 class TestFirebaseAuthCreationApp extends StatelessWidget {
-  const TestFirebaseAuthCreationApp({Key? key}) : super(key: key);
+  const TestFirebaseAuthCreationApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +28,7 @@ class TestFirebaseAuthCreationApp extends StatelessWidget {
 }
 
 class TestFirebaseAuthCreationScreen extends StatefulWidget {
-  const TestFirebaseAuthCreationScreen({Key? key}) : super(key: key);
+  const TestFirebaseAuthCreationScreen({super.key});
 
   @override
   State<TestFirebaseAuthCreationScreen> createState() => _TestFirebaseAuthCreationScreenState();

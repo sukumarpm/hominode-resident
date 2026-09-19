@@ -50,114 +50,137 @@ class ApartmentImagesService {
     try {
       print('🔵 APARTMENT IMAGES SERVICE: Starting fetch...');
 
-      // STEP 1: Validate user authentication
-      print('🔐 STEP 1: Validating user authentication...');
+      final user = FirebaseAuth.instance.currentUser;
 
-      final currentUser = _auth.currentUser;
-      if (currentUser == null) {
-        print('❌ STEP 1 FAILED: User not authenticated');
-        return ApartmentImagesResult.failure(
+      if (user == null) {
+        return ApartmentImagesResult(
+          success: false,
           message: 'User not authenticated',
-          errorCode: 'NOT_AUTHENTICATED',
         );
       }
 
-      print('✅ STEP 1 PASSED: User authenticated');
-      print('   User ID: ${currentUser.uid}');
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
 
-      // STEP 2: Query Firestore collection
-      print('🔐 STEP 2: Querying apartmentImages collection...');
-
-      final snapshot = await _firestore.collection('apartmentImages').get();
-
-      print('✅ STEP 2 PASSED: Query completed');
-      print('   Documents found: ${snapshot.docs.length}');
-
-      if (snapshot.docs.isEmpty) {
-        print('⚠️  No documents in apartmentImages collection');
-        return ApartmentImagesResult.success(
-          message: 'No apartment images available',
-          imageUrls: [],
+      if (!userDoc.exists) {
+        return ApartmentImagesResult(
+          success: false,
+          message: 'User profile not found',
         );
       }
 
-      // STEP 3: Extract image URLs
-      print('🔐 STEP 3: Extracting image URLs...');
+      final userData = userDoc.data()!;
+      final buildingId = userData['buildingId']?.toString();
+      final communityId = userData['communityId']?.toString().trim();
 
-      final images = <String>[];
-      for (var i = 0; i < snapshot.docs.length; i++) {
-        final doc = snapshot.docs[i];
-        final data = doc.data();
-        final imageUrl = data['imageUrl'] as String?;
-
-        if (imageUrl != null && imageUrl.isNotEmpty) {
-          images.add(imageUrl);
-          print('   ✅ Image $i: $imageUrl');
-        } else {
-          print('   ⚠️  Document ${doc.id}: No imageUrl field');
-        }
+      if (buildingId == null ||
+          buildingId.isEmpty ||
+          communityId == null ||
+          communityId.isEmpty) {
+        return ApartmentImagesResult(
+          success: false,
+          message: 'Building not assigned',
+        );
       }
 
-      print('✅ STEP 3 PASSED: Extracted ${images.length} image URLs');
+      print('🏢 Resident buildingId: $buildingId');
 
-      // STEP 4: Return success result
-      print('✅ APARTMENT IMAGES SERVICE: SUCCESS');
+      final snapshot = await FirebaseFirestore.instance
+          .collection('apartmentImages')
+          .where('communityId', isEqualTo: communityId)
+          .where('buildingId', isEqualTo: buildingId)
+          .where('status', isEqualTo: 'active')
+          .get();
 
-      return ApartmentImagesResult.success(
-        message: 'Apartment images fetched successfully',
-        imageUrls: images,
-      );
+      final imageUrls = snapshot.docs
+          .map((doc) => doc.data()['imageUrl']?.toString())
+          .whereType<String>()
+          .where((url) => url.isNotEmpty)
+          .toList();
+
+      print('✅ Apartment images found: ${imageUrls.length}');
+
+      return ApartmentImagesResult(success: true, imageUrls: imageUrls);
     } catch (e, stackTrace) {
       print('❌ APARTMENT IMAGES SERVICE: Error: $e');
       print('   Stack trace: $stackTrace');
-      return ApartmentImagesResult.failure(
+
+      return ApartmentImagesResult(
+        success: false,
         message: 'Failed to fetch apartment images: $e',
-        errorCode: 'FETCH_ERROR',
       );
     }
   }
 
   /// Stream apartment images in real-time
   /// Following flow function pattern with real-time updates
-  Stream<ApartmentImagesResult> streamApartmentImages() {
+  Stream<ApartmentImagesResult> streamApartmentImages() async* {
     print('🔵 APARTMENT IMAGES SERVICE: Setting up stream...');
 
-    return _firestore.collection('apartmentImages').snapshots().map((snapshot) {
-      try {
-        print('✅ Stream update received: ${snapshot.docs.length} documents');
+    final user = _auth.currentUser;
+    if (user == null) {
+      yield ApartmentImagesResult.failure(message: 'User not authenticated');
+      return;
+    }
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final data = userDoc.data();
+    final communityId = data?['communityId']?.toString().trim();
+    final buildingId = data?['buildingId']?.toString().trim();
+    if (communityId == null ||
+        communityId.isEmpty ||
+        buildingId == null ||
+        buildingId.isEmpty) {
+      yield ApartmentImagesResult.failure(
+        message: 'Community or building not assigned',
+      );
+      return;
+    }
 
-        if (snapshot.docs.isEmpty) {
-          print('⚠️  No documents in stream');
-          return ApartmentImagesResult.success(
-            message: 'No apartment images available',
-            imageUrls: [],
-          );
-        }
+    yield* _firestore
+        .collection('apartmentImages')
+        .where('communityId', isEqualTo: communityId)
+        .where('buildingId', isEqualTo: buildingId)
+        .where('status', isEqualTo: 'active')
+        .snapshots()
+        .map((snapshot) {
+          try {
+            print(
+              '✅ Stream update received: ${snapshot.docs.length} documents',
+            );
 
-        final images = <String>[];
-        for (var doc in snapshot.docs) {
-          final data = doc.data();
-          final imageUrl = data['imageUrl'] as String?;
+            if (snapshot.docs.isEmpty) {
+              print('⚠️  No documents in stream');
+              return ApartmentImagesResult.success(
+                message: 'No apartment images available',
+                imageUrls: [],
+              );
+            }
 
-          if (imageUrl != null && imageUrl.isNotEmpty) {
-            images.add(imageUrl);
+            final images = <String>[];
+            for (var doc in snapshot.docs) {
+              final data = doc.data();
+              final imageUrl = data['imageUrl'] as String?;
+
+              if (imageUrl != null && imageUrl.isNotEmpty) {
+                images.add(imageUrl);
+              }
+            }
+
+            print('✅ Stream: Extracted ${images.length} image URLs');
+
+            return ApartmentImagesResult.success(
+              message: 'Apartment images received',
+              imageUrls: images,
+            );
+          } catch (e) {
+            print('❌ Stream error: $e');
+            return ApartmentImagesResult.failure(
+              message: 'Stream error: $e',
+              errorCode: 'STREAM_ERROR',
+            );
           }
-        }
-
-        print('✅ Stream: Extracted ${images.length} image URLs');
-
-        return ApartmentImagesResult.success(
-          message: 'Apartment images received',
-          imageUrls: images,
-        );
-      } catch (e) {
-        print('❌ Stream error: $e');
-        return ApartmentImagesResult.failure(
-          message: 'Stream error: $e',
-          errorCode: 'STREAM_ERROR',
-        );
-      }
-    });
+        });
   }
 }
-

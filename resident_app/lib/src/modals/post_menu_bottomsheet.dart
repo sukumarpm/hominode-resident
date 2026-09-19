@@ -2,6 +2,7 @@
 // Bottom sheet menu for post options
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/post.dart';
 
 void showPostMenu(
@@ -30,38 +31,38 @@ class PostMenuBottomSheet extends StatelessWidget {
   final VoidCallback onReport;
 
   const PostMenuBottomSheet({
-    Key? key,
+    super.key,
     required this.post,
     required this.onEdit,
     required this.onDelete,
     required this.onReport,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(20.r),
+          topRight: Radius.circular(20.r),
         ),
       ),
       child: SafeArea(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
             // Handle bar
             Container(
-              width: 40,
-              height: 4,
+              width: 40.w,
+              height: 4.h,
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             if (post.isMine) ...[
               // Edit option
@@ -97,7 +98,7 @@ class PostMenuBottomSheet extends StatelessWidget {
               ),
             ],
 
-            const SizedBox(height: 12),
+            SizedBox(height: 12.h),
           ],
         ),
       ),
@@ -113,19 +114,15 @@ class PostMenuBottomSheet extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
         child: Row(
           children: [
-            Icon(
-              icon,
-              color: color ?? const Color(0xFF111111),
-              size: 24,
-            ),
-            const SizedBox(width: 16),
+            Icon(icon, color: color ?? const Color(0xFF111111), size: 24.w),
+            SizedBox(width: 16.w),
             Text(
               label,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w500,
                 color: color ?? const Color(0xFF111111),
               ),

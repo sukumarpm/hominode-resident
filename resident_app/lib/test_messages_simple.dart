@@ -38,7 +38,7 @@ void main() async {
 }
 
 class TestMessagesApp extends StatelessWidget {
-  const TestMessagesApp({Key? key}) : super(key: key);
+  const TestMessagesApp({super.key});
 
   @override
   Widget build(BuildContext context) {

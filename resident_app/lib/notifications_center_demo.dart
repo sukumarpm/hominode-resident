@@ -9,7 +9,7 @@ void main() {
 }
 
 class NotificationsCenterDemoApp extends StatelessWidget {
-  const NotificationsCenterDemoApp({Key? key}) : super(key: key);
+  const NotificationsCenterDemoApp({super.key});
 
   @override
   Widget build(BuildContext context) {

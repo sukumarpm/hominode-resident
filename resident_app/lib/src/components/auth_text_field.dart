@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
 
 /// Reusable Authentication Text Field Component
@@ -18,7 +19,7 @@ class AuthTextField extends StatelessWidget {
   final int? maxLength;
 
   const AuthTextField({
-    Key? key,
+    super.key,
     required this.controller,
     this.focusNode,
     required this.hintText,
@@ -31,18 +32,15 @@ class AuthTextField extends StatelessWidget {
     this.onSubmitted,
     this.inputFormatters,
     this.maxLength,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: const Color(0xFFE5E7EB),
-          width: 1,
-        ),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
       ),
       child: TextField(
         controller: controller,
@@ -54,24 +52,24 @@ class AuthTextField extends StatelessWidget {
         onSubmitted: onSubmitted,
         inputFormatters: inputFormatters,
         maxLength: maxLength,
-        style: const TextStyle(
-          fontSize: 15,
+        style: TextStyle(
+          fontSize: 15.sp,
           fontWeight: FontWeight.w400,
           color: Color(0xFF111111),
           letterSpacing: 0.2,
         ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            fontSize: 15,
+          hintStyle: TextStyle(
+            fontSize: 15.sp,
             fontWeight: FontWeight.w400,
             color: Color(0xFFA3A3A3),
             letterSpacing: 0.1,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 16.h,
           ),
           suffixIcon: suffixIcon,
           counterText: '',

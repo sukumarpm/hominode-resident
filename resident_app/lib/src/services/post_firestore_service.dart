@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import '../models/post.dart';
 import 'content_moderation_service.dart';
 
@@ -19,41 +20,37 @@ class PostFirestoreService {
   /// Queries users collection by authUid field to find the document ID
   Future<String?> _getCurrentUserId() async {
     try {
-      // Return cached value if available and not expired (cache for 5 minutes)
-      if (_cachedUserId != null && 
-          _cacheTime != null && 
+      // Return cached value if available and not expired.
+      if (_cachedUserId != null &&
+          _cacheTime != null &&
           DateTime.now().difference(_cacheTime!).inMinutes < 5) {
         return _cachedUserId;
       }
 
       final firebaseUser = _auth.currentUser;
+
       if (firebaseUser == null) {
         print('❌ PostService: No Firebase Auth user');
         return null;
       }
 
-      final authUid = firebaseUser.uid;
-      print('📱 PostService: Firebase Auth UID: $authUid');
+      final uid = firebaseUser.uid;
+      print('📱 PostService: Firebase Auth UID: $uid');
 
-      // Query users collection by authUid field
-      final querySnapshot = await _usersCollection
-          .where('authUid', isEqualTo: authUid)
-          .limit(1)
-          .get();
+      // Canonical resident document ID is Firebase Auth UID.
+      final userDoc = await _usersCollection.doc(uid).get();
 
-      if (querySnapshot.docs.isEmpty) {
-        print('❌ PostService: User document not found for authUid: $authUid');
+      if (!userDoc.exists) {
+        print('❌ PostService: User document not found: $uid');
         return null;
       }
 
-      final userId = querySnapshot.docs.first.id;
-      print('✅ PostService: User document ID: $userId');
+      print('✅ PostService: User document found: $uid');
 
-      // Cache the result
-      _cachedUserId = userId;
+      _cachedUserId = uid;
       _cacheTime = DateTime.now();
 
-      return userId;
+      return uid;
     } catch (e) {
       print('❌ PostService: Error getting user ID: $e');
       return null;
@@ -90,12 +87,9 @@ class PostFirestoreService {
       }
 
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('📝 Creating post...');
@@ -114,7 +108,11 @@ class PostFirestoreService {
         );
       }
 
-      final flatLabel = userData?['flatLabel'] ?? userData?['flatNumber'] ?? userData?['flatId'] ?? 'N/A';
+      final flatLabel =
+          userData?['flatLabel'] ??
+          userData?['flatNumber'] ??
+          userData?['flatId'] ??
+          'N/A';
       final flatId = userData?['flatId'];
       final buildingName = userData?['buildingName'] ?? 'Unknown Building';
 
@@ -122,7 +120,8 @@ class PostFirestoreService {
         'content': content,
         'imageUrl': imageUrl,
         'imageUrls': imageUrls,
-        'authorId': _auth.currentUser?.uid ?? currentUserId,  // Use Firebase Auth UID
+        'authorId':
+            _auth.currentUser?.uid ?? currentUserId, // Use Firebase Auth UID
         'authorName': userData?['name'] ?? 'Unknown User',
         'profileImage': userData?['profileImage'] ?? '',
         'flat': flatLabel,
@@ -170,7 +169,7 @@ class PostFirestoreService {
   Future<List<Post>> getAllPosts() async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         return [];
@@ -217,7 +216,7 @@ class PostFirestoreService {
   Future<List<Post>> getAdminPosts() async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         return [];
@@ -267,7 +266,7 @@ class PostFirestoreService {
   Future<List<Post>> getPostsByBuildingId(String buildingId) async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         return [];
@@ -300,7 +299,7 @@ class PostFirestoreService {
   Future<List<Post>> getPostsForCurrentUser() async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         return [];
@@ -330,7 +329,7 @@ class PostFirestoreService {
   Stream<List<Post>> streamAllPosts() async* {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         yield [];
@@ -338,7 +337,9 @@ class PostFirestoreService {
       }
 
       // Get user's building ID first
-      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((userSnapshot) {
+      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((
+        userSnapshot,
+      ) {
         if (!userSnapshot.exists) {
           print('❌ User document not found');
           return Stream.value([]);
@@ -359,15 +360,15 @@ class PostFirestoreService {
             .where('buildingId', isEqualTo: userBuildingId)
             .snapshots()
             .map((snapshot) {
-          final posts = snapshot.docs.map((doc) {
-            return _postFromFirestore(doc, currentUserId);
-          }).toList();
+              final posts = snapshot.docs.map((doc) {
+                return _postFromFirestore(doc, currentUserId);
+              }).toList();
 
-          // Sort by createdAt in memory (newest first)
-          posts.sort((a, b) => _compareTimeAgo(a.timeAgo, b.timeAgo));
+              // Sort by createdAt in memory (newest first)
+              posts.sort((a, b) => _compareTimeAgo(a.timeAgo, b.timeAgo));
 
-          return posts;
-        });
+              return posts;
+            });
       });
     } catch (e) {
       print('❌ Error streaming posts: $e');
@@ -381,7 +382,7 @@ class PostFirestoreService {
   Stream<List<Post>> streamAdminPosts() async* {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         yield [];
@@ -389,7 +390,9 @@ class PostFirestoreService {
       }
 
       // Get user's role and building first
-      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((userSnapshot) {
+      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((
+        userSnapshot,
+      ) {
         if (!userSnapshot.exists) {
           print('❌ User document not found');
           return Stream.value([]);
@@ -416,15 +419,15 @@ class PostFirestoreService {
             .where('buildingId', isEqualTo: userBuildingId)
             .snapshots()
             .map((snapshot) {
-          final posts = snapshot.docs.map((doc) {
-            return _postFromFirestore(doc, currentUserId);
-          }).toList();
+              final posts = snapshot.docs.map((doc) {
+                return _postFromFirestore(doc, currentUserId);
+              }).toList();
 
-          // Sort by createdAt in memory (newest first)
-          posts.sort((a, b) => _compareTimeAgo(a.timeAgo, b.timeAgo));
+              // Sort by createdAt in memory (newest first)
+              posts.sort((a, b) => _compareTimeAgo(a.timeAgo, b.timeAgo));
 
-          return posts;
-        });
+              return posts;
+            });
       });
     } catch (e) {
       print('❌ Error streaming admin posts: $e');
@@ -438,7 +441,7 @@ class PostFirestoreService {
   Stream<List<Post>> streamPostsForCurrentUser() async* {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
         print('❌ User not authenticated');
         yield [];
@@ -446,7 +449,9 @@ class PostFirestoreService {
       }
 
       // Get user's role first
-      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((userSnapshot) {
+      yield* _usersCollection.doc(currentUserId).snapshots().asyncExpand((
+        userSnapshot,
+      ) {
         if (!userSnapshot.exists) {
           print('❌ User document not found');
           return Stream.value([]);
@@ -475,12 +480,9 @@ class PostFirestoreService {
   Future<ServiceResult> likePost(String postId) async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('👍 Liking post: $postId');
@@ -509,12 +511,9 @@ class PostFirestoreService {
   Future<ServiceResult> unlikePost(String postId) async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('👎 Unliking post: $postId');
@@ -560,12 +559,9 @@ class PostFirestoreService {
       }
 
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('💬 Adding comment to post: $postId');
@@ -576,7 +572,8 @@ class PostFirestoreService {
 
       final commentData = {
         'postId': postId,
-        'authorId': _auth.currentUser?.uid ?? currentUserId,  // Use Firebase Auth UID
+        'authorId':
+            _auth.currentUser?.uid ?? currentUserId, // Use Firebase Auth UID
         'authorName': userData?['name'] ?? 'Unknown User',
         'profileImage': userData?['profileImage'] ?? '',
         'comment': comment,
@@ -644,12 +641,9 @@ class PostFirestoreService {
   Future<ServiceResult> deletePost(String postId) async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('🗑️ Deleting post: $postId');
@@ -710,12 +704,9 @@ class PostFirestoreService {
   Future<ServiceResult> reportPost(String postId, String reason) async {
     try {
       final currentUserId = await _getCurrentUserId();
-      
+
       if (currentUserId == null || currentUserId.isEmpty) {
-        return ServiceResult(
-          success: false,
-          message: 'User not authenticated',
-        );
+        return ServiceResult(success: false, message: 'User not authenticated');
       }
 
       print('🚩 Reporting post: $postId');
@@ -811,32 +802,32 @@ class PostFirestoreService {
   int _compareTimeAgo(String a, String b) {
     // Simplified comparison - newer posts first
     // "Just now" > "5 minutes ago" > "2 hours ago" > "Yesterday"
-    
+
     if (a == b) return 0;
     if (a == 'Just now') return -1;
     if (b == 'Just now') return 1;
-    
+
     // Extract numbers for comparison
     final aNum = int.tryParse(a.split(' ')[0]) ?? 0;
     final bNum = int.tryParse(b.split(' ')[0]) ?? 0;
-    
+
     if (a.contains('minute')) {
       if (b.contains('minute')) return aNum.compareTo(bNum);
       return -1; // minutes are more recent than hours/days
     }
-    
+
     if (a.contains('hour')) {
       if (b.contains('minute')) return 1;
       if (b.contains('hour')) return aNum.compareTo(bNum);
       return -1; // hours are more recent than days
     }
-    
+
     if (a.contains('day')) {
       if (b.contains('minute') || b.contains('hour')) return 1;
       if (b.contains('day')) return aNum.compareTo(bNum);
       return -1;
     }
-    
+
     return 0;
   }
 }
@@ -849,9 +840,5 @@ class ServiceResult {
   final String? message;
   final dynamic data;
 
-  ServiceResult({
-    required this.success,
-    this.message,
-    this.data,
-  });
+  ServiceResult({required this.success, this.message, this.data});
 }

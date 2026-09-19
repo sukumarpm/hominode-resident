@@ -12,7 +12,10 @@ class MarketplaceRequestService {
   Future<String> get _currentUserId async {
     final firebaseUser = _auth.currentUser;
     if (firebaseUser != null) {
-      final doc = await _firestore.collection('users').doc(firebaseUser.uid).get();
+      final doc = await _firestore
+          .collection('users')
+          .doc(firebaseUser.uid)
+          .get();
       if (doc.exists) {
         return firebaseUser.uid;
       }
@@ -52,8 +55,11 @@ class MarketplaceRequestService {
       }
 
       // Get current user details
-      final userDoc = await _firestore.collection('users').doc(currentUserId).get();
-      final userData = userDoc.data() as Map<String, dynamic>?;
+      final userDoc = await _firestore
+          .collection('users')
+          .doc(currentUserId)
+          .get();
+      final userData = userDoc.data();
       final userName = userData?['name'] ?? 'Unknown';
       final userFlat = userData?['flatLabel'] ?? 'N/A';
       final userPhone = userData?['phone'] as String? ?? '';
@@ -93,22 +99,9 @@ class MarketplaceRequestService {
           'createdAt': FieldValue.serverTimestamp(),
           'updatedAt': FieldValue.serverTimestamp(),
         });
-
-        // Create notification for seller
-        final notificationRef = _firestore.collection('notifications').doc();
-        transaction.set(notificationRef, {
-          'userId': productOwnerId,
-          'type': 'phone_request',
-          'title': 'New Phone Request',
-          'message': '$userName requested your phone number for a product',
-          'productId': productId,
-          'requestId': requestRef.id,
-          'status': 'unread',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
       });
 
-      print('✅ Phone request created and notification sent');
+      print('✅ Phone request created');
       return true;
     } catch (e) {
       print('❌ Error requesting phone: $e');
@@ -117,26 +110,27 @@ class MarketplaceRequestService {
   }
 
   // Get requests for a product (for product owner)
-  Stream<List<MarketplaceRequestModel>> getRequestsForProduct(String productId) {
+  Stream<List<MarketplaceRequestModel>> getRequestsForProduct(
+    String productId,
+  ) {
     return _firestore
         .collection('marketplaceRequests')
         .where('productId', isEqualTo: productId)
         .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => MarketplaceRequestModel.fromFirestore(doc))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => MarketplaceRequestModel.fromFirestore(doc))
+              .toList();
+        });
   }
 
   // Accept request
   Future<bool> acceptRequest(String requestId) async {
     try {
-      await _firestore
-          .collection('marketplaceRequests')
-          .doc(requestId)
-          .update({'status': 'accepted'});
+      await _firestore.collection('marketplaceRequests').doc(requestId).update({
+        'status': 'accepted',
+      });
       print('✅ Request accepted');
       return true;
     } catch (e) {
@@ -148,10 +142,9 @@ class MarketplaceRequestService {
   // Reject request
   Future<bool> rejectRequest(String requestId) async {
     try {
-      await _firestore
-          .collection('marketplaceRequests')
-          .doc(requestId)
-          .update({'status': 'rejected'});
+      await _firestore.collection('marketplaceRequests').doc(requestId).update({
+        'status': 'rejected',
+      });
       print('✅ Request rejected');
       return true;
     } catch (e) {
@@ -181,8 +174,11 @@ class MarketplaceRequestService {
       if (request.docs.isEmpty) return null;
 
       // Get owner's phone
-      final ownerDoc = await _firestore.collection('users').doc(productOwnerId).get();
-      final ownerData = ownerDoc.data() as Map<String, dynamic>?;
+      final ownerDoc = await _firestore
+          .collection('users')
+          .doc(productOwnerId)
+          .get();
+      final ownerData = ownerDoc.data();
       final phone = ownerData?['phone'] as String?;
 
       // Validate phone is not empty
@@ -199,9 +195,7 @@ class MarketplaceRequestService {
   }
 
   // Check if user already requested
-  Future<bool> hasUserRequested({
-    required String productId,
-  }) async {
+  Future<bool> hasUserRequested({required String productId}) async {
     try {
       final currentUserId = await _currentUserId;
       if (currentUserId.isEmpty) return false;

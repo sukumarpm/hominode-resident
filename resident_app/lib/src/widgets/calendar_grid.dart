@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CalendarGrid extends StatefulWidget {
   final DateTime? selectedDate;
@@ -6,11 +7,11 @@ class CalendarGrid extends StatefulWidget {
   final Set<DateTime> blockedDates;
 
   const CalendarGrid({
-    Key? key,
+    super.key,
     this.selectedDate,
     required this.onDateSelected,
     this.blockedDates = const {},
-  }) : super(key: key);
+  });
 
   @override
   State<CalendarGrid> createState() => _CalendarGridState();
@@ -54,17 +55,17 @@ class _CalendarGridState extends State<CalendarGrid> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: const Color(0xFFF6F8FA),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(16.r),
       ),
       child: Column(
         children: [
           _buildMonthHeader(),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           _buildWeekdayLabels(),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           _buildDaysGrid(),
         ],
       ),
@@ -73,8 +74,18 @@ class _CalendarGridState extends State<CalendarGrid> {
 
   Widget _buildMonthHeader() {
     final monthNames = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
 
     return Row(
@@ -82,23 +93,23 @@ class _CalendarGridState extends State<CalendarGrid> {
       children: [
         IconButton(
           onPressed: _previousMonth,
-          icon: const Icon(Icons.chevron_left, size: 24),
+          icon: Icon(Icons.chevron_left, size: 24.w),
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
         ),
         Text(
           '${monthNames[_currentMonth.month - 1]} ${_currentMonth.year}',
-          style: const TextStyle(
-            fontSize: 16,
+          style: TextStyle(
+            fontSize: 16.sp,
             fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),
         IconButton(
           onPressed: _nextMonth,
-          icon: const Icon(Icons.chevron_right, size: 24),
+          icon: Icon(Icons.chevron_right, size: 24.w),
           padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+          constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
         ),
       ],
     );
@@ -110,12 +121,12 @@ class _CalendarGridState extends State<CalendarGrid> {
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: weekdays.map((day) {
         return SizedBox(
-          width: 40,
+          width: 40.w,
           child: Center(
             child: Text(
               day,
-              style: const TextStyle(
-                fontSize: 13,
+              style: TextStyle(
+                fontSize: 13.sp,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF9B9B9B),
               ),
@@ -127,10 +138,18 @@ class _CalendarGridState extends State<CalendarGrid> {
   }
 
   Widget _buildDaysGrid() {
-    final firstDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month, 1);
-    final lastDayOfMonth = DateTime(_currentMonth.year, _currentMonth.month + 1, 0);
+    final firstDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month,
+      1,
+    );
+    final lastDayOfMonth = DateTime(
+      _currentMonth.year,
+      _currentMonth.month + 1,
+      0,
+    );
     final firstWeekday = firstDayOfMonth.weekday % 7;
-    
+
     final daysInMonth = lastDayOfMonth.day;
     final previousMonth = DateTime(_currentMonth.year, _currentMonth.month, 0);
     final daysInPreviousMonth = previousMonth.day;
@@ -140,29 +159,19 @@ class _CalendarGridState extends State<CalendarGrid> {
     // Previous month days
     for (int i = firstWeekday - 1; i >= 0; i--) {
       final day = daysInPreviousMonth - i;
-      dayWidgets.add(_buildDayCell(
-        day,
-        isCurrentMonth: false,
-      ));
+      dayWidgets.add(_buildDayCell(day, isCurrentMonth: false));
     }
 
     // Current month days
     for (int day = 1; day <= daysInMonth; day++) {
       final date = DateTime(_currentMonth.year, _currentMonth.month, day);
-      dayWidgets.add(_buildDayCell(
-        day,
-        isCurrentMonth: true,
-        date: date,
-      ));
+      dayWidgets.add(_buildDayCell(day, isCurrentMonth: true, date: date));
     }
 
     // Next month days to fill grid
     final remainingCells = 42 - dayWidgets.length;
     for (int day = 1; day <= remainingCells; day++) {
-      dayWidgets.add(_buildDayCell(
-        day,
-        isCurrentMonth: false,
-      ));
+      dayWidgets.add(_buildDayCell(day, isCurrentMonth: false));
     }
 
     return GridView.count(
@@ -175,11 +184,17 @@ class _CalendarGridState extends State<CalendarGrid> {
     );
   }
 
-  Widget _buildDayCell(int day, {required bool isCurrentMonth, DateTime? date}) {
+  Widget _buildDayCell(
+    int day, {
+    required bool isCurrentMonth,
+    DateTime? date,
+  }) {
     final isSelected = date != null && _isSameDay(widget.selectedDate, date);
     final isBlocked = date != null && _isBlocked(date);
     final isToday = date != null && _isToday(date);
-    final isPast = date != null && date.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+    final isPast =
+        date != null &&
+        date.isBefore(DateTime.now().subtract(const Duration(days: 1)));
 
     Color textColor;
     Color? backgroundColor;
@@ -213,13 +228,13 @@ class _CalendarGridState extends State<CalendarGrid> {
       child: Container(
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
         ),
         child: Center(
           child: Text(
             day.toString(),
             style: TextStyle(
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: fontWeight,
               color: textColor,
             ),
